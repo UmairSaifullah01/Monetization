@@ -1,6 +1,7 @@
 using System;
 using GoogleMobileAds.Api;
 using UnityEngine;
+using THEBADDEST.Monetization;
 
 
 namespace THEBADDEST.Advertisement
@@ -66,7 +67,7 @@ namespace THEBADDEST.Advertisement
 		{
 			if (bannerView != null && !isDisplaying)
 			{
-				Debug.Log("Showing banner view.");
+				SendLog.Log("Showing banner ad.");
 				bannerView.Show();
 				isDisplaying = true;
 			}

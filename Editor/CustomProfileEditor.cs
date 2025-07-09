@@ -1,12 +1,10 @@
-using System;
 using System.Collections.Generic;
-using THEBADDEST.EditorUtls;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 
-namespace THEBADDEST.CustomProfileEditor
+namespace THEBADDEST.MonetizationEditor
 {
 	
 
@@ -31,7 +29,7 @@ namespace THEBADDEST.CustomProfileEditor
 		void DrawProperties()
 		{
 			if (propertiesToShow == null || propertiesToShow.Length == 0) return;
-			THEBADDEST.EditorUtls.EditorTools.DrawLineHelpBox();
+			EditorTools.DrawLineHelpBox();
 			EditorGUILayout.LabelField(new GUIContent("Properties"), EditorStyles.boldLabel);
 			foreach (string propertyName in propertiesToShow)
 			{
@@ -48,7 +46,7 @@ namespace THEBADDEST.CustomProfileEditor
 			EditorGUILayout.Space();
 			GUILayout.EndVertical();
 			EditorGUILayout.Space();
-			THEBADDEST.EditorUtls.EditorTools.DrawLineHelpBox();
+			EditorTools.DrawLineHelpBox();
 		}
 
 		public override void OnInspectorGUI()

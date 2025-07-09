@@ -2,6 +2,7 @@ using System;
 using GoogleMobileAds.Api;
 using GoogleMobileAds.Common;
 using UnityEngine;
+using THEBADDEST.Monetization;
 
 
 namespace THEBADDEST.Advertisement
@@ -51,7 +52,7 @@ namespace THEBADDEST.Advertisement
 		{
 			if (appOpenAd != null)
 			{
-				Debug.Log("Destroying app open ad.");
+				SendLog.Log("Destroying app open ad instance.");
 				appOpenAd.Destroy();
 				appOpenAd = null;
 			}
@@ -67,12 +68,12 @@ namespace THEBADDEST.Advertisement
 			// App open ads can be preloaded for up to 4 hours.
 			if (appOpenAd != null && appOpenAd.CanShowAd())
 			{
-				Debug.Log("Showing app open ad.");
+				SendLog.Log("Showing app open ad.");
 				appOpenAd.Show();
 			}
 			else
 			{
-				Debug.Log("<color=green>App open ad is not ready yet.</color>");
+				SendLog.LogWarning("App open ad is not ready yet.");
 			}
 		}
 
@@ -86,7 +87,7 @@ namespace THEBADDEST.Advertisement
 				// If the operation failed with a reason.
 				if (error != null)
 				{
-					Debug.Log("App open ad failed to load an ad with error : " + error);
+					SendLog.LogError("App open ad failed to load: " + error);
 					OnAdLoadFailed?.Invoke();
 					return;
 				}

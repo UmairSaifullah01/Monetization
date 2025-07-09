@@ -1,20 +1,28 @@
 ﻿using System.Collections.Generic;
 
-public interface IAnalyticsModule
+
+namespace THEBADDEST.Analytics
 {
 
-	public void SendEvent(string name);
 
-	public void SendEvent(string name, string value);
+	public interface IAnalyticsModule
+	{
 
-	public void SendEvent(ProgressionStatus status, string eventName);
+		public void SendEvent(string name);
 
-	public void SendDesignEvent(string category, string subCategory, string outcome, float value);
+		public void SendEvent(string name, string value);
 
-	public void SendDesignEvent(string category, string subCategory, string outcome);
+		public void SendEvent(ProgressionStatus status, string eventName);
 
-	public void SendTransaction(string productId, string currencyCode, int quantity, double unitPrice, string receipt, string signature);
+		public void SendDesignEvent(string category, string subCategory, string outcome, float value);
 
-	public void SendEventLog(Dictionary<string, object> eventLog);
+		public void SendDesignEvent(string category, string subCategory, string outcome);
+
+		public void SendTransaction(string productId, string currencyCode, int quantity, double unitPrice, string receipt, string signature);
+
+		public void SendEventLog(Dictionary<string, object> eventLog);
+
+	}
+
 
 }

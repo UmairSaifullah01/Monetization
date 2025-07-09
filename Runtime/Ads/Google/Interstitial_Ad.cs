@@ -1,6 +1,7 @@
 using System;
 using GoogleMobileAds.Api;
 using UnityEngine;
+using THEBADDEST.Monetization;
 
 
 namespace THEBADDEST.Advertisement
@@ -52,7 +53,7 @@ namespace THEBADDEST.Advertisement
 			}
 			else
 			{
-				Debug.LogError("Interstitial ad is not ready yet.");
+				SendLog.LogError("Interstitial ad is not ready yet.");
 			}
 		}
 
@@ -63,7 +64,7 @@ namespace THEBADDEST.Advertisement
 			{
 				if (error != null)
 				{
-					Debug.LogError("Interstitial ad failed to load an ad with error : " + error);
+					SendLog.LogError("Interstitial ad failed to load: " + error);
 					OnAdLoadFailed?.Invoke();
 					return;
 				}
@@ -72,7 +73,7 @@ namespace THEBADDEST.Advertisement
 				// This is an unexpected error, please report this bug if it happens.
 				if (ad == null)
 				{
-					Debug.LogError("Unexpected error: Interstitial load event fired with null ad and null error.");
+					SendLog.LogError("Unexpected error: Interstitial load event fired with null ad and null error.");
 					return;
 				}
 

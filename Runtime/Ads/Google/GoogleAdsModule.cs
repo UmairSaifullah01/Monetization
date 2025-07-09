@@ -2,6 +2,7 @@ using System;
 using GoogleMobileAds.Api;
 using GoogleMobileAds.Ump.Api;
 using UnityEngine;
+using THEBADDEST.Monetization;
 
 
 namespace THEBADDEST.Advertisement
@@ -58,13 +59,13 @@ namespace THEBADDEST.Advertisement
 			if (consentError != null)
 			{
 				InitializeAds();
-				Debug.Log("Error Consent........" + consentError.Message);
+				SendLog.LogError($"Consent error: {consentError.Message}");
 				return;
 			}
 
 			if (ConsentInformation.PrivacyOptionsRequirementStatus == PrivacyOptionsRequirementStatus.Required && ConsentInformation.ConsentStatus != GoogleMobileAds.Ump.Api.ConsentStatus.Obtained)
 			{
-				Debug.Log("Obtaining Consent........");
+				SendLog.Log("Obtaining Consent...");
 				ConsentForm.LoadAndShowConsentFormIfRequired((FormError formError) =>
 				{
 					if (formError == null)
@@ -78,7 +79,7 @@ namespace THEBADDEST.Advertisement
 			else
 			{
 				InitializeAds();
-				Debug.Log("Consent Not Required");
+				SendLog.Log("Consent Not Required");
 			}
 		}
 
@@ -91,7 +92,7 @@ namespace THEBADDEST.Advertisement
 		{
 			bool statusBool = status == null;
 			OnInitialize?.Invoke(statusBool);
-			Debug.Log(statusBool ? "[ADS] Error Initialization Status......." : $"[ADS]Initialization Status....... Success");
+			SendLog.Log(statusBool ? "[ADS] Error Initialization Status..." : "[ADS] Initialization Status... Success");
 		}
 
 		void SetupAllAds()

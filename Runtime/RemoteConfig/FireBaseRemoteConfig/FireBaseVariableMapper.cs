@@ -4,6 +4,7 @@ using Firebase.RemoteConfig;
 using UnityEngine;
 using THEBADDEST.PrimitiveTypes;
 using String = THEBADDEST.PrimitiveTypes.String;
+using THEBADDEST.Monetization;
 
 
 namespace THEBADDEST.RemoteConfigSystem
@@ -13,7 +14,6 @@ namespace THEBADDEST.RemoteConfigSystem
 	[CreateAssetMenu(menuName = "THEBADDEST/RemoteConfigSystem/FireBaseVariableMapper", fileName = "FireBaseVariableMapper", order = 0)]
 	public class FireBaseVariableMapper : RemoteVariablesMapper
 	{
-		[SerializeField] private bool enableLogging = false;
 		protected override void ConvertPrimitiveToSoValue(RemoteVariable remoteVariable, object targetObject)
 		{
 			if (targetObject is ConfigValue configValue)
@@ -51,11 +51,8 @@ namespace THEBADDEST.RemoteConfigSystem
 				default:
 					throw new ArgumentOutOfRangeException();
 			}
-			if (enableLogging)
-			{
-				Debug.Log($"<color=green>[Remote Config Var]</color> :  {remoteVariable.type} : {remoteVariableValue}");
-			}
-			
+		
+				SendLog.Log($"[Remote Config Var] Name: {remoteVariable} | Type: {remoteVariable.type} | Value: {remoteVariableValue}");
 			
 		}
 

@@ -5,6 +5,7 @@ using Firebase.Extensions;
 using Firebase.RemoteConfig;
 using THEBADDEST.Tasks;
 using UnityEngine;
+using THEBADDEST.Monetization;
 
 
 namespace THEBADDEST.RemoteConfigSystem
@@ -59,15 +60,15 @@ namespace THEBADDEST.RemoteConfigSystem
 			{
 				if (_fetchTask.IsCanceled)
 				{
-					Debug.Log("Fetch canceled.");
+					SendLog.LogWarning("Fetch canceled.");
 				}
 				else if (_fetchTask.IsFaulted)
 				{
-					Debug.Log("Fetch encountered an error.");
+					SendLog.LogError("Fetch encountered an error.");
 				}
 				else if (_fetchTask.IsCompleted)
 				{
-					Debug.Log("Fetch completed successfully!");
+					SendLog.Log("Fetch completed successfully!");
 				}
 
 				var info = firebaseRemoteConfig.Info;
@@ -76,7 +77,7 @@ namespace THEBADDEST.RemoteConfigSystem
 					case LastFetchStatus.Success:
 						firebaseRemoteConfig.ActivateAsync().ContinueWithOnMainThread(task =>
 						{
-							Debug.Log($"Remote data loaded and ready (last fetch time {info.FetchTime}).");
+							SendLog.Log($"Remote data loaded and ready (last fetch time {info.FetchTime}).");
 							// Load Data
 							Load();
 							config?.Invoke(variablesMapper.GetDefaultValues());
@@ -87,18 +88,18 @@ namespace THEBADDEST.RemoteConfigSystem
 						switch (info.LastFetchFailureReason)
 						{
 							case FetchFailureReason.Error:
-								Debug.Log("Fetch failed for unknown reason");
+								SendLog.LogError("Fetch failed for unknown reason");
 								break;
 
 							case FetchFailureReason.Throttled:
-								Debug.Log("Fetch throttled until " + info.ThrottledEndTime);
+								SendLog.LogWarning("Fetch throttled until " + info.ThrottledEndTime);
 								break;
 						}
 
 						break;
 
 					case LastFetchStatus.Pending:
-						Debug.Log("Latest Fetch call still pending.");
+						SendLog.LogWarning("Latest Fetch call still pending.");
 						break;
 				}
 			}

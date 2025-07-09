@@ -1,12 +1,11 @@
 using System;
 using System.Collections.Generic;
-using THEBADDEST.EditorUtls;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 
-namespace THEBADDEST.EditorUtls
+namespace THEBADDEST.MonetizationEditor
 {
 
 
@@ -50,7 +49,6 @@ namespace THEBADDEST.EditorUtls
 				EditorGUILayout.EndVertical();
 				return;
 			}
-
 			using var check = new EditorGUI.ChangeCheckScope();
 			EditorGUILayout.Space();
 			InitSubEditors();
@@ -77,7 +75,6 @@ namespace THEBADDEST.EditorUtls
 
 		void OnHide()
 		{
-			Debug.Log("rrrrrrrrrrrrrrrrrrrrr");
 			hide = !hide;
 			for (int i = 0; i < collectionProperty.arraySize; i++)
 			{
