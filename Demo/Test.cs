@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using THEBADDEST.Monetization;
 
 
 namespace THEBADDEST.RemoteConfigSystem.Demo
@@ -19,7 +20,7 @@ namespace THEBADDEST.RemoteConfigSystem.Demo
 
 		void OnInitialize(bool init)
 		{
-			Debug.Log($"Initialized {init}");
+			SendLog.Log($"Initialized {init}");
 		}
 
 		public void Fetch()

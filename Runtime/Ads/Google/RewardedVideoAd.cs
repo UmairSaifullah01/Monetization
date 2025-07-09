@@ -1,6 +1,7 @@
 using System;
 using GoogleMobileAds.Api;
 using UnityEngine;
+using THEBADDEST.Monetization;
 
 
 namespace THEBADDEST.Advertisement
@@ -34,7 +35,7 @@ namespace THEBADDEST.Advertisement
 		{
 			if (rewardedAd != null)
 			{
-				Debug.Log("Destroying rewarded ad.");
+				SendLog.Log("Destroying rewarded ad instance.");
 				rewardedAd.Destroy();
 				rewardedAd = null;
 			}
@@ -49,18 +50,16 @@ namespace THEBADDEST.Advertisement
 		{
 			if (rewardedAd != null && rewardedAd.CanShowAd())
 			{
-				Debug.Log("Showing rewarded ad.");
+				SendLog.Log("Showing rewarded ad.");
 				rewardedAd.Show((Reward reward) =>
 				{
-					Debug.Log(String.Format("Rewarded ad granted a reward: {0} {1}",
-						reward.Amount,
-						reward.Type));
+					SendLog.Log($"Rewarded ad granted a reward: {reward.Amount} {reward.Type}");
 					OnRewardClaimed?.Invoke(reward);
 				});
 			}
 			else
 			{
-				Debug.LogError("Rewarded ad is not ready yet.");
+				SendLog.LogError("Rewarded ad is not ready yet.");
 				
 			}
 		}
@@ -75,7 +74,7 @@ namespace THEBADDEST.Advertisement
 				// If the operation failed with a reason.
 				if (error != null)
 				{
-					Debug.LogError("Rewarded ad failed to load an ad with error : " + error);
+					SendLog.LogError("Rewarded ad failed to load: " + error);
 					OnAdLoadFailed?.Invoke();
 					return;
 				}
@@ -83,12 +82,12 @@ namespace THEBADDEST.Advertisement
 				// This is an unexpected error, please report this bug if it happens.
 				if (ad == null)
 				{
-					Debug.LogError("Unexpected error: Rewarded load event fired with null ad and null error.");
+					SendLog.LogError("Unexpected error: Rewarded load event fired with null ad and null error.");
 					return;
 				}
 
 				// The operation completed successfully.
-				Debug.Log("Rewarded ad loaded with response : " + ad.GetResponseInfo());
+				SendLog.Log("Rewarded ad loaded successfully. Response: " + ad.GetResponseInfo());
 				rewardedAd = ad;
 				
 			});
@@ -105,18 +104,16 @@ namespace THEBADDEST.Advertisement
 		{
 			if (rewardedAd != null && rewardedAd.CanShowAd())
 			{
-				Debug.Log("Showing rewarded ad.");
+				SendLog.Log("Showing rewarded ad.");
 				rewardedAd.Show((Reward reward) =>
 				{
-					Debug.Log(String.Format("Rewarded ad granted a reward: {0} {1}",
-						reward.Amount,
-						reward.Type));
+					SendLog.Log($"Rewarded ad granted a reward: {reward.Amount} {reward.Type}");
 					onRewardClaimed?.Invoke(reward);
 				});
 			}
 			else
 			{
-				Debug.LogError("Rewarded ad is not ready yet.");
+				SendLog.LogError("Rewarded ad is not ready yet.");
 			}
 		}
 

@@ -1,4 +1,5 @@
 using System;
+using THEBADDEST.Monetization;
 using THEBADDEST.Tasks;
 
 
@@ -6,7 +7,7 @@ namespace THEBADDEST.RemoteConfigSystem
 {
 
 
-	public abstract class RemoteConfigModule : MonotizationModule, IRemoteConfig<object>
+	public abstract class RemoteConfigModule : MonetizationModule, IRemoteConfig<object>
 	{
 
 		public event Action<bool> OnInitialize;

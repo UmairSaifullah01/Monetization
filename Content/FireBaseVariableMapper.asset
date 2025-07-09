@@ -17,5 +17,8 @@ MonoBehaviour:
     - key: TestNumber
       value:
         type: 1
-        soVariable: {fileID: 11400000, guid: f64532351637516478fbca5e1da3e9af, type: 2}
-  enableLogging: 1
+        booleanValue: 0
+        longValue: 0
+        doubleValue: 0
+        stringValue: 
+  enableLogging: 0

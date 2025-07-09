@@ -23,12 +23,10 @@ namespace THEBADDEST.RemoteConfigSystem
 	{
 
 		public RemoteVariableType type;
-		
-		public string stringValue;
 		public bool booleanValue;
 		public int longValue;
 		public float doubleValue;
-		
+		public string stringValue;
 		
 	}
 

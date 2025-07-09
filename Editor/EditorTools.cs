@@ -10,7 +10,7 @@ using Object = UnityEngine.Object;
 #endif
 
 
-namespace THEBADDEST.EditorUtls
+namespace THEBADDEST.MonetizationEditor
 {
 
 

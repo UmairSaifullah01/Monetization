@@ -49,6 +49,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 128156ce19eff495e9f0e2b1e3cdc7a7, type: 3}
   m_Name: MonotizationProfile
   m_EditorClassIdentifier: 
+  debugLog: 1
   modules:
   - {fileID: -3576784125040861377}
   - {fileID: -8874187065702333003}
