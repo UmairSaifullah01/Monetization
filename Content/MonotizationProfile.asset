@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8874187065702333003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7af5440ab4bd40d185cbbadc06eb61e8, type: 3}
+  m_Name: AnalyticsBridgeModule
+  m_EditorClassIdentifier: 
+--- !u!114 &-3576784125040861377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4933304f2025420eb1d04d503ef719e5, type: 3}
+  m_Name: GoogleAdsModule
+  m_EditorClassIdentifier: 
+  config:
+    appId: ca-app-pub-3940256099942544~3347511713
+    bannerData:
+      m_UnitId: 
+      m_Type: 0
+      m_Position: 0
+    interstitialId: ca-app-pub-3940256099942544/1033173712
+    interstitialVideoId: ca-app-pub-3940256099942544/8691691433
+    rewardedId: ca-app-pub-3940256099942544/5224354917
+    appOpenId: ca-app-pub-3940256099942544/5662855259
+    testDeviceIds:
+    - SIMULATOR
+    - 702815ACFC14FF222DA1DC767672A573
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 128156ce19eff495e9f0e2b1e3cdc7a7, type: 3}
+  m_Name: MonotizationProfile
+  m_EditorClassIdentifier: 
+  modules:
+  - {fileID: -3576784125040861377}
+  - {fileID: -8874187065702333003}
