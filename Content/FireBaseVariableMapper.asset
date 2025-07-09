@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 574e7721378b416ea7dbae8b9f087aad, type: 3}
+  m_Name: FireBaseVariableMapper
+  m_EditorClassIdentifier: 
+  m_DefaultVariables:
+    elements:
+    - key: TestNumber
+      value:
+        type: 1
+        soVariable: {fileID: 11400000, guid: f64532351637516478fbca5e1da3e9af, type: 2}
+  enableLogging: 1
