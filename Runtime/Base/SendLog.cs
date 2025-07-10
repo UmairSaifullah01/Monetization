@@ -1,7 +1,7 @@
 using UnityEngine;
 
 
-namespace THEBADDEST.Monetization
+namespace THEBADDEST.MonetizationApi
 {
 
 

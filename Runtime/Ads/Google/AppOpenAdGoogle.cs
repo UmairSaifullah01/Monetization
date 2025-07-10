@@ -2,7 +2,7 @@ using System;
 using GoogleMobileAds.Api;
 using GoogleMobileAds.Common;
 using UnityEngine;
-using THEBADDEST.Monetization;
+using THEBADDEST.MonetizationApi;
 
 
 namespace THEBADDEST.Advertisement

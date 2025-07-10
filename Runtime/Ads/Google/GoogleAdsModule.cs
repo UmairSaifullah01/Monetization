@@ -2,7 +2,7 @@ using System;
 using GoogleMobileAds.Api;
 using GoogleMobileAds.Ump.Api;
 using UnityEngine;
-using THEBADDEST.Monetization;
+using THEBADDEST.MonetizationApi;
 
 
 namespace THEBADDEST.Advertisement
@@ -46,7 +46,7 @@ namespace THEBADDEST.Advertisement
 
 		void RequestConsent()
 		{
-#if UnityEditor
+#if UNITY_EDITOR
 			InitializeAds();
 			return;
 #endif

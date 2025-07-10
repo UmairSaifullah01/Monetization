@@ -1,7 +1,7 @@
 using System;
 using GoogleMobileAds.Api;
 using UnityEngine;
-using THEBADDEST.Monetization;
+using THEBADDEST.MonetizationApi;
 
 
 namespace THEBADDEST.Advertisement
@@ -15,6 +15,7 @@ namespace THEBADDEST.Advertisement
 		public event Action OnAdLoadFailed;
 		public event Action<AdValue>     OnAdPaid;
 		public event Action<object>      OnRewardClaimed;
+		public event Action      OnRewardFailed;
 		public RewardedAd                ad => rewardedAd;
 		object IAppAd.                   ad => ad;
 		private RewardedAd               rewardedAd;
@@ -60,7 +61,7 @@ namespace THEBADDEST.Advertisement
 			else
 			{
 				SendLog.LogError("Rewarded ad is not ready yet.");
-				
+				OnRewardFailed?.Invoke();
 			}
 		}
 
@@ -76,12 +77,14 @@ namespace THEBADDEST.Advertisement
 				{
 					SendLog.LogError("Rewarded ad failed to load: " + error);
 					OnAdLoadFailed?.Invoke();
+					OnRewardFailed?.Invoke();
 					return;
 				}
 				// If the operation failed for unknown reasons.
 				// This is an unexpected error, please report this bug if it happens.
 				if (ad == null)
 				{
+					OnRewardFailed?.Invoke();
 					SendLog.LogError("Unexpected error: Rewarded load event fired with null ad and null error.");
 					return;
 				}
@@ -113,6 +116,7 @@ namespace THEBADDEST.Advertisement
 			}
 			else
 			{
+				OnRewardFailed?.Invoke();
 				SendLog.LogError("Rewarded ad is not ready yet.");
 			}
 		}

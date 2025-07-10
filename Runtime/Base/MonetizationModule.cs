@@ -2,21 +2,20 @@ using THEBADDEST.Tasks;
 using UnityEngine;
 
 
-namespace THEBADDEST.Monetization
+namespace THEBADDEST.MonetizationApi
 {
 
-
-    [CreateAssetMenu(menuName = "Monotization/MonotizationModule", fileName = "MonotizationModule", order = 1)]
-    public abstract class MonetizationModule : ScriptableObject
+    
+    public  abstract class MonetizationModule : ScriptableObject
     {
 
         public virtual async UTask Initialize()
         {
         }
 
-    }
+        internal virtual void UpdateModule(){}
 
-    // SendLog static class for colored tagged logging
+    }
 
 
 }

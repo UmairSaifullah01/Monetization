@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7af5440ab4bd40d185cbbadc06eb61e8, type: 3}
   m_Name: AnalyticsBridgeModule
   m_EditorClassIdentifier: 
+  gameAnalyticsKey: d153a8ad4faf76cae2fd89f07eb7c89d
+  gameAnalyticsSecret: 371a8deefcfc29c3d9eb7c5708c7582f0a2ec10f
 --- !u!114 &-3576784125040861377
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -47,7 +49,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 128156ce19eff495e9f0e2b1e3cdc7a7, type: 3}
-  m_Name: MonotizationProfile
+  m_Name: MonetizationProfile
   m_EditorClassIdentifier: 
   debugLog: 1
   modules:
