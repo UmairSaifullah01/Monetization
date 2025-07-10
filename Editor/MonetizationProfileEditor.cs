@@ -1,4 +1,4 @@
-using THEBADDEST.Monetization;
+using THEBADDEST.MonetizationApi;
 using UnityEditor;
 using UnityEngine;
 
@@ -40,7 +40,19 @@ namespace THEBADDEST.MonetizationEditor
 				return;
 			}
 			
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("debugLog"));
+			EditorGUILayout.BeginHorizontal();
+			EditorGUILayout.PrefixLabel("Debug Log");
+			if (EditorGUILayout.Toggle(serializedObject.FindProperty("debugLog").boolValue, EditorStyles.toggle))
+				serializedObject.FindProperty("debugLog").boolValue = true;
+			else
+				serializedObject.FindProperty("debugLog").boolValue = false;
+			EditorGUILayout.EndHorizontal();
+			
+			if (GUILayout.Button("Update Project", GUILayout.Width(200)))
+			{
+				(serializedObject.targetObject as MonetizationProfile)?.UpdateModules();
+			}
+			
 			EditorGUILayout.EndVertical();
 			EditorGUILayout.Space(10);
 			EditorUtility.SetDirty(target as MonetizationProfile);

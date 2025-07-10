@@ -5,7 +5,7 @@ using Firebase.Extensions;
 using Firebase.RemoteConfig;
 using THEBADDEST.Tasks;
 using UnityEngine;
-using THEBADDEST.Monetization;
+using THEBADDEST.MonetizationApi;
 
 
 namespace THEBADDEST.RemoteConfigSystem

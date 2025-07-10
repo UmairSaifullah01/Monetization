@@ -4,7 +4,7 @@ using Firebase.RemoteConfig;
 using UnityEngine;
 using THEBADDEST.PrimitiveTypes;
 using String = THEBADDEST.PrimitiveTypes.String;
-using THEBADDEST.Monetization;
+using THEBADDEST.MonetizationApi;
 
 
 namespace THEBADDEST.RemoteConfigSystem

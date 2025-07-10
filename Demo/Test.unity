@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44402185, g: 0.49316472, b: 0.57223153, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -471,8 +470,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fc6368de763ba645ae33fa750c087ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  remoteConfig:
-    m_Reference: {fileID: 11400000, guid: 5b268bf689cee354db97263e7917a64f, type: 2}
 --- !u!1 &590908019
 GameObject:
   m_ObjectHideFlags: 0
@@ -616,6 +613,7 @@ GameObject:
   m_Component:
   - component: {fileID: 868485800}
   - component: {fileID: 868485799}
+  - component: {fileID: 868485801}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -700,6 +698,29 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+--- !u!114 &868485801
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 868485798}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Version: 3
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_LightLayerMask: 1
+  m_RenderingLayers: 1
+  m_CustomShadowLayers: 0
+  m_ShadowLayerMask: 1
+  m_ShadowRenderingLayers: 1
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
 --- !u!1 &906555261
 GameObject:
   m_ObjectHideFlags: 0
@@ -1074,8 +1095,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 474486711}
-        m_TargetAssemblyTypeName: AppCore.RemoteConfigSystem.Demo.Test, Assembly-CSharp
-        m_MethodName: Fetch
+        m_TargetAssemblyTypeName: THEBADDEST.RemoteConfigSystem.Demo.Test, Assembly-CSharp
+        m_MethodName: ShowInterstitial
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

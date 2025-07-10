@@ -47,6 +47,7 @@ namespace THEBADDEST.Advertisement
 	public interface IAppRewardAd : IAppAd
 	{
 		event Action<object> OnRewardClaimed;
+		event Action OnRewardFailed;
 		void                 Show(Action<object> onRewardClaimed);
 
 	}
