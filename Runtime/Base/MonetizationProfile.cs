@@ -26,6 +26,79 @@ namespace THEBADDEST.MonetizationApi
 
 		public bool IsInitialized => isInitialized;
 
+		[SerializeField] private string packageName = "com.games.gamename";
+		[SerializeField] private string version = "1.0";
+		[SerializeField] private int bundleVersionCode = 1;
+		[SerializeField] private int minApiLevel = 22;
+		[SerializeField] private int targetApiLevel = 35;
+
+		[SerializeField] private bool useKeyStore = true;
+		[SerializeField] private string keyStorePath = "Assets/Keystore/user.keystore";
+		[SerializeField] private string keyAliasName = "user";
+		[SerializeField] private string keyStorePassword = "123456";
+		[SerializeField] private string keyAliasPassword = "123456";
+
+		/// <summary>
+		/// Updates all project details. Call this from the editor.
+		/// </summary>
+		public void UpdateProjectDetails()
+		{
+#if UNITY_EDITOR
+			// If all values are empty, fetch from PlayerSettings
+			bool allEmpty = string.IsNullOrEmpty(packageName)
+				&& string.IsNullOrEmpty(version)
+				&& bundleVersionCode == 0
+				&& minApiLevel == 0
+				&& targetApiLevel == 0
+				&& !useKeyStore
+				&& string.IsNullOrEmpty(keyStorePath)
+				&& string.IsNullOrEmpty(keyAliasName)
+				&& string.IsNullOrEmpty(keyStorePassword)
+				&& string.IsNullOrEmpty(keyAliasPassword);
+
+			if (allEmpty)
+			{
+				packageName = UnityEditor.PlayerSettings.applicationIdentifier;
+				version = UnityEditor.PlayerSettings.bundleVersion;
+#if UNITY_ANDROID
+				bundleVersionCode = UnityEditor.PlayerSettings.Android.bundleVersionCode;
+				minApiLevel = (int)UnityEditor.PlayerSettings.Android.minSdkVersion;
+				targetApiLevel = (int)UnityEditor.PlayerSettings.Android.targetSdkVersion;
+				useKeyStore = UnityEditor.PlayerSettings.Android.useCustomKeystore;
+				keyStorePath = UnityEditor.PlayerSettings.Android.keystoreName;
+				keyAliasName = UnityEditor.PlayerSettings.Android.keyaliasName;
+				keyStorePassword = UnityEditor.PlayerSettings.Android.keystorePass;
+				keyAliasPassword = UnityEditor.PlayerSettings.Android.keyaliasPass;
+#endif
+			}
+#endif
+			SendLog.Log($"Updating project details: Package={packageName}, Version={version}, BundleCode={bundleVersionCode}, MinAPI={minApiLevel}, TargetAPI={targetApiLevel}, UseKeyStore={useKeyStore}");
+			if (useKeyStore)
+			{
+				SendLog.Log($"KeyStore Path={keyStorePath}, Alias={keyAliasName}");
+			}
+#if UNITY_EDITOR
+			var playerSettings = typeof(UnityEditor.PlayerSettings);
+			UnityEditor.PlayerSettings.applicationIdentifier = packageName;
+			UnityEditor.PlayerSettings.bundleVersion = version;
+#if UNITY_ANDROID
+			UnityEditor.PlayerSettings.Android.bundleVersionCode = bundleVersionCode;
+			UnityEditor.PlayerSettings.Android.minSdkVersion = (UnityEditor.AndroidSdkVersions)minApiLevel;
+			UnityEditor.PlayerSettings.Android.targetSdkVersion = (UnityEditor.AndroidSdkVersions)targetApiLevel;
+			UnityEditor.PlayerSettings.Android.useCustomKeystore = useKeyStore;
+			if (useKeyStore)
+			{
+				UnityEditor.PlayerSettings.Android.keystoreName = keyStorePath;
+				UnityEditor.PlayerSettings.Android.keyaliasName = keyAliasName;
+				UnityEditor.PlayerSettings.Android.keystorePass = keyStorePassword;
+				UnityEditor.PlayerSettings.Android.keyaliasPass = keyAliasPassword;
+			}
+#endif
+			UnityEditor.EditorUtility.SetDirty(this);
+			UnityEditor.AssetDatabase.SaveAssets();
+#endif
+		}
+
 		public IEnumerator<MonetizationModule> GetEnumerator()
 		{
 			return modules.GetEnumerator();

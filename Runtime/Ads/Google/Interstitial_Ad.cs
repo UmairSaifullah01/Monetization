@@ -50,6 +50,11 @@ namespace THEBADDEST.Advertisement
 			if (interstitialAd != null && interstitialAd.CanShowAd())
 			{
 				interstitialAd.Show();
+				EventBus.Publish(new AdShownEvent {
+					AdType = "Interstitial",
+					Placement = unitId,
+					Time = DateTime.Now
+				});
 			}
 			else
 			{
