@@ -321,6 +321,30 @@ namespace THEBADDEST.MonetizationEditor
 			return state;
 		}
 
+		public static void EditorWindowWithHeader(string title)
+		{
+			EditorGUILayout.Space(10);
+			GUILayout.BeginVertical(EditorTools.Window);
+			EditorGUILayout.Space();
+			var backgroundRect = GUILayoutUtility.GetRect(1f, 17f);
+			var labelRect      = backgroundRect;
+			labelRect.xMin += 6f;
+			labelRect.xMax -= 20f;
+			var foldoutRect = backgroundRect;
+			foldoutRect.y      += 1f;
+			foldoutRect.width  =  13f;
+			foldoutRect.height =  13f;
+			
+			// Title
+			EditorGUI.LabelField(labelRect, title, EditorStyles.boldLabel);
+		}
+
+		public static void EditorWindowClose()
+		{
+			EditorGUILayout.Space();
+			GUILayout.EndVertical();
+			EditorGUILayout.Space();
+		}
 		public static bool DrawHeaderFoldoutLessWidthHide(string title, bool state, Action onHide)
 		{
 			var backgroundRect = GUILayoutUtility.GetRect(1f, 17f);
@@ -391,9 +415,11 @@ namespace THEBADDEST.MonetizationEditor
 			// EditorGUILayout.ObjectField("Script", script, typeof(MonoScript), false);
 			// EditorGUI.EndDisabledGroup();
 		}
-
+		
 		public static void DrawAllFields(object target, SerializedObject serializedObject, bool includeBaseTypeFields = false)
 		{
+			if(serializedObject == null) return;
+			
 			serializedObject?.Update();
             
             // Track shown field names to avoid duplicates
@@ -414,7 +440,10 @@ namespace THEBADDEST.MonetizationEditor
                         SerializedProperty property = serializedObject?.FindProperty(field.Name);
                         if (property != null)
                         {
+                            EditorGUILayout.BeginHorizontal();
+							GUILayout.Space(10); // Add 10 pixels of padding on the right
                             EditorGUILayout.PropertyField(property, true);
+                            EditorGUILayout.EndHorizontal();
                             shownFields.Add(field.Name);
                         }
                     }
@@ -433,11 +462,14 @@ namespace THEBADDEST.MonetizationEditor
                 SerializedProperty property = serializedObject.FindProperty(field.Name);
                 if (property != null)
                 {
+                    EditorGUILayout.BeginHorizontal();
+					GUILayout.Space(10);
                     EditorGUILayout.PropertyField(property, true);
+                    EditorGUILayout.EndHorizontal();
                 }
             }
-
-            serializedObject?.ApplyModifiedProperties();
+			if(serializedObject != null)
+				serializedObject?.ApplyModifiedProperties();
         }
 
 		public static void DrawAddRemoveButton(Action addEvent, Action removeEvent)

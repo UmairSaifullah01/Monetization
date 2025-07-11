@@ -39,6 +39,21 @@ MonoBehaviour:
     testDeviceIds:
     - SIMULATOR
     - 702815ACFC14FF222DA1DC767672A573
+--- !u!114 &-946998443004297677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d8dd75ae24b4090b19f911b650f8949, type: 3}
+  m_Name: UnityIAPModule
+  m_EditorClassIdentifier: 
+  catalog:
+    items: []
+  environment: production
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -51,7 +66,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 128156ce19eff495e9f0e2b1e3cdc7a7, type: 3}
   m_Name: MonetizationProfile
   m_EditorClassIdentifier: 
-  debugLog: 1
+  debugLog: 0
   modules:
   - {fileID: -3576784125040861377}
   - {fileID: -8874187065702333003}
+  - {fileID: 3912799098935748640}
+  - {fileID: -946998443004297677}
+--- !u!114 &3912799098935748640
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 340d3f5e62f14f51bf5e2ae3df1a0b31, type: 3}
+  m_Name: FireBaseRemoteConfigModuleModule
+  m_EditorClassIdentifier: 
+  m_VariablesMapper: {fileID: 0}

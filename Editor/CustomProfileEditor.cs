@@ -16,17 +16,22 @@ namespace THEBADDEST.MonetizationEditor
 
 		protected virtual string[] propertiesToShow { get; set; }
 
-		DrawCollection<T1> drawCollection;
+		protected DrawCollection<T1> drawCollection;
 
 		protected virtual void GUI()
 		{
-			if (drawCollection == null) drawCollection = new DrawCollection<T1>(collectionPropertyName, collectionTitle, serializedObject, target, typeof(T1));
 			DrawTitle();
 			DrawProperties();
+			DrawCollections();
+		}
+
+		protected void DrawCollections()
+		{
+			if (drawCollection == null) drawCollection = new DrawCollection<T1>(collectionPropertyName, collectionTitle, serializedObject, target, typeof(T1));
 			drawCollection.OnInspectorGUI();
 		}
 
-		void DrawProperties()
+		protected void DrawProperties()
 		{
 			if (propertiesToShow == null || propertiesToShow.Length == 0) return;
 			EditorTools.DrawLineHelpBox();

@@ -12,19 +12,19 @@ namespace THEBADDEST.RemoteConfigSystem
 {
 
 
-	public class FireBaseRemoteConfigModuleModule : RemoteConfigModule
+	public class FirebaseRemoteConfig : RemoteConfigModule
 	{
 
 		[SerializeField] RemoteVariablesMapper m_VariablesMapper;
 		public override IVariablesMapper variablesMapper => m_VariablesMapper;
 
-		FirebaseRemoteConfig firebaseRemoteConfig;
+		Firebase.RemoteConfig.FirebaseRemoteConfig firebaseRemoteConfig;
 
 
 		public override async UTask Initialize()
 		{
 			await base.Initialize();
-			firebaseRemoteConfig = FirebaseRemoteConfig.DefaultInstance;
+			firebaseRemoteConfig = Firebase.RemoteConfig.FirebaseRemoteConfig.DefaultInstance;
 			if (firebaseRemoteConfig == null)
 			{
 				OnInitializeCompleted(IsInitialized);
