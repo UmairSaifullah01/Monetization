@@ -49,10 +49,7 @@ namespace THEBADDEST.MonetizationApi
 			price = item.price;
 		}
 
-		public virtual void RestorePurchases()
-		{
-			
-		}
+		public abstract void RestorePurchases();
 
 	}
 

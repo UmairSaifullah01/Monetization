@@ -14,9 +14,6 @@ namespace THEBADDEST.RemoteConfigSystem
 		void Load();
 
 		void FetchConfig(Action<T> config);
-		
-		
-
 	}
 
 }

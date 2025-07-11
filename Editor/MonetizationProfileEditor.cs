@@ -11,6 +11,7 @@ namespace THEBADDEST.MonetizationEditor
 	{
 		protected override string              collectionTitle        => "Modules";
 		protected override string              collectionPropertyName => "modules";
+		
 		DrawCollection<MonetizationModule> drawComponentCollection;
 		bool                                   titleFoldout;
 		bool                                   settingsFoldout;
@@ -30,32 +31,34 @@ namespace THEBADDEST.MonetizationEditor
 
 		protected override void GUI()
 		{
-			base.GUI();
-			EditorGUILayout.Space(10);
-			EditorGUILayout.BeginVertical(EditorTools.Window);
-			settingsFoldout = EditorTools.DrawHeaderFoldoutLessWidthHide("Settings", settingsFoldout, OnHide);
-			if (!settingsFoldout)
-			{
-				EditorGUILayout.EndVertical();
-				return;
-			}
+			DrawTitle();
+			EditorTools.EditorWindowWithHeader("Settings");
 			
 			EditorGUILayout.BeginHorizontal();
+			GUILayout.Space(10); 
 			EditorGUILayout.PrefixLabel("Debug Log");
 			if (EditorGUILayout.Toggle(serializedObject.FindProperty("debugLog").boolValue, EditorStyles.toggle))
 				serializedObject.FindProperty("debugLog").boolValue = true;
 			else
 				serializedObject.FindProperty("debugLog").boolValue = false;
 			EditorGUILayout.EndHorizontal();
+			EditorTools.EditorWindowClose();
 			
-			if (GUILayout.Button("Update Project", GUILayout.Width(200)))
+			DrawCollections();
+			EditorGUILayout.Space(10);
+			
+			EditorGUILayout.Space();
+			EditorGUILayout.BeginHorizontal();
+			EditorGUILayout.Space();
+			
+			if (GUILayout.Button("Update Project", GUILayout.Width(200),GUILayout.Height(40)))
 			{
 				(serializedObject.targetObject as MonetizationProfile)?.UpdateModules();
 			}
-			
-			EditorGUILayout.EndVertical();
-			EditorGUILayout.Space(10);
+			EditorGUILayout.Space();
+			EditorGUILayout.EndHorizontal();
 			EditorUtility.SetDirty(target as MonetizationProfile);
+			
 		}
 
 		void OnHide()
