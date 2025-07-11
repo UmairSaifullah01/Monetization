@@ -1,4 +1,5 @@
 using System;
+using THEBADDEST.MonetizationApi;
 
 
 namespace THEBADDEST.Advertisement
@@ -52,7 +53,7 @@ namespace THEBADDEST.Advertisement
 
 	}
 	
-	public interface IAdsModule
+	public interface IAdsModule : IModule
 	{
 
 		event Action<bool> OnInitialize;

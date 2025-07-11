@@ -12,8 +12,8 @@ namespace THEBADDEST.MonetizationEditor
 	public class EditorData<T>
 	{
 
-		public T                reference;
-		public bool             folded;
+		public T reference;
+		public bool folded;
 		public SerializedObject serializedObject;
 
 	}
@@ -22,22 +22,22 @@ namespace THEBADDEST.MonetizationEditor
 	{
 
 		readonly SerializedProperty collectionProperty;
-		readonly IEnumerable<Type>  editorTypes;
-		readonly SerializedObject   serializedObject;
-		readonly Object             target;
-		readonly string             title;
-		EditorData<T>[]             editorDataContainer;
-		int                         oldLength = -1;
-		static bool                  hide      = false;
-		static bool                 folded;
+		readonly IEnumerable<Type> editorTypes;
+		readonly SerializedObject serializedObject;
+		readonly Object target;
+		readonly string title;
+		EditorData<T>[] editorDataContainer;
+		int oldLength = -1;
+		static bool hide = false;
+		static bool folded;
 
 		public DrawCollection(string collectionPropertyName, string title, SerializedObject serializedObject, Object target, Type collectionParentType)
 		{
-			this.target           = target;
+			this.target = target;
 			this.serializedObject = serializedObject;
-			this.title            = title;
-			collectionProperty    = this.serializedObject.FindProperty(collectionPropertyName);
-			editorTypes           = EditorTools.GetInheritedClasses(collectionParentType);
+			this.title = title;
+			collectionProperty = this.serializedObject.FindProperty(collectionPropertyName);
+			editorTypes = EditorTools.GetInheritedClasses(collectionParentType);
 		}
 
 		public void OnInspectorGUI()
@@ -49,6 +49,7 @@ namespace THEBADDEST.MonetizationEditor
 				EditorGUILayout.EndVertical();
 				return;
 			}
+
 			using var check = new EditorGUI.ChangeCheckScope();
 			EditorGUILayout.Space();
 			InitSubEditors();
@@ -58,7 +59,7 @@ namespace THEBADDEST.MonetizationEditor
 				{
 					EditorGUILayout.BeginVertical(GUI.skin.box);
 					int cache = i;
-					editorDataContainer[i].folded = EditorTools.DrawHeaderFoldoutLessWithButton(editorDataContainer[i].reference.GetType().Name, editorDataContainer[i].folded, EditorGUIUtility.IconContent("Toolbar Minus"),()=> RemoveType(cache));
+					editorDataContainer[i].folded = EditorTools.DrawHeaderFoldoutLessWithButton(editorDataContainer[i].reference.GetType().Name, editorDataContainer[i].folded, EditorGUIUtility.IconContent("Toolbar Minus"), () => RemoveType(cache));
 					if (editorDataContainer[i].folded)
 					{
 						EditorTools.DrawScript(editorDataContainer[i].reference);
@@ -81,17 +82,18 @@ namespace THEBADDEST.MonetizationEditor
 				SerializedProperty arrayElementAtIndex = collectionProperty.GetArrayElementAtIndex(i);
 				EditorTools.HidFlags(arrayElementAtIndex.objectReferenceValue, hide);
 			}
+
 			AssetDatabase.Refresh();
 		}
 
 		void DrawAddMenu()
 		{
-			var menu    = new GenericMenu();
+			var menu = new GenericMenu();
 			var typeMap = editorTypes;
 			foreach (var kvp in typeMap)
 			{
-				var  type   = kvp;
-				var  title  = new GUIContent(type.Name);
+				var type = kvp;
+				var title = new GUIContent(type.Name);
 				bool exists = TypeExistInCollection(type);
 				if (!exists)
 					menu.AddItem(title, false, () => AddType(type));
@@ -106,9 +108,9 @@ namespace THEBADDEST.MonetizationEditor
 			for (int i = 0; i < collectionProperty.arraySize; i++)
 			{
 				SerializedProperty arrayElementAtIndex = collectionProperty.GetArrayElementAtIndex(i);
-				Type               type                = arrayElementAtIndex.objectReferenceValue.GetType();
-				var                title               = new GUIContent(type.Name);
-				int                cachedI             = i;
+				Type type = arrayElementAtIndex.objectReferenceValue.GetType();
+				var title = new GUIContent(type.Name);
+				int cachedI = i;
 				menu.AddItem(title, false, () => RemoveType(cachedI));
 			}
 
@@ -163,7 +165,7 @@ namespace THEBADDEST.MonetizationEditor
 			int count = collectionProperty.arraySize;
 			if (count != oldLength)
 			{
-				oldLength           = count;
+				oldLength = count;
 				editorDataContainer = new EditorData<T>[count];
 				for (int j = 0; j < count; j++)
 				{

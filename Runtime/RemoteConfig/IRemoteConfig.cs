@@ -1,11 +1,12 @@
 using System;
+using THEBADDEST.MonetizationApi;
 
 
 namespace THEBADDEST.RemoteConfigSystem
 {
 
 
-	public interface IRemoteConfig<T> 
+	public interface IRemoteConfig<T>  : IModule
 	{
 
 		event Action<bool> OnInitialize;

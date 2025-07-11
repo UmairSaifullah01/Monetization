@@ -6,7 +6,10 @@ namespace THEBADDEST.MonetizationApi
 {
 
 
-    public abstract class MonetizationModule : ScriptableObject
+    /// <summary>
+    /// Abstract base class for all monetization modules.
+    /// </summary>
+    public abstract class MonetizationModule : ScriptableObject, IModule
     {
         [Header("Module Settings")]
         [SerializeField] protected bool enabled = true;
@@ -15,11 +18,16 @@ namespace THEBADDEST.MonetizationApi
         protected bool isInitialized = false;
         protected bool isInitializing = false;
 
+        /// <inheritdoc/>
         public bool IsEnabled => enabled;
+        /// <inheritdoc/>
         public bool IsInitialized => isInitialized;
+        /// <inheritdoc/>
         public bool IsInitializing => isInitializing;
+        /// <inheritdoc/>
         public string ModuleName => string.IsNullOrEmpty(moduleName) ? GetType().Name : moduleName;
 
+        /// <inheritdoc/>
         public virtual async UTask Initialize()
         {
             if (isInitialized)
@@ -60,13 +68,17 @@ namespace THEBADDEST.MonetizationApi
             }
         }
 
+        /// <summary>
+        /// Override to implement module-specific initialization logic.
+        /// </summary>
         protected virtual async UTask OnInitialize()
         {
             // Override in derived classes
             await UTask.CompletedTask;
         }
 
-        internal virtual void UpdateModule()
+        /// <inheritdoc/>
+        public virtual void UpdateModule()
         {
             if (!enabled || !isInitialized)
             {
@@ -83,11 +95,15 @@ namespace THEBADDEST.MonetizationApi
             }
         }
 
+        /// <summary>
+        /// Override to implement module-specific update logic.
+        /// </summary>
         protected virtual void OnUpdateModule()
         {
             // Override in derived classes
         }
 
+        /// <inheritdoc/>
         public virtual void OnDestroy()
         {
             try
@@ -100,17 +116,24 @@ namespace THEBADDEST.MonetizationApi
             }
         }
 
+        /// <summary>
+        /// Override to implement module-specific cleanup logic.
+        /// </summary>
         protected virtual void OnModuleDestroy()
         {
             // Override in derived classes for cleanup
         }
 
+        /// <inheritdoc/>
         public virtual void Reset()
         {
             isInitialized = false;
             isInitializing = false;
         }
 
+        /// <summary>
+        /// Called by Unity when the script is loaded or a value changes in the inspector.
+        /// </summary>
         protected virtual void OnValidate()
         {
             if (string.IsNullOrEmpty(moduleName))

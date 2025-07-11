@@ -22,7 +22,7 @@ namespace THEBADDEST.MonetizationApi
 		public static bool IsInitialized => isInitialized;
 		public static bool IsInitializing => isInitializing;
 
-		public static T GetModule<T>()
+		public static T GetModule<T>() where T : class, IModule
 		{
 			if (!isInitialized)
 			{
@@ -85,7 +85,7 @@ namespace THEBADDEST.MonetizationApi
 				if (retryAttempts < maxRetryAttempts)
 				{
 					SendLog.LogWarning($"Retrying initialization in {retryDelaySeconds} seconds... (Attempt {retryAttempts + 1}/{maxRetryAttempts})");
-					await UTask.Delay(TimeSpan.FromSeconds(retryDelaySeconds));
+					await UTask.Delay((retryDelaySeconds));
 					await Initialize(retryAttempts + 1);
 				}
 				else
