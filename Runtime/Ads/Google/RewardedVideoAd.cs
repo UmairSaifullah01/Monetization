@@ -57,6 +57,11 @@ namespace THEBADDEST.Advertisement
 					SendLog.Log($"Rewarded ad granted a reward: {reward.Amount} {reward.Type}");
 					OnRewardClaimed?.Invoke(reward);
 				});
+				EventBus.Publish(new AdShownEvent {
+					AdType = "Rewarded",
+					Placement = unitId,
+					Time = DateTime.Now
+				});
 			}
 			else
 			{

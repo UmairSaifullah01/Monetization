@@ -70,6 +70,11 @@ namespace THEBADDEST.Advertisement
 				SendLog.Log("Showing banner ad.");
 				bannerView.Show();
 				isDisplaying = true;
+				EventBus.Publish(new AdShownEvent {
+					AdType = "Banner",
+					Placement = bannerData.unitId,
+					Time = DateTime.Now
+				});
 			}
 		}
 

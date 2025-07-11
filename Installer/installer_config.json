@@ -1,0 +1,25 @@
+{
+  "packages": {
+    "com.thebaddest.utask": "https://github.com/UmairSaifullah01/UTask.git",
+    "com.unity.purchasing": "4.10.0",
+    "com.gameanalytics.sdk": "7.10.4",
+    "com.google.ads.mobile": "10.3.0"
+  },
+  "registries": [
+    {
+      "name": "OpenUPM",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.google",
+        "com.gameanalytics"
+      ]
+    }
+  ],
+  "tgzPackages": {
+    "com.google.external-dependency-manager-1.2.183.tgz": "com.google.external-dependency-manager",
+    "com.google.firebase.app-12.5.0.tgz": "com.google.firebase.app",
+    "com.google.firebase.auth-12.5.0.tgz": "com.google.firebase.auth",
+    "com.google.firebase.database-12.5.0.tgz": "com.google.firebase.database",
+    "com.google.firebase.remote-config-12.5.0.tgz": "com.google.firebase.remote-config"
+  }
+}

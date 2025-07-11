@@ -2,8 +2,6 @@ using System;
 using System.Globalization;
 using Firebase.RemoteConfig;
 using UnityEngine;
-using THEBADDEST.PrimitiveTypes;
-using String = THEBADDEST.PrimitiveTypes.String;
 using THEBADDEST.MonetizationApi;
 
 

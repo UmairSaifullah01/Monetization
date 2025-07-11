@@ -79,6 +79,16 @@ MonoBehaviour:
   - {fileID: -8874187065702333003}
   - {fileID: 3912799098935748640}
   - {fileID: -946998443004297677}
+  packageName: com.games.gamename
+  version: 1.0
+  bundleVersionCode: 1
+  minApiLevel: 22
+  targetApiLevel: 35
+  useKeyStore: 0
+  keyStorePath: Assets/Keystore/user.keystore
+  keyAliasName: user
+  keyStorePassword: 123456
+  keyAliasPassword: 123456
 --- !u!114 &3912799098935748640
 MonoBehaviour:
   m_ObjectHideFlags: 0
