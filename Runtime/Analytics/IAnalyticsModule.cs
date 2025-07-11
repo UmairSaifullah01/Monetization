@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using THEBADDEST.MonetizationApi;
 
 
 namespace THEBADDEST.Analytics
 {
 
 
-	public interface IAnalyticsModule
+	public interface IAnalyticsModule : IModule
 	{
 
 		public void SendEvent(string name);

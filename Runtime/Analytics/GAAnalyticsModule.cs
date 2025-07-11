@@ -9,14 +9,12 @@ namespace THEBADDEST.Analytics
 {
 
 
-	public class AnalyticsBridgeModule : AnalyticsModule
+	public class GAAnalyticsModule : AnalyticsModule
 	{
 		[SerializeField] string gameAnalyticsKey;
 		[SerializeField] string gameAnalyticsSecret;
-		
-		private bool isInitialized = false;
 
-		internal override void UpdateModule()
+		public override void UpdateModule()
 		{
 			if (!string.IsNullOrEmpty(gameAnalyticsKey) && !string.IsNullOrEmpty(gameAnalyticsSecret))
 			{

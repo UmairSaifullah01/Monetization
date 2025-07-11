@@ -5,16 +5,24 @@ using UnityEngine;
 
 namespace THEBADDEST.MonetizationApi
 {
+
+
+	/// <summary>
+	/// ScriptableObject that holds and manages all monetization modules.
+	/// </summary>
 	[CreateAssetMenu(menuName = "Monotization/MonotizationProfile", fileName = "MonotizationProfile", order = 0)]
 	public class MonetizationProfile : ScriptableObject, IEnumerable<MonetizationModule>
 	{
 		[SerializeField] bool debugLog = true;
 		[SerializeField] bool validateModulesOnStart = true;
 
+		/// <summary>
+		/// List of all modules in this profile. Only one module per type is allowed.
+		/// </summary>
 		public List<MonetizationModule> modules = new List<MonetizationModule>();
 
 		private bool isInitialized = false;
-		private Dictionary<System.Type, MonetizationModule> moduleCache = new Dictionary<System.Type, MonetizationModule>();
+		private Dictionary<System.Type, IModule> moduleCache = new Dictionary<System.Type, IModule>();
 
 		public bool IsInitialized => isInitialized;
 
@@ -28,6 +36,9 @@ namespace THEBADDEST.MonetizationApi
 			return GetEnumerator();
 		}
 
+		/// <summary>
+		/// Initializes all modules in the profile asynchronously.
+		/// </summary>
 		public async UTask Initialize()
 		{
 			if (isInitialized)
@@ -40,7 +51,7 @@ namespace THEBADDEST.MonetizationApi
 
 			if (validateModulesOnStart)
 			{
-				ValidateModules();
+				RemoveDuplicateModules();
 			}
 
 			var initializationTasks = new List<UTask>();
@@ -84,6 +95,30 @@ namespace THEBADDEST.MonetizationApi
 			}
 		}
 
+		private void RemoveDuplicateModules()
+		{
+			var typeToModule = new Dictionary<System.Type, MonetizationModule>();
+			var toRemove = new List<MonetizationModule>();
+			foreach (var module in modules)
+			{
+				if (module == null) continue;
+				var type = module.GetType();
+				if (typeToModule.ContainsKey(type))
+				{
+					SendLog.LogWarning($"Duplicate module of type {type.Name} found. Removing duplicate.");
+					toRemove.Add(module);
+				}
+				else
+				{
+					typeToModule[type] = module;
+				}
+			}
+			foreach (var module in toRemove)
+			{
+				modules.Remove(module);
+			}
+		}
+
 		private void ValidateModules()
 		{
 			var moduleTypes = new HashSet<System.Type>();
@@ -117,12 +152,15 @@ namespace THEBADDEST.MonetizationApi
 			{
 				if (module != null)
 				{
-					moduleCache[module.GetType()] = module;
+					moduleCache[module.GetType()] = module as IModule;
 				}
 			}
 		}
 
-		internal T GetModule<T>()
+		/// <summary>
+		/// Gets a module of the specified type.
+		/// </summary>
+		internal T GetModule<T>() where T : class, IModule
 		{
 			if (!isInitialized)
 			{
@@ -133,7 +171,7 @@ namespace THEBADDEST.MonetizationApi
 			// Try cache first for better performance
 			if (moduleCache.TryGetValue(typeof(T), out var cachedModule))
 			{
-				return (T)cachedModule;
+				return cachedModule as T;
 			}
 
 			// Fallback to linear search
@@ -149,14 +187,11 @@ namespace THEBADDEST.MonetizationApi
 			return default;
 		}
 
+		/// <summary>
+		/// Updates all modules in the profile.
+		/// </summary>
 		public void UpdateModules()
 		{
-			if (!isInitialized)
-			{
-				SendLog.LogWarning("Cannot update modules: profile not initialized.");
-				return;
-			}
-
 			foreach (MonetizationModule module in modules)
 			{
 				if (module != null)
@@ -166,6 +201,9 @@ namespace THEBADDEST.MonetizationApi
 			}
 		}
 
+		/// <summary>
+		/// Resets the profile and all module caches.
+		/// </summary>
 		public void Reset()
 		{
 			isInitialized = false;

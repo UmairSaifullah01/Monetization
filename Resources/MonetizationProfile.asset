@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7af5440ab4bd40d185cbbadc06eb61e8, type: 3}
   m_Name: AnalyticsBridgeModule
   m_EditorClassIdentifier: 
+  enabled: 1
+  moduleName: AnalyticsBridgeModule
   gameAnalyticsKey: d153a8ad4faf76cae2fd89f07eb7c89d
   gameAnalyticsSecret: 371a8deefcfc29c3d9eb7c5708c7582f0a2ec10f
 --- !u!114 &-3576784125040861377
@@ -26,6 +28,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4933304f2025420eb1d04d503ef719e5, type: 3}
   m_Name: GoogleAdsModule
   m_EditorClassIdentifier: 
+  enabled: 1
+  moduleName: GoogleAdsModule
   config:
     appId: ca-app-pub-3940256099942544~3347511713
     bannerData:
@@ -51,6 +55,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d8dd75ae24b4090b19f911b650f8949, type: 3}
   m_Name: UnityIAPModule
   m_EditorClassIdentifier: 
+  enabled: 1
+  moduleName: UnityIAPModule
   catalog:
     items: []
   environment: production
@@ -67,6 +73,7 @@ MonoBehaviour:
   m_Name: MonetizationProfile
   m_EditorClassIdentifier: 
   debugLog: 0
+  validateModulesOnStart: 1
   modules:
   - {fileID: -3576784125040861377}
   - {fileID: -8874187065702333003}
@@ -84,4 +91,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 340d3f5e62f14f51bf5e2ae3df1a0b31, type: 3}
   m_Name: FireBaseRemoteConfigModuleModule
   m_EditorClassIdentifier: 
+  enabled: 1
+  moduleName: FirebaseRemoteConfig
   m_VariablesMapper: {fileID: 0}

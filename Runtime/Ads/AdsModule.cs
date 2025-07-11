@@ -11,7 +11,6 @@ namespace THEBADDEST.Advertisement
 	[CreateAssetMenu(menuName = "Monotization/AdsModule", fileName = "AdsModule", order = 10)]
 	public abstract class AdsModule : MonetizationModule, IAdsModule
 	{
-		protected bool isInitialized = false;
 		public override async UTask Initialize()
 		{
 			Init();

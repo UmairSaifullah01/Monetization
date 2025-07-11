@@ -5,7 +5,7 @@ namespace THEBADDEST.MonetizationApi
 {
 
 
-	public interface IIAPModule
+	public interface IIAPModule : IModule
 	{
 		IAPCatalog Catalog { get; }
 
