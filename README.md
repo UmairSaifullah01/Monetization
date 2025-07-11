@@ -36,7 +36,16 @@ Create a `MonetizationProfile` asset in your Resources folder:
 // Add your modules (Ads, IAP, Analytics, RemoteConfig)
 ```
 
-### 2. Initialize the System
+### 2. Install Dependencies (Recommended)
+
+Open the Monetization Installer from the Unity Editor:
+
+- Go to `Tools → Monetization → Installer`
+- Click the **Install** button. The installer will automatically fetch and install all required dependencies for you.
+
+No manual manifest editing required!
+
+### 3. Initialize the System
 
 ```csharp
 using THEBADDEST.MonetizationApi;

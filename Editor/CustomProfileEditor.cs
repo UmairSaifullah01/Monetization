@@ -18,7 +18,7 @@ namespace THEBADDEST.MonetizationEditor
 
 		protected DrawCollection<T1> drawCollection;
 
-		protected virtual void GUI()
+		protected virtual void OnGUIUpdate()
 		{
 			DrawTitle();
 			DrawProperties();
@@ -57,7 +57,7 @@ namespace THEBADDEST.MonetizationEditor
 		public override void OnInspectorGUI()
 		{
 			serializedObject.Update();
-			GUI();
+			OnGUIUpdate();
 			serializedObject.ApplyModifiedProperties();
 		}
 

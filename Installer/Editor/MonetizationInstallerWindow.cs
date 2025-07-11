@@ -4,8 +4,7 @@ using UnityEngine;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using Installer; // For MiniJSON
+// For MiniJSON
 using UnityEditor.PackageManager;
 
 namespace Installer
@@ -38,7 +37,8 @@ namespace Installer
         public static void ShowWindow()
         {
             var window = GetWindow<MonetizationInstallerWindow>("Monetization Installer");
-            window.minSize = new Vector2(400, 250);
+            window.minSize = new Vector2(500, 450);
+            window.maxSize = new Vector2(500, 450);
         }
 
         void OnGUI()
@@ -50,7 +50,7 @@ namespace Installer
             GUILayout.FlexibleSpace();
             if (logoTexture != null)
             {
-                GUILayout.Label(logoTexture, GUILayout.Width(50), GUILayout.Height(50));
+                GUILayout.Label(logoTexture, GUILayout.Width(70), GUILayout.Height(70));
                 GUILayout.Space(10);
             }
             var titleStyle = new GUIStyle(GUI.skin.label)
