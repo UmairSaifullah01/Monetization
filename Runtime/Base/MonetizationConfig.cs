@@ -13,36 +13,56 @@ namespace THEBADDEST.MonetizationApi
         [SerializeField] private float initializationTimeout = 30f;
         [SerializeField] private int maxRetryAttempts = 3;
         [SerializeField] private float retryDelaySeconds = 2f;
+        [Tooltip("If enabled, checks for internet connectivity before initializing modules.")]
+        [SerializeField] private bool checkInternetBeforeInit = true;
+        [Tooltip("If enabled, validates and removes duplicate modules on start.")]
+        [SerializeField] private bool validateModulesOnStart = true;
 
         [Header("Ads Settings")]
+        [Tooltip("Enable or disable all ad modules.")]
         [SerializeField] private bool enableAds = true;
+        [Tooltip("Enable test mode for ads (use test ad units).")]
         [SerializeField] private bool enableTestMode = true;
+        [Tooltip("Timeout in seconds for ad loading.")]
         [SerializeField] private float adLoadTimeout = 10f;
+        [Tooltip("Maximum number of attempts to load an ad before giving up.")]
         [SerializeField] private int maxAdLoadAttempts = 3;
 
         [Header("IAP Settings")]
+        [Tooltip("Enable or disable all in-app purchase modules.")]
         [SerializeField] private bool enableIAP = true;
+        [Tooltip("Enable receipt validation for purchases.")]
         [SerializeField] private bool enableReceiptValidation = true;
+        [Tooltip("Timeout in seconds for purchase operations.")]
         [SerializeField] private float purchaseTimeout = 30f;
 
         [Header("Analytics Settings")]
+        [Tooltip("Enable or disable all analytics modules.")]
         [SerializeField] private bool enableAnalytics = true;
+        [Tooltip("Enable batching of analytics events.")]
         [SerializeField] private bool enableEventBatching = true;
+        [Tooltip("Number of events to batch before sending.")]
         [SerializeField] private int batchSize = 10;
+        [Tooltip("Timeout in seconds before sending a batch of events.")]
         [SerializeField] private float batchTimeout = 5f;
 
         [Header("Remote Config Settings")]
+        [Tooltip("Enable or disable remote config modules.")]
         [SerializeField] private bool enableRemoteConfig = true;
+        [Tooltip("Timeout in seconds for fetching remote config.")]
         [SerializeField] private float configFetchTimeout = 15f;
+        [Tooltip("Enable caching of remote config data.")]
         [SerializeField] private bool enableConfigCaching = true;
 
-        // Public properties
+        // Public properties for all settings
         public bool EnableDebugLogs => enableDebugLogs;
         public LogLevel LogLevel => logLevel;
         public bool EnablePerformanceLogging => enablePerformanceLogging;
         public float InitializationTimeout => initializationTimeout;
         public int MaxRetryAttempts => maxRetryAttempts;
         public float RetryDelaySeconds => retryDelaySeconds;
+        public bool CheckInternetBeforeInit => checkInternetBeforeInit;
+        public bool ValidateModulesOnStart => validateModulesOnStart;
 
         public bool EnableAds => enableAds;
         public bool EnableTestMode => enableTestMode;
@@ -81,14 +101,7 @@ namespace THEBADDEST.MonetizationApi
             }
         }
 
-        private void OnEnable()
-        {
-            // Apply configuration
-            SendLog.Enabled = enableDebugLogs;
-            SendLog.CurrentLogLevel = logLevel;
-        }
-
-        public void ApplyConfiguration()
+        public void ApplySendLogConfiguration()
         {
             SendLog.Enabled = enableDebugLogs;
             SendLog.CurrentLogLevel = logLevel;

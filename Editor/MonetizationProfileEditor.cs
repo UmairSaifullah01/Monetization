@@ -85,6 +85,23 @@ namespace THEBADDEST.MonetizationEditor
 			}
 
 			EditorGUILayout.Space();
+
+			// Remove Profile Options section (now in MonetizationConfig)
+			EditorGUILayout.HelpBox("Global monetization settings (logging, internet check, validation, etc.) are now managed in the MonetizationConfig asset.", MessageType.Info);
+			if (GUILayout.Button("Edit MonetizationConfig", GUILayout.Width(220)))
+			{
+				var config = MonetizationConfig.Instance;
+				if (config != null)
+				{
+					Selection.activeObject = config;
+					EditorGUIUtility.PingObject(config);
+				}
+				else
+				{
+					EditorUtility.DisplayDialog("MonetizationConfig Not Found", "No MonetizationConfig asset found in Resources. Please create one via Create > Monetization > Configuration.", "OK");
+				}
+			}
+			EditorGUILayout.Space();
 			EditorTools.EditorWindowClose();
 			DrawCollections();
 			EditorGUILayout.Space(10);

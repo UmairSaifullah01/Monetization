@@ -70,7 +70,8 @@ namespace THEBADDEST.Advertisement
 				SendLog.Log("Showing banner ad.");
 				bannerView.Show();
 				isDisplaying = true;
-				EventBus.Publish(new AdShownEvent {
+				EventBus.Publish(new AdShownEvent
+				{
 					AdType = "Banner",
 					Placement = bannerData.unitId,
 					Time = DateTime.Now
@@ -80,10 +81,18 @@ namespace THEBADDEST.Advertisement
 
 		public void Load()
 		{
+			var config = THEBADDEST.MonetizationApi.MonetizationConfig.Instance;
 			// Create an instance of a banner view first.
 			if (bannerView == null)
 			{
 				Create();
+			}
+
+			// Use test mode if enabled (override ad unit if needed)
+			if (config.EnableTestMode)
+			{
+				SendLog.LogInfo("[BannerAd] Test mode enabled by MonetizationConfig.");
+				// Optionally override bannerData.unitId here for test ad unit
 			}
 
 			// Create our request used to load the ad.
