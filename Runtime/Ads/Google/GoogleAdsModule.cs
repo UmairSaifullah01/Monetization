@@ -27,6 +27,22 @@ namespace THEBADDEST.Advertisement
 
 		public override void Init()
 		{
+			var configAsset = THEBADDEST.MonetizationApi.MonetizationConfig.Instance;
+			if (!configAsset.EnableAds)
+			{
+				SendLog.LogWarning("[Ads] Ads are disabled by MonetizationConfig.");
+				isInitialized = false;
+				OnInitialize?.Invoke(false);
+				return;
+			}
+
+			// Use test mode if enabled
+			if (configAsset.EnableTestMode)
+			{
+				SendLog.LogInfo("[Ads] Test mode enabled by MonetizationConfig.");
+				// You may want to override ad unit IDs here for test mode
+			}
+
 			SetupAllAds();
 			MobileAds.RaiseAdEventsOnUnityMainThread = true;
 			if (CheckInternetState())

@@ -5,17 +5,12 @@ using UnityEngine;
 
 namespace THEBADDEST.MonetizationApi
 {
-
-
 	/// <summary>
 	/// ScriptableObject that holds and manages all monetization modules.
 	/// </summary>
 	[CreateAssetMenu(menuName = "THEBADDEST/MonetizationApi/MonetizationProfile", fileName = "MonetizationProfile", order = 0)]
 	public class MonetizationProfile : ScriptableObject, IEnumerable<MonetizationModule>
 	{
-		[SerializeField] bool debugLog = true;
-		[SerializeField] bool validateModulesOnStart = true;
-
 		/// <summary>
 		/// List of all modules in this profile. Only one module per type is allowed.
 		/// </summary>
@@ -37,6 +32,19 @@ namespace THEBADDEST.MonetizationApi
 		[SerializeField] private string keyAliasName = "user";
 		[SerializeField] private string keyStorePassword = "123456";
 		[SerializeField] private string keyAliasPassword = "123456";
+
+		/// <summary>
+		/// Checks if the device has internet connectivity.
+		/// </summary>
+		public static bool IsInternetAvailable()
+		{
+#if UNITY_EDITOR
+			// In editor, always return true for testing
+			return true;
+#else
+			return Application.internetReachability != NetworkReachability.NotReachable;
+#endif
+		}
 
 		/// <summary>
 		/// Updates all project details. Call this from the editor.
@@ -120,9 +128,17 @@ namespace THEBADDEST.MonetizationApi
 				return;
 			}
 
-			SendLog.Enabled = debugLog;
+			var config = MonetizationConfig.Instance;
 
-			if (validateModulesOnStart)
+			config.ApplySendLogConfiguration();
+
+			if (config.CheckInternetBeforeInit && !IsInternetAvailable())
+			{
+				SendLog.LogError("No internet connection. Initialization aborted.");
+				return;
+			}
+
+			if (config.ValidateModulesOnStart)
 			{
 				RemoveDuplicateModules();
 			}
@@ -189,32 +205,6 @@ namespace THEBADDEST.MonetizationApi
 			foreach (var module in toRemove)
 			{
 				modules.Remove(module);
-			}
-		}
-
-		private void ValidateModules()
-		{
-			var moduleTypes = new HashSet<System.Type>();
-			var duplicates = new List<string>();
-
-			foreach (var module in modules)
-			{
-				if (module == null) continue;
-
-				var moduleType = module.GetType();
-				if (moduleTypes.Contains(moduleType))
-				{
-					duplicates.Add(moduleType.Name);
-				}
-				else
-				{
-					moduleTypes.Add(moduleType);
-				}
-			}
-
-			if (duplicates.Count > 0)
-			{
-				SendLog.LogWarning($"Duplicate modules found: {string.Join(", ", duplicates)}");
 			}
 		}
 

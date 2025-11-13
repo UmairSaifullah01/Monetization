@@ -24,7 +24,14 @@ namespace THEBADDEST.Analytics
 
 		public override async UTask Initialize()
 		{
-			// Initialize Game Analytics
+			var configAsset = THEBADDEST.MonetizationApi.MonetizationConfig.Instance;
+			if (!configAsset.EnableAnalytics)
+			{
+				SendLog.LogWarning("[Analytics] Analytics is disabled by MonetizationConfig.");
+				isInitialized = false;
+				return;
+			}
+			// Use configAsset.EnableEventBatching, configAsset.BatchSize, configAsset.BatchTimeout for batching logic
 			GameAnalytics.Initialize();
 			isInitialized = true;
 			SendLog.Log("[Analytics] Game Analytics initialized successfully.");
@@ -32,6 +39,12 @@ namespace THEBADDEST.Analytics
 
 		public override void SendEvent(string name)
 		{
+			var configAsset = THEBADDEST.MonetizationApi.MonetizationConfig.Instance;
+			if (!configAsset.EnableAnalytics)
+			{
+				SendLog.LogWarning("[Analytics] Analytics is disabled by MonetizationConfig. Event not sent.");
+				return;
+			}
 			if (!isInitialized)
 			{
 				SendLog.LogWarning("[Analytics] Cannot send event: Game Analytics not initialized.");

@@ -19,10 +19,20 @@ namespace THEBADDEST.RemoteConfigSystem
 		public override IVariablesMapper variablesMapper => m_VariablesMapper;
 
 		Firebase.RemoteConfig.FirebaseRemoteConfig firebaseRemoteConfig;
+		private object cachedConfig = null;
+		private DateTime lastFetchTime = DateTime.MinValue;
 
 
 		public override async UTask Initialize()
 		{
+			var configAsset = THEBADDEST.MonetizationApi.MonetizationConfig.Instance;
+			if (!configAsset.EnableRemoteConfig)
+			{
+				SendLog.LogWarning("[RemoteConfig] Remote Config is disabled by MonetizationConfig.");
+				IsInitialized = false;
+				return;
+			}
+			// Use configAsset.ConfigFetchTimeout and configAsset.EnableConfigCaching for fetch logic
 			await base.Initialize();
 			firebaseRemoteConfig = Firebase.RemoteConfig.FirebaseRemoteConfig.DefaultInstance;
 			if (firebaseRemoteConfig == null)
@@ -52,11 +62,19 @@ namespace THEBADDEST.RemoteConfigSystem
 
 		public override void FetchConfig(Action<object> config)
 		{
+			var configAsset = THEBADDEST.MonetizationApi.MonetizationConfig.Instance;
+			if (configAsset.EnableConfigCaching && cachedConfig != null && (DateTime.Now - lastFetchTime).TotalSeconds < configAsset.ConfigFetchTimeout)
+			{
+				SendLog.LogInfo("[RemoteConfig] Returning cached config.");
+				config?.Invoke(cachedConfig);
+				return;
+			}
+
 			if (!IsInitialized) return;
-			var fetchTask = firebaseRemoteConfig.FetchAsync(TimeSpan.Zero);
+			var fetchTask = firebaseRemoteConfig.FetchAsync(TimeSpan.FromSeconds(configAsset.ConfigFetchTimeout));
 			fetchTask.ContinueWithOnMainThread(FetchComplete);
 
-			void FetchComplete(Task _fetchTask)
+			async void FetchComplete(System.Threading.Tasks.Task _fetchTask)
 			{
 				if (_fetchTask.IsCanceled)
 				{
@@ -80,7 +98,9 @@ namespace THEBADDEST.RemoteConfigSystem
 							SendLog.Log($"Remote data loaded and ready (last fetch time {info.FetchTime}).");
 							// Load Data
 							Load();
-							config?.Invoke(variablesMapper.GetDefaultValues());
+							cachedConfig = variablesMapper.GetDefaultValues();
+							lastFetchTime = DateTime.Now;
+							config?.Invoke(cachedConfig);
 						});
 						break;
 

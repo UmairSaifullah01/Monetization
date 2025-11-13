@@ -16,8 +16,6 @@ namespace THEBADDEST.MonetizationApi
 		private static MonetizationProfile profile;
 		private static bool isInitializing = false;
 		private static bool isInitialized = false;
-		private static int maxRetryAttempts = 3;
-		private static float retryDelaySeconds = 2f;
 
 		public static bool IsInitialized => isInitialized;
 		public static bool IsInitializing => isInitializing;
@@ -56,6 +54,8 @@ namespace THEBADDEST.MonetizationApi
 
 			isInitializing = true;
 
+			var config = MonetizationConfig.Instance;
+
 			try
 			{
 				var profileObject = Resources.Load<MonetizationProfile>("MonetizationProfile");
@@ -82,10 +82,10 @@ namespace THEBADDEST.MonetizationApi
 				OnError?.Invoke(errorMessage);
 
 				// Retry logic
-				if (retryAttempts < maxRetryAttempts)
+				if (retryAttempts < config.MaxRetryAttempts)
 				{
-					SendLog.LogWarning($"Retrying initialization in {retryDelaySeconds} seconds... (Attempt {retryAttempts + 1}/{maxRetryAttempts})");
-					await UTask.Delay((retryDelaySeconds));
+					SendLog.LogWarning($"Retrying initialization in {config.RetryDelaySeconds} seconds... (Attempt {retryAttempts + 1}/{config.MaxRetryAttempts})");
+					await UTask.Delay(config.RetryDelaySeconds);
 					await Initialize(retryAttempts + 1);
 				}
 				else

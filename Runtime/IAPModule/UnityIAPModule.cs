@@ -22,6 +22,13 @@ namespace THEBADDEST.MonetizationApi
 
         public override async UTask Initialize()
         {
+            var configAsset = THEBADDEST.MonetizationApi.MonetizationConfig.Instance;
+            if (!configAsset.EnableIAP)
+            {
+                SendLog.LogWarning("[IAP] IAP is disabled by MonetizationConfig.");
+                IsInitialized = false;
+                return;
+            }
             // try
             // {
             //     var options = new InitializationOptions().SetEnvironmentName(environment);
