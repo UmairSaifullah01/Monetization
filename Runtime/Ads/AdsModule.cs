@@ -1,14 +1,11 @@
 using System;
 using THEBADDEST.MonetizationApi;
 using THEBADDEST.Tasks;
-using UnityEngine;
 
 
 namespace THEBADDEST.Advertisement
 {
-
-
-	[CreateAssetMenu(menuName = "Monotization/AdsModule", fileName = "AdsModule", order = 10)]
+	
 	public abstract class AdsModule : MonetizationModule, IAdsModule
 	{
 		public override async UTask Initialize()

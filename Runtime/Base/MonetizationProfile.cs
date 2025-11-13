@@ -10,7 +10,7 @@ namespace THEBADDEST.MonetizationApi
 	/// <summary>
 	/// ScriptableObject that holds and manages all monetization modules.
 	/// </summary>
-	[CreateAssetMenu(menuName = "Monotization/MonotizationProfile", fileName = "MonotizationProfile", order = 0)]
+	[CreateAssetMenu(menuName = "THEBADDEST/MonetizationApi/MonetizationProfile", fileName = "MonetizationProfile", order = 0)]
 	public class MonetizationProfile : ScriptableObject, IEnumerable<MonetizationModule>
 	{
 		[SerializeField] bool debugLog = true;

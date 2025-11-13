@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace THEBADDEST.MonetizationApi
 {
-    [CreateAssetMenu(menuName = "Monetization/Configuration", fileName = "MonetizationConfig", order = 1)]
+    [CreateAssetMenu(menuName = "THEBADDEST/MonetizationApi/Configuration", fileName = "MonetizationConfig", order = 1)]
     public class MonetizationConfig : ScriptableObject
     {
         [Header("General Settings")]
