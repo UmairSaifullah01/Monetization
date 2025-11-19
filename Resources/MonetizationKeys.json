@@ -1,0 +1,29 @@
+{
+  "AdKeys": {
+    "BannerTop": "ca-app-pub-1234567890/banner_top",
+    "BannerBottom": "ca-app-pub-1234567890/banner_bottom",
+    "Rewarded": "ca-app-pub-1234567890/rewarded_video",
+    "Interstitial": "ca-app-pub-1234567890/interstitial",
+    "AppOpen": "ca-app-pub-1234567890/app_open"
+  },
+  "IAPKeys": {
+    "NoAds": "remove_ads",
+    "GemPackSmall": "gems_small_pack",
+    "GemPackMedium": "gems_medium_pack",
+    "GemPackLarge": "gems_large_pack",
+    "CoinPackSmall": "coins_small_pack",
+    "CoinPackLarge": "coins_large_pack",
+    "PremiumSubscription": "premium_subscription_monthly",
+    "ProSubscription": "pro_subscription_yearly"
+  },
+  "AnalyticsKeys": {
+    "FirebaseProjectId": "your-firebase-project-id",
+    "GameAnalyticsGameKey": "your-ga-game-key",
+    "GameAnalyticsSecretKey": "your-ga-secret-key"
+  },
+  "RemoteConfigKeys": {
+    "RemoteConfigUrl": "https://your-remote-config-url.com/config",
+    "ApiKey": "your-api-key",
+    "Environment": "production"
+  }
+}
