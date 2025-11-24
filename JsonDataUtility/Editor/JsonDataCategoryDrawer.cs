@@ -45,7 +45,7 @@ namespace THEBADDEST.MonetizationEditor
                 normal = { textColor = new Color(0.8f, 0.8f, 0.8f) },
                 padding = new RectOffset(5, 0, 0, 0)
             };
-            EditorGUI.LabelField(headerRect, $"▼ {category}", headerStyle);
+            EditorGUI.LabelField(headerRect, $" {category}", headerStyle);
 
             // 2. Draw Content
             float currentY = position.y + HEADER_HEIGHT;
@@ -68,7 +68,7 @@ namespace THEBADDEST.MonetizationEditor
                 {
                     // Draw Separator Line
                     Rect lineRect = new Rect(position.x, currentY, position.width, 1f);
-                    EditorGUI.DrawRect(lineRect, LineColor);
+                    //EditorGUI.DrawRect(lineRect, LineColor);
 
                     // Draw Key
                     Rect keyRect = new Rect(position.x, currentY + 2, keyWidth, LINE_HEIGHT - 2);
@@ -84,8 +84,18 @@ namespace THEBADDEST.MonetizationEditor
                 // Draw Bottom Line
                 Rect bottomLineRect = new Rect(position.x, currentY, position.width, 1f);
                 EditorGUI.DrawRect(bottomLineRect, LineColor);
-            }
+                string combinedValues = "";
 
+                if (data.Count > 0)
+                {
+                    List<string> allValues = new List<string>(data.Values);
+                    combinedValues = string.Join(",", allValues);
+                }
+
+                // Write back into the SerializedProperty
+                property.stringValue = combinedValues;
+            }
+            
             EditorGUI.EndProperty();
         }
 

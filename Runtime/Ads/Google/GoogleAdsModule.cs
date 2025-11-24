@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using GoogleMobileAds.Api;
 using GoogleMobileAds.Ump.Api;
 using UnityEngine;
+using UnityEngine.Serialization;
 using THEBADDEST.MonetizationApi;
 
 
@@ -9,10 +11,119 @@ namespace THEBADDEST.Advertisement
 {
 
 
+	public enum AdSizeType
+	{
+
+		Banner = 0,
+		MediumRectangle = 1,
+		IABBanner = 2,
+		Leaderboard = 3,
+		SmartBanner = 4,
+		AdaptiveBanner = 5,
+
+	}
+
+	[Serializable]
+	public struct BannerData
+	{
+		private const string AD_KEYS_CATEGORY = "AdKeys";
+
+		[SerializeField] private string m_UnitId;
+		[SerializeField] private AdSizeType m_Type;
+		[SerializeField] private AdPosition m_Position;
+
+		public string unitId => GetUnitId();
+		public AdSize size => ConvertTypeToSize();
+		public AdPosition position => m_Position;
+
+		private string GetUnitId()
+		{
+			// If m_UnitId is null or empty, return empty
+			if (string.IsNullOrEmpty(m_UnitId))
+			{
+				return m_UnitId ?? string.Empty;
+			}
+
+			// Ensure JsonDataUtility is loaded
+			JsonDataUtility.LoadData();
+
+			// Try to load from JSON first - m_UnitId might be a key like "BannerTop" or "BannerBottom"
+			string jsonBannerId = JsonDataUtility.GetData(AD_KEYS_CATEGORY, m_UnitId);
+			if (!string.IsNullOrEmpty(jsonBannerId))
+			{
+				return jsonBannerId;
+			}
+
+			// Fallback to the serialized value if it's already an ad unit ID (starts with "ca-app-pub-")
+			return m_UnitId;
+		}
+
+		private AdSize ConvertTypeToSize()
+		{
+			switch (m_Type)
+			{
+				case AdSizeType.Banner:
+					return AdSize.Banner;
+
+				case AdSizeType.MediumRectangle:
+					return AdSize.MediumRectangle;
+
+				case AdSizeType.IABBanner:
+					return AdSize.IABBanner;
+
+				case AdSizeType.Leaderboard:
+					return AdSize.Leaderboard;
+
+				case AdSizeType.AdaptiveBanner:
+					return AdSize.GetCurrentOrientationAnchoredAdaptiveBannerAdSizeWithWidth(AdSize.FullWidth);
+			}
+
+			return AdSize.Banner;
+		}
+
+	}
+
+
 	public class GoogleAdsModule : AdsModule
 	{
 
-		[SerializeField] private GoogleAdsConfig config;
+		public const string AD_KEYS_CATEGORY = "AdKeys";
+
+		// Fixed key names for JSON lookup
+		private const string APP_ID_KEY = "AppId";
+		private const string BANNER_ID_KEY = "BannerTop";
+		private const string INTERSTITIAL_ID_KEY = "Interstitial";
+		private const string INTERSTITIAL_VIDEO_ID_KEY = "InterstitialVideo";
+		private const string REWARDED_ID_KEY = "Rewarded";
+		private const string APP_OPEN_ID_KEY = "AppOpen";
+
+		[Header("Ads IDs from JSON")]
+		[Tooltip("Shows all available Ad IDs from JSON.")]
+		[JsonDataCategory(AD_KEYS_CATEGORY)]
+		[SerializeField] private string adKeysReference = "";
+
+		[Header("Banner Settings")]
+		[SerializeField] private BannerData bannerData = new BannerData();
+
+		[Header("Test Devices")]
+		[SerializeField]
+		private List<string> testDeviceIds = new List<string>()
+		{
+			AdRequest.TestDeviceSimulator,
+#if UNITY_IPHONE
+            "96e23e80653bb28980d3f40beb58915c",
+#elif UNITY_ANDROID
+			"702815ACFC14FF222DA1DC767672A573"
+#endif
+		};
+
+		// Cached loaded IDs
+		private string _cachedAppId;
+		private string _cachedBannerId;
+		private string _cachedInterstitialId;
+		private string _cachedInterstitialVideoId;
+		private string _cachedRewardedId;
+		private string _cachedAppOpenId;
 
 		IAppAd bannerView;
 		IAppAd interstitial;
@@ -25,6 +136,77 @@ namespace THEBADDEST.Advertisement
 
 		public bool CanRequestAds => ConsentInformation.CanRequestAds();
 
+		private void LoadAdIdsFromJson()
+		{
+			// Ensure JsonDataUtility is loaded
+			JsonDataUtility.LoadData();
+
+			// Load App ID
+			_cachedAppId = JsonDataUtility.GetData(AD_KEYS_CATEGORY, APP_ID_KEY);
+			if (string.IsNullOrEmpty(_cachedAppId))
+			{
+				_cachedAppId = "ca-app-pub-3940256099942544~3347511713"; // Fallback to test ID
+			}
+
+			// Load Banner ID
+			_cachedBannerId = JsonDataUtility.GetData(AD_KEYS_CATEGORY, BANNER_ID_KEY);
+			if (string.IsNullOrEmpty(_cachedBannerId))
+			{
+				_cachedBannerId = "ca-app-pub-3940256099942544/6300978111"; // Fallback to test ID
+			}
+
+			// Load Interstitial ID
+			_cachedInterstitialId = JsonDataUtility.GetData(AD_KEYS_CATEGORY, INTERSTITIAL_ID_KEY);
+			if (string.IsNullOrEmpty(_cachedInterstitialId))
+			{
+				_cachedInterstitialId = "ca-app-pub-3940256099942544/1033173712"; // Fallback to test ID
+			}
+
+			// Load Interstitial Video ID
+			_cachedInterstitialVideoId = JsonDataUtility.GetData(AD_KEYS_CATEGORY, INTERSTITIAL_VIDEO_ID_KEY);
+			if (string.IsNullOrEmpty(_cachedInterstitialVideoId))
+			{
+				_cachedInterstitialVideoId = "ca-app-pub-3940256099942544/8691691433"; // Fallback to test ID
+			}
+
+			// Load Rewarded ID
+			_cachedRewardedId = JsonDataUtility.GetData(AD_KEYS_CATEGORY, REWARDED_ID_KEY);
+			if (string.IsNullOrEmpty(_cachedRewardedId))
+			{
+				_cachedRewardedId = "ca-app-pub-3940256099942544/5224354917"; // Fallback to test ID
+			}
+
+			// Load App Open ID
+			_cachedAppOpenId = JsonDataUtility.GetData(AD_KEYS_CATEGORY, APP_OPEN_ID_KEY);
+			if (string.IsNullOrEmpty(_cachedAppOpenId))
+			{
+				_cachedAppOpenId = "ca-app-pub-3940256099942544/5662855259"; // Fallback to test ID
+			}
+
+			// Update banner data with loaded key if not already set
+			if (string.IsNullOrEmpty(GetBannerDataUnitId()))
+			{
+				SetBannerDataUnitId(BANNER_ID_KEY);
+			}
+		}
+
+		private string GetBannerDataUnitId()
+		{
+			var field = typeof(BannerData).GetField("m_UnitId", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+			return field?.GetValue(bannerData) as string ?? "";
+		}
+
+		private void SetBannerDataUnitId(string unitId)
+		{
+			var field = typeof(BannerData).GetField("m_UnitId", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+			if (field != null)
+			{
+				var bannerDataCopy = bannerData;
+				field.SetValue(bannerDataCopy, unitId);
+				bannerData = bannerDataCopy;
+			}
+		}
+
 		public override void Init()
 		{
 			var configAsset = THEBADDEST.MonetizationApi.MonetizationConfig.Instance;
@@ -36,11 +218,13 @@ namespace THEBADDEST.Advertisement
 				return;
 			}
 
+			// Load ad IDs from JSON
+			LoadAdIdsFromJson();
+
 			// Use test mode if enabled
 			if (configAsset.EnableTestMode)
 			{
 				SendLog.LogInfo("[Ads] Test mode enabled by MonetizationConfig.");
-				// You may want to override ad unit IDs here for test mode
 			}
 
 			SetupAllAds();
@@ -66,7 +250,7 @@ namespace THEBADDEST.Advertisement
 			InitializeAds();
 			return;
 #endif
-			ConsentRequestParameters request = new ConsentRequestParameters { TagForUnderAgeOfConsent = false, ConsentDebugSettings = new ConsentDebugSettings() { DebugGeography = DebugGeography.EEA, TestDeviceHashedIds = config.TestDeviceIds() }, };
+			ConsentRequestParameters request = new ConsentRequestParameters { TagForUnderAgeOfConsent = false, ConsentDebugSettings = new ConsentDebugSettings() { DebugGeography = DebugGeography.EEA, TestDeviceHashedIds = testDeviceIds }, };
 			ConsentInformation.Update(request, OnConsentInfoUpdated);
 		}
 
@@ -101,6 +285,8 @@ namespace THEBADDEST.Advertisement
 
 		void InitializeAds()
 		{
+			// Note: App ID should be configured in GoogleMobileAdsSettings asset
+			// The AppId from JSON is available via _cachedAppId if needed
 			MobileAds.Initialize(OnInitComplete);
 		}
 
@@ -113,11 +299,17 @@ namespace THEBADDEST.Advertisement
 
 		void SetupAllAds()
 		{
-			bannerView = new BannerAd(config.BannerData);
-			interstitial = new Interstitial_Ad(config.InterstitialId);
-			interstitialVideo = new Interstitial_Ad(config.InterstitialVideoId);
-			rewardedVideo = new RewardedVideoAd(config.RewardedId);
-			appOpenAd = new AppOpenAdGoogle(config.AppOpenId);
+			// Update banner data unit ID if not already set
+			if (string.IsNullOrEmpty(GetBannerDataUnitId()))
+			{
+				SetBannerDataUnitId(BANNER_ID_KEY);
+			}
+
+			bannerView = new BannerAd(bannerData);
+			interstitial = new Interstitial_Ad(_cachedInterstitialId);
+			interstitialVideo = new Interstitial_Ad(_cachedInterstitialVideoId);
+			rewardedVideo = new RewardedVideoAd(_cachedRewardedId);
+			appOpenAd = new AppOpenAdGoogle(_cachedAppOpenId);
 		}
 
 		public override IAppAd FetchBanner(string placement = "default")

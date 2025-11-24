@@ -1,6 +1,5 @@
 using System;
 using GoogleMobileAds.Api;
-using UnityEngine;
 using THEBADDEST.MonetizationApi;
 
 

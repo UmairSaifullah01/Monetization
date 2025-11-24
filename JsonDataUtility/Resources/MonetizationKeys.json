@@ -1,9 +1,11 @@
 {
   "AdKeys": {
+    "AppId": "ca-app-pub-3940256099942544~3347511713",
     "BannerTop": "ca-app-pub-1234567890/banner_top",
     "BannerBottom": "ca-app-pub-1234567890/banner_bottom",
     "Rewarded": "ca-app-pub-1234567890/rewarded_video",
     "Interstitial": "ca-app-pub-1234567890/interstitial",
+    "InterstitialVideo": "ca-app-pub-1234567890/interstitial_video",
     "AppOpen": "ca-app-pub-1234567890/app_open"
   },
   "IAPKeys": {
@@ -16,10 +18,12 @@
     "PremiumSubscription": "premium_subscription_monthly",
     "ProSubscription": "pro_subscription_yearly"
   },
-  "AnalyticsKeys": {
-    "FirebaseProjectId": "your-firebase-project-id",
-    "GameAnalyticsGameKey": "your-ga-game-key",
-    "GameAnalyticsSecretKey": "your-ga-secret-key"
+  "GameAnalyticsKeys": {
+    "GameKey": "your-ga-game-key",
+    "SecretKey": "your-ga-secret-key"
+  },
+  "FirebaseKeys": {
+    "FirebaseProjectId": "your-firebase-project-id"
   },
   "RemoteConfigKeys": {
     "RemoteConfigUrl": "https://your-remote-config-url.com/config",

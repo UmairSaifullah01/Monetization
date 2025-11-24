@@ -12,13 +12,8 @@ namespace THEBADDEST.MonetizationApi
 
     public class UnityIAPModule : IAPModule, IDetailedStoreListener
     {
-        [SerializeField] private string environment = "production";
-
-
         private IStoreController controller;
         private IExtensionProvider extensions;
-
-
 
         public override async UTask Initialize()
         {
@@ -29,15 +24,6 @@ namespace THEBADDEST.MonetizationApi
                 IsInitialized = false;
                 return;
             }
-            // try
-            // {
-            //     var options = new InitializationOptions().SetEnvironmentName(environment);
-            //     await UnityServices.InitializeAsync(options);
-            // }
-            // catch (Exception exception)
-            // {
-            //     Debug.LogException(exception);
-            // }
 
             ConfigurationBuilder builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
             foreach (var product in Catalog.items)
@@ -196,7 +182,7 @@ namespace THEBADDEST.MonetizationApi
 
             foreach (var item in Catalog.items)
             {
-                if (item.consumable) return;
+                if (item.consumable) continue;
                 Product product = controller.products.WithID(item.productId);
                 if (product is { hasReceipt: true } && product.definition.type == ProductType.NonConsumable)
                 {

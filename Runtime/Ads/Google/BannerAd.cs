@@ -24,8 +24,6 @@ namespace THEBADDEST.Advertisement
 		BannerView bannerView;
 		BannerData bannerData;
 		bool isDisplaying = false;
-		private bool isBannerVisible = false;
-		private bool isBannerLoaded = false;
 
 		public BannerAd(BannerData bannerData)
 		{

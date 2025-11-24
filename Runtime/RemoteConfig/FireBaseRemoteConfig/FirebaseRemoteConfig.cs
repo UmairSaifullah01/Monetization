@@ -50,6 +50,12 @@ namespace THEBADDEST.RemoteConfigSystem
 
 		public override void Load()
 		{
+			if (firebaseRemoteConfig == null || variablesMapper == null)
+			{
+				SendLog.LogWarning("[RemoteConfig] Cannot load: Firebase Remote Config or Variables Mapper is null.");
+				return;
+			}
+
 			IDictionary<string, object> newDictionary = new Dictionary<string, object>();
 			foreach (var pair in variablesMapper.GetDefaultValues())
 			{
@@ -70,7 +76,11 @@ namespace THEBADDEST.RemoteConfigSystem
 				return;
 			}
 
-			if (!IsInitialized) return;
+			if (!IsInitialized || firebaseRemoteConfig == null)
+			{
+				SendLog.LogWarning("[RemoteConfig] Cannot fetch: Remote Config is not initialized.");
+				return;
+			}
 			var fetchTask = firebaseRemoteConfig.FetchAsync(TimeSpan.FromSeconds(configAsset.ConfigFetchTimeout));
 			fetchTask.ContinueWithOnMainThread(FetchComplete);
 

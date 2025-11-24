@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEngine;
 #if UNITY_EDITOR
-using UnityEditor;
 #endif
 
 namespace THEBADDEST.MonetizationApi
@@ -30,7 +28,7 @@ namespace THEBADDEST.MonetizationApi
             TextAsset jsonFile = Resources.Load<TextAsset>(JSON_FILE_NAME);
             if (jsonFile == null)
             {
-                Debug.LogError($"[JsonDataUtility] Could not find {JSON_FILE_NAME}.json in Resources folder.");
+                SendLog.LogError($"[JsonDataUtility] Could not find {JSON_FILE_NAME}.json in Resources folder.");
                 return;
             }
 
@@ -74,7 +72,7 @@ namespace THEBADDEST.MonetizationApi
             }
             catch (Exception e)
             {
-                Debug.LogError($"[JsonDataUtility] Error parsing JSON: {e.Message}");
+                SendLog.LogError($"[JsonDataUtility] Error parsing JSON: {e.Message}");
             }
         }
 
@@ -102,7 +100,7 @@ namespace THEBADDEST.MonetizationApi
                 return value;
             }
             
-            Debug.LogWarning($"[JsonDataUtility] Key not found: {category} -> {key}");
+            SendLog.LogWarning($"[JsonDataUtility] Key not found: {category} -> {key}");
             return null;
         }
 

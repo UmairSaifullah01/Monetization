@@ -50,7 +50,7 @@ namespace THEBADDEST.RemoteConfigSystem
 					throw new ArgumentOutOfRangeException();
 			}
 		
-				SendLog.Log($"[Remote Config Var] Name: {remoteVariable} | Type: {remoteVariable.type} | Value: {remoteVariableValue}");
+				SendLog.Log($"[Remote Config Var] Name: {remoteVariable.type} | Type: {remoteVariable.type} | Value: {remoteVariableValue}");
 			
 		}
 

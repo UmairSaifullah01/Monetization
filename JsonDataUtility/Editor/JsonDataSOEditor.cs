@@ -64,7 +64,7 @@ namespace THEBADDEST.MonetizationEditor
                 normal = { textColor = HeaderTextColor },
                 padding = new RectOffset(5, 0, 0, 0)
             };
-            EditorGUI.LabelField(headerRect, $"▼ {category}", headerStyle);
+            EditorGUI.LabelField(headerRect, $"{category}", headerStyle);
 
             // 2. Draw Content
             if (data.Count == 0)
@@ -83,7 +83,7 @@ namespace THEBADDEST.MonetizationEditor
                     
                     // Draw Separator Line (Top of the row)
                     Rect separatorRect = new Rect(lineRect.x, lineRect.y, lineRect.width, 1f);
-                    EditorGUI.DrawRect(separatorRect, LineColor);
+                   // EditorGUI.DrawRect(separatorRect, LineColor);
 
                     float keyWidth = lineRect.width * 0.35f;
                     float valueWidth = lineRect.width * 0.65f - COLUMN_SPACING;

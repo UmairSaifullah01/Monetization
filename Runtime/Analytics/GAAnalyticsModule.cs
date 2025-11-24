@@ -11,14 +11,48 @@ namespace THEBADDEST.Analytics
 
 	public class GAAnalyticsModule : AnalyticsModule
 	{
-		[SerializeField] string gameAnalyticsKey;
-		[SerializeField] string gameAnalyticsSecret;
+
+		private const string ANALYTICS_KEYS_CATEGORY = "GameAnalyticsKeys";
+
+		// Fixed key names for JSON lookup
+		private static readonly string GAME_ANALYTICS_GAME_KEY = "GameKey";
+		private static readonly string GAME_ANALYTICS_SECRET_KEY = "SecretKey";
+
+		[Tooltip("Shows all available Analytics IDs from JSON.")]
+		[JsonDataCategory(ANALYTICS_KEYS_CATEGORY)]
+		[SerializeField] private string analyticsKeysReference = "";
+
+
+		// Cached loaded IDs
+		private string _cachedGameKey;
+		private string _cachedSecretKey;
+
+		private void LoadAnalyticsIdsFromJson()
+		{
+			// Ensure JsonDataUtility is loaded
+			JsonDataUtility.LoadData();
+
+			// Load Game Analytics Game Key
+			_cachedGameKey = JsonDataUtility.GetData(ANALYTICS_KEYS_CATEGORY, GAME_ANALYTICS_GAME_KEY);
+
+			// Load Game Analytics Secret Key
+			_cachedSecretKey = JsonDataUtility.GetData(ANALYTICS_KEYS_CATEGORY, GAME_ANALYTICS_SECRET_KEY);
+		}
 
 		public override void UpdateModule()
 		{
-			if (!string.IsNullOrEmpty(gameAnalyticsKey) && !string.IsNullOrEmpty(gameAnalyticsSecret))
+			// Load IDs from JSON
+			LoadAnalyticsIdsFromJson();
+
+			// Set keys if loaded successfully
+			if (!string.IsNullOrEmpty(_cachedGameKey) && !string.IsNullOrEmpty(_cachedSecretKey))
 			{
-				GameAnalytics.SettingsGA.SetKeys(gameAnalyticsKey, gameAnalyticsSecret);
+				GameAnalytics.SettingsGA.SetKeys(_cachedGameKey, _cachedSecretKey);
+				SendLog.Log("[GAAnalyticsModule] Game Analytics keys set successfully.");
+			}
+			else
+			{
+				SendLog.LogWarning("[GAAnalyticsModule] Game Analytics keys not found in JSON. Please configure keys in MonetizationKeys.json under GameAnalyticsKeys category.");
 			}
 		}
 
@@ -31,6 +65,13 @@ namespace THEBADDEST.Analytics
 				isInitialized = false;
 				return;
 			}
+
+			// Ensure keys are loaded before initialization
+			if (string.IsNullOrEmpty(_cachedGameKey) || string.IsNullOrEmpty(_cachedSecretKey))
+			{
+				LoadAnalyticsIdsFromJson();
+			}
+
 			// Use configAsset.EnableEventBatching, configAsset.BatchSize, configAsset.BatchTimeout for batching logic
 			GameAnalytics.Initialize();
 			isInitialized = true;
@@ -45,6 +86,7 @@ namespace THEBADDEST.Analytics
 				SendLog.LogWarning("[Analytics] Analytics is disabled by MonetizationConfig. Event not sent.");
 				return;
 			}
+
 			if (!isInitialized)
 			{
 				SendLog.LogWarning("[Analytics] Cannot send event: Game Analytics not initialized.");
@@ -146,11 +188,7 @@ namespace THEBADDEST.Analytics
 				string eventName = kvp.Key;
 				object value = kvp.Value;
 
-				if (value is string stringValue)
-				{
-					//GameAnalytics.NewDesignEvent(eventName, stringValue);
-				}
-				else if (value is float floatValue)
+				if (value is float floatValue)
 				{
 					GameAnalytics.NewDesignEvent(eventName, floatValue);
 				}
@@ -158,11 +196,13 @@ namespace THEBADDEST.Analytics
 				{
 					GameAnalytics.NewDesignEvent(eventName, (float)intValue);
 				}
-				else
+				else if (value is double doubleValue)
 				{
-					//GameAnalytics.NewDesignEvent(eventName, value.ToString());
+					GameAnalytics.NewDesignEvent(eventName, (float)doubleValue);
 				}
+				// Note: GameAnalytics doesn't support string values directly in NewDesignEvent
 			}
+
 			SendLog.Log($"[Analytics] Event log sent with {eventLog.Count} events");
 		}
 
@@ -172,10 +212,13 @@ namespace THEBADDEST.Analytics
 			{
 				case ProgressionStatus.Start:
 					return GAProgressionStatus.Start;
+
 				case ProgressionStatus.Complete:
 					return GAProgressionStatus.Complete;
+
 				case ProgressionStatus.Fail:
 					return GAProgressionStatus.Fail;
+
 				case ProgressionStatus.Undefined:
 				default:
 					return GAProgressionStatus.Undefined;
@@ -220,6 +263,8 @@ namespace THEBADDEST.Analytics
 			GameAnalytics.SetCustomDimension01(propertyName);
 			SendLog.Log($"[Analytics] User property set: {propertyName} = {propertyValue}");
 		}
+
 	}
+
 
 }
