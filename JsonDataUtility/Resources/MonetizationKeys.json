@@ -29,5 +29,17 @@
     "RemoteConfigUrl": "https://your-remote-config-url.com/config",
     "ApiKey": "your-api-key",
     "Environment": "production"
+  },
+  "ProjectKeys": {
+    "PackageName": "com.games.abcd",
+    "Version": "1.0",
+    "BundleVersionCode": "1",
+    "MinApiLevel": "22",
+    "TargetApiLevel": "35",
+    "UseKeyStore": "true",
+    "KeyStorePath": "Assets/Keystore/user.keystore",
+    "KeyAliasName": "user",
+    "KeyStorePassword": "123456",
+    "KeyAliasPassword": "123456"
   }
 }

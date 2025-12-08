@@ -63,7 +63,7 @@ namespace THEBADDEST.MonetizationEditor
 					if (editorDataContainer[i].folded)
 					{
 						EditorTools.DrawScript(editorDataContainer[i].reference);
-						EditorTools.DrawAllFields(editorDataContainer[i].reference, editorDataContainer[i].serializedObject, true);
+						EditorTools.DrawAllFields(editorDataContainer[i].reference, editorDataContainer[i].serializedObject, false);
 					}
 
 					EditorGUILayout.EndVertical();

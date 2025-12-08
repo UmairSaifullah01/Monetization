@@ -10,6 +10,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3e95f5373361ee847af6e16671b18b71, type: 3}
-  m_Name: JsonDataSO
+  m_Name: GameKeys
   m_EditorClassIdentifier: 
   description: This object displays all keys loaded from MonetizationKeys.json

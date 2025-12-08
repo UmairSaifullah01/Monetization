@@ -97,7 +97,7 @@ namespace THEBADDEST.Advertisement
 		private const string REWARDED_ID_KEY = "Rewarded";
 		private const string APP_OPEN_ID_KEY = "AppOpen";
 
-		[Header("Ads IDs from JSON")]
+		
 		[Tooltip("Shows all available Ad IDs from JSON.")]
 		[JsonDataCategory(AD_KEYS_CATEGORY)]
 		[SerializeField] private string adKeysReference = "";

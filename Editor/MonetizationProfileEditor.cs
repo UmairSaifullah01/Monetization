@@ -56,53 +56,6 @@ namespace THEBADDEST.MonetizationEditor
 		protected override void OnGUIUpdate()
 		{
 			DrawTitle();
-			EditorTools.EditorWindowWithHeader("Settings");
-			SerializedProperty packageNameProp = serializedObject.FindProperty("packageName");
-			SerializedProperty versionProp = serializedObject.FindProperty("version");
-			SerializedProperty bundleVersionCodeProp = serializedObject.FindProperty("bundleVersionCode");
-			SerializedProperty minApiLevelProp = serializedObject.FindProperty("minApiLevel");
-			SerializedProperty targetApiLevelProp = serializedObject.FindProperty("targetApiLevel");
-			SerializedProperty useKeyStoreProp = serializedObject.FindProperty("useKeyStore");
-			SerializedProperty keyStorePathProp = serializedObject.FindProperty("keyStorePath");
-			SerializedProperty keyAliasNameProp = serializedObject.FindProperty("keyAliasName");
-			SerializedProperty keyStorePasswordProp = serializedObject.FindProperty("keyStorePassword");
-			SerializedProperty keyAliasPasswordProp = serializedObject.FindProperty("keyAliasPassword");
-			EditorGUILayout.LabelField("Project Info", EditorStyles.boldLabel);
-			EditorGUILayout.PropertyField(packageNameProp, new GUIContent("Package Name"));
-			EditorGUILayout.PropertyField(versionProp, new GUIContent("Version"));
-			EditorGUILayout.PropertyField(bundleVersionCodeProp, new GUIContent("Bundle Version Code"));
-			EditorGUILayout.PropertyField(minApiLevelProp, new GUIContent("Min API Level"));
-			EditorGUILayout.PropertyField(targetApiLevelProp, new GUIContent("Target API Level"));
-			EditorGUILayout.Space();
-			EditorGUILayout.LabelField("Keystore", EditorStyles.boldLabel);
-			EditorGUILayout.PropertyField(useKeyStoreProp, new GUIContent("Use KeyStore"));
-			if (useKeyStoreProp.boolValue)
-			{
-				EditorGUILayout.PropertyField(keyStorePathProp, new GUIContent("KeyStore Path"));
-				EditorGUILayout.PropertyField(keyAliasNameProp, new GUIContent("Alias Name"));
-				EditorGUILayout.PropertyField(keyStorePasswordProp, new GUIContent("KeyStore Password"));
-				EditorGUILayout.PropertyField(keyAliasPasswordProp, new GUIContent("Alias Password"));
-			}
-
-			EditorGUILayout.Space();
-
-			// Remove Profile Options section (now in MonetizationConfig)
-			EditorGUILayout.HelpBox("Global monetization settings (logging, internet check, validation, etc.) are now managed in the MonetizationConfig asset.", MessageType.Info);
-			if (GUILayout.Button("Edit MonetizationConfig", GUILayout.Width(220)))
-			{
-				var config = MonetizationConfig.Instance;
-				if (config != null)
-				{
-					Selection.activeObject = config;
-					EditorGUIUtility.PingObject(config);
-				}
-				else
-				{
-					EditorUtility.DisplayDialog("MonetizationConfig Not Found", "No MonetizationConfig asset found in Resources. Please create one via Create > Monetization > Configuration.", "OK");
-				}
-			}
-			EditorGUILayout.Space();
-			EditorTools.EditorWindowClose();
 			DrawCollections();
 			EditorGUILayout.Space(10);
 			EditorGUILayout.BeginHorizontal();
@@ -110,16 +63,12 @@ namespace THEBADDEST.MonetizationEditor
 			if (GUILayout.Button("Sync Project", GUILayout.Width(200), GUILayout.Height(40)))
 			{
 				serializedObject.ApplyModifiedProperties();
-				(serializedObject.targetObject as MonetizationProfile)?.UpdateProjectDetails();
+				(serializedObject.targetObject as MonetizationProfile)?.UpdateModules();
 			}
 
 			EditorGUILayout.Space();
 			EditorGUILayout.EndHorizontal();
 			EditorUtility.SetDirty(target as MonetizationProfile);
-		}
-
-		void OnHide()
-		{
 		}
 
 	}

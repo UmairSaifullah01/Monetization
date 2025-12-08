@@ -45,7 +45,7 @@ namespace THEBADDEST.MonetizationEditor
                 normal = { textColor = new Color(0.8f, 0.8f, 0.8f) },
                 padding = new RectOffset(5, 0, 0, 0)
             };
-            EditorGUI.LabelField(headerRect, $" {category}", headerStyle);
+            EditorGUI.LabelField(headerRect, $"{category}", headerStyle);
 
             // 2. Draw Content
             float currentY = position.y + HEADER_HEIGHT;
