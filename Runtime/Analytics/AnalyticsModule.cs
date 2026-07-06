@@ -11,19 +11,20 @@ namespace THEBADDEST.Analytics
 	public abstract class AnalyticsModule : MonetizationModule, IAnalyticsModule
 	{
 
-		public override async UTask Initialize()
+		protected override async UTask OnInitialize()
 		{
 			EventBus.Subscribe<AdShownEvent>(OnAdShown);
+			await UTask.CompletedTask;
 		}
 
-		/// <summary>
-		/// Called when an ad is shown. Override to process ad shown events.
-		/// </summary>
-		/// <param name="evt">The ad shown event.</param>
+		protected override void OnModuleDestroy()
+		{
+			EventBus.Unsubscribe<AdShownEvent>(OnAdShown);
+		}
+
 		protected virtual void OnAdShown(AdShownEvent evt)
 		{
 			SendLog.Log($"[Analytics] Ad shown: Type={evt.AdType}, Placement={evt.Placement}, Time={evt.Time}");
-			// Derived classes can override to send analytics events
 		}
 
 		public abstract void SendEvent(string name);

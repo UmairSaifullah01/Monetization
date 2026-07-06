@@ -69,7 +69,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enabled: 1
   moduleName: ProjectModule
-  projectKeysReference: com.games.gamename,1.0,1,22,35,true,Assets/Keystore/user.keystore,user,123456,123456
+  projectKeysReference: com.games.abcd,1.0,1,22,35,true,Assets/Keystore/user.keystore,user,123456,123456
 --- !u!114 &5045826046289508288
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -83,7 +83,7 @@ MonoBehaviour:
   m_Name: FirebaseRemoteConfig
   m_EditorClassIdentifier: 
   enabled: 1
-  moduleName: 
+  moduleName: FirebaseRemoteConfig
   m_VariablesMapper: {fileID: 0}
 --- !u!114 &8165067903822880473
 MonoBehaviour:
@@ -98,6 +98,6 @@ MonoBehaviour:
   m_Name: UnityIAPModule
   m_EditorClassIdentifier: 
   enabled: 1
-  moduleName: 
+  moduleName: UnityIAPModule
   catalog:
     items: []

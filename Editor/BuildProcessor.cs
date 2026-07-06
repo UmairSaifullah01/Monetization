@@ -20,10 +20,10 @@ namespace THEBADDEST.MonetizationEditor
             if (profile != null)
             {
                 Debug.Log("[Monetization] Syncing project settings before build...");
-                var projectModule = profile.GetModule<ProjectModule>();
+                var projectModule = profile.FindModule<ProjectModule>();
                 if (projectModule != null)
                 {
-                    projectModule.UpdateModule();
+                    projectModule.SyncProjectSettings();
                 }
                 else
                 {

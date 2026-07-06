@@ -11,11 +11,7 @@ namespace THEBADDEST.Advertisement
 	public class BannerAd : IAppAd
 	{
 
-		public event Action OnAdLoaded
-		{
-			add => bannerView.OnBannerAdLoaded += value;
-			remove => bannerView.OnBannerAdLoaded -= value;
-		}
+		public event Action OnAdLoaded;
 		public event Action OnAdLoadFailed;
 		public event Action<AdValue> OnAdPaid;
 
@@ -39,12 +35,21 @@ namespace THEBADDEST.Advertisement
 			}
 
 			bannerView = new BannerView(bannerData.unitId, bannerData.size, bannerData.position);
+			bannerView.OnBannerAdLoaded += () =>
+			{
+				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Banner, AdEventType.LoadSucceeded, bannerData.unitId);
+				OnAdLoaded?.Invoke();
+			};
 			bannerView.OnAdPaid += info =>
 			{
 				AdValue adValue = new AdValue { Value = info.Value, CurrencyCode = info.CurrencyCode, Precision = (AdValue.PrecisionType)(int)info.Precision };
 				OnAdPaid?.Invoke(adValue);
 			};
-			bannerView.OnBannerAdLoadFailed += error => { OnAdLoadFailed?.Invoke(); };
+			bannerView.OnBannerAdLoadFailed += error =>
+			{
+				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Banner, AdEventType.LoadFailed, bannerData.unitId);
+				OnAdLoadFailed?.Invoke();
+			};
 		}
 
 		public void Destroy()
@@ -68,32 +73,34 @@ namespace THEBADDEST.Advertisement
 				SendLog.Log("Showing banner ad.");
 				bannerView.Show();
 				isDisplaying = true;
+				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Banner, AdEventType.ShowSucceeded, bannerData.unitId);
 				EventBus.Publish(new AdShownEvent
 				{
-					AdType = "Banner",
+					AdType = AdMetricsTypes.Banner,
 					Placement = bannerData.unitId,
 					Time = DateTime.Now
 				});
+			}
+			else
+			{
+				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Banner, AdEventType.ShowFailed, bannerData.unitId);
 			}
 		}
 
 		public void Load()
 		{
-			var config = THEBADDEST.MonetizationApi.MonetizationConfig.Instance;
-			// Create an instance of a banner view first.
+			var config = MonetizationConfig.Instance;
 			if (bannerView == null)
 			{
 				Create();
 			}
 
-			// Use test mode if enabled (override ad unit if needed)
 			if (config.EnableTestMode)
 			{
 				SendLog.LogInfo("[BannerAd] Test mode enabled by MonetizationConfig.");
-				// Optionally override bannerData.unitId here for test ad unit
 			}
 
-			// Create our request used to load the ad.
+			PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Banner, AdEventType.LoadStarted, bannerData.unitId);
 			var adRequest = new AdRequest();
 			bannerView?.LoadAd(adRequest);
 			isDisplaying = true;

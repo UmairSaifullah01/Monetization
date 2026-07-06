@@ -14,16 +14,20 @@ namespace THEBADDEST.MonetizationApi
     {
         private IStoreController controller;
         private IExtensionProvider extensions;
+        private bool _storeInitComplete;
+        private bool _storeInitSuccess;
 
-        public override async UTask Initialize()
+        protected override async UTask OnInitialize()
         {
-            var configAsset = THEBADDEST.MonetizationApi.MonetizationConfig.Instance;
+            var configAsset = MonetizationConfig.Instance;
             if (!configAsset.EnableIAP)
             {
                 SendLog.LogWarning("[IAP] IAP is disabled by MonetizationConfig.");
-                IsInitialized = false;
                 return;
             }
+
+            _storeInitComplete = false;
+            _storeInitSuccess = false;
 
             ConfigurationBuilder builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
             foreach (var product in Catalog.items)
@@ -32,6 +36,12 @@ namespace THEBADDEST.MonetizationApi
             }
 
             UnityPurchasing.Initialize(this, builder);
+            await UTask.WaitUntil(() => _storeInitComplete);
+
+            if (!_storeInitSuccess)
+            {
+                throw new InvalidOperationException("[IAP] Unity IAP failed to initialize.");
+            }
         }
 
 
@@ -135,21 +145,18 @@ namespace THEBADDEST.MonetizationApi
             if (string.IsNullOrWhiteSpace(priceString))
                 return;
 
-            // Find the first digit index (where the number starts)
             int index = 0;
             while (index < priceString.Length && !char.IsDigit(priceString[index]) && priceString[index] != '.')
             {
                 index++;
             }
 
-            // Split into currency symbol and price
-            currencyCode = priceString.Substring(0, index).Trim();  // Everything before the number
-            string pricePart = priceString.Substring(index).Trim(); // The number part
+            currencyCode = priceString.Substring(0, index).Trim();
+            string pricePart = priceString.Substring(index).Trim();
 
-            // Convert price string to double
             if (!double.TryParse(pricePart, NumberStyles.Currency, CultureInfo.InvariantCulture, out price))
             {
-                price = 0.0; // Fallback in case of error
+                price = 0.0;
             }
         }
 
@@ -157,7 +164,8 @@ namespace THEBADDEST.MonetizationApi
         {
             this.controller = controller;
             this.extensions = extensions;
-            IsInitialized = true;
+            _storeInitSuccess = true;
+            _storeInitComplete = true;
             SendLog.Log("[IAP] IAP initialized successfully.");
 #if UNITY_ANDROID
             this.extensions.GetExtension<IGooglePlayStoreExtensions>()
@@ -196,12 +204,15 @@ namespace THEBADDEST.MonetizationApi
         public void OnInitializeFailed(InitializationFailureReason error)
         {
             SendLog.LogError($"[IAP] Failed to initialize IAP: {error}");
-
+            _storeInitSuccess = false;
+            _storeInitComplete = true;
         }
 
         public void OnInitializeFailed(InitializationFailureReason error, string message)
         {
             SendLog.LogError($"[IAP] Failed to initialize IAP: {error} - {message}");
+            _storeInitSuccess = false;
+            _storeInitComplete = true;
         }
 
         public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs purchaseEvent)

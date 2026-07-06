@@ -1,6 +1,5 @@
 using System;
 using THEBADDEST.MonetizationApi;
-using THEBADDEST.Tasks;
 
 
 namespace THEBADDEST.Advertisement
@@ -8,21 +7,25 @@ namespace THEBADDEST.Advertisement
 	
 	public abstract class AdsModule : MonetizationModule, IAdsModule
 	{
-		public override async UTask Initialize()
-		{
-			Init();
-			await UTask.WaitUntil( () => isInitialized);
-		}
+        protected Action<bool> initialize;
 
-		public event Action<bool> OnInitialize;
+        public event Action<bool> onInitialize
+        {
+            add
+            {
+				initialize += value;
+            }
+            remove
+            {
+				initialize -= value;
+            }
+        }
 
-		public abstract void Init();
 		public abstract IAppAd FetchBanner(string placement = "default");
 		public abstract IAppAd FetchInterstitial(string placement = "default");
 		public abstract IAppAd FetchInterstitialVideo(string placement = "default");
 		public abstract IAppRewardAd FetchRewarded(string placement = "default");
 		public abstract IAppAd FetchAppOpen(string placement = "default");
-
 	}
 
 

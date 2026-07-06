@@ -57,14 +57,16 @@ namespace THEBADDEST.Advertisement
 					SendLog.Log($"Rewarded ad granted a reward: {reward.Amount} {reward.Type}");
 					OnRewardClaimed?.Invoke(reward);
 				});
+				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Rewarded, AdEventType.ShowSucceeded, unitId);
 				EventBus.Publish(new AdShownEvent {
-					AdType = "Rewarded",
+					AdType = AdMetricsTypes.Rewarded,
 					Placement = unitId,
 					Time = DateTime.Now
 				});
 			}
 			else
 			{
+				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Rewarded, AdEventType.ShowFailed, unitId);
 				SendLog.LogError("Rewarded ad is not ready yet.");
 				OnRewardFailed?.Invoke();
 			}
@@ -72,29 +74,29 @@ namespace THEBADDEST.Advertisement
 
 		public void Load()
 		{
+			PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Rewarded, AdEventType.LoadStarted, unitId);
 			var adRequest = new AdRequest();
 
-			// Send the request to load the ad.
 			RewardedAd.Load(unitId, adRequest, (RewardedAd ad, LoadAdError error) =>
 			{
-				// If the operation failed with a reason.
 				if (error != null)
 				{
+					PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Rewarded, AdEventType.LoadFailed, unitId);
 					SendLog.LogError("Rewarded ad failed to load: " + error);
 					OnAdLoadFailed?.Invoke();
 					OnRewardFailed?.Invoke();
 					return;
 				}
-				// If the operation failed for unknown reasons.
-				// This is an unexpected error, please report this bug if it happens.
+
 				if (ad == null)
 				{
+					PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Rewarded, AdEventType.LoadFailed, unitId);
 					OnRewardFailed?.Invoke();
 					SendLog.LogError("Unexpected error: Rewarded load event fired with null ad and null error.");
 					return;
 				}
 
-				// The operation completed successfully.
+				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Rewarded, AdEventType.LoadSucceeded, unitId);
 				SendLog.Log("Rewarded ad loaded successfully. Response: " + ad.GetResponseInfo());
 				rewardedAd = ad;
 				
@@ -106,8 +108,6 @@ namespace THEBADDEST.Advertisement
 			Destroy();
 		}
 
-		
-
 		public void Show(Action<object> onRewardClaimed)
 		{
 			if (rewardedAd != null && rewardedAd.CanShowAd())
@@ -118,9 +118,16 @@ namespace THEBADDEST.Advertisement
 					SendLog.Log($"Rewarded ad granted a reward: {reward.Amount} {reward.Type}");
 					onRewardClaimed?.Invoke(reward);
 				});
+				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Rewarded, AdEventType.ShowSucceeded, unitId);
+				EventBus.Publish(new AdShownEvent {
+					AdType = AdMetricsTypes.Rewarded,
+					Placement = unitId,
+					Time = DateTime.Now
+				});
 			}
 			else
 			{
+				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Rewarded, AdEventType.ShowFailed, unitId);
 				OnRewardFailed?.Invoke();
 				SendLog.LogError("Rewarded ad is not ready yet.");
 			}

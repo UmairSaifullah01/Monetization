@@ -19,10 +19,12 @@ namespace THEBADDEST.Advertisement
 		object IAppAd.        ad => ad;
 		InterstitialAd        interstitialAd;
 		string                unitId;
+		string                adType;
 
-		public Interstitial_Ad(string unitId)
+		public Interstitial_Ad(string unitId, string adType = AdMetricsTypes.Interstitial)
 		{
 			this.unitId = unitId;
+			this.adType = adType;
 		}
 
 		public void Create()
@@ -49,38 +51,42 @@ namespace THEBADDEST.Advertisement
 			if (interstitialAd != null && interstitialAd.CanShowAd())
 			{
 				interstitialAd.Show();
+				PerformanceMonitor.Instance.RecordAdEvent(adType, AdEventType.ShowSucceeded, unitId);
 				EventBus.Publish(new AdShownEvent {
-					AdType = "Interstitial",
+					AdType = adType,
 					Placement = unitId,
 					Time = DateTime.Now
 				});
 			}
 			else
 			{
+				PerformanceMonitor.Instance.RecordAdEvent(adType, AdEventType.ShowFailed, unitId);
 				SendLog.LogError("Interstitial ad is not ready yet.");
 			}
 		}
 
 		public void Load()
 		{
+			PerformanceMonitor.Instance.RecordAdEvent(adType, AdEventType.LoadStarted, unitId);
 			var adRequest = new AdRequest();
 			InterstitialAd.Load(unitId, adRequest, (InterstitialAd ad, LoadAdError error) =>
 			{
 				if (error != null)
 				{
+					PerformanceMonitor.Instance.RecordAdEvent(adType, AdEventType.LoadFailed, unitId);
 					SendLog.LogError("Interstitial ad failed to load: " + error);
 					OnAdLoadFailed?.Invoke();
 					return;
 				}
 
-				// If the operation failed for unknown reasons.
-				// This is an unexpected error, please report this bug if it happens.
 				if (ad == null)
 				{
+					PerformanceMonitor.Instance.RecordAdEvent(adType, AdEventType.LoadFailed, unitId);
 					SendLog.LogError("Unexpected error: Interstitial load event fired with null ad and null error.");
 					return;
 				}
 
+				PerformanceMonitor.Instance.RecordAdEvent(adType, AdEventType.LoadSucceeded, unitId);
 				OnAdLoaded?.Invoke();
 				interstitialAd          =  ad;
 				interstitialAd.OnAdPaid += info =>

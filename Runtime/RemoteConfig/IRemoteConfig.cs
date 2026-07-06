@@ -9,7 +9,7 @@ namespace THEBADDEST.RemoteConfigSystem
 	public interface IRemoteConfig<T>  : IModule
 	{
 
-		event Action<bool> OnInitialize;
+		event Action<bool> onInitialize;
 		event Action OnDataLoad;
 		
 		void Load();

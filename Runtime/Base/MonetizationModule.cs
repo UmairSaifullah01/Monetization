@@ -32,20 +32,20 @@ namespace THEBADDEST.MonetizationApi
         {
             if (isInitialized)
             {
-                SendLog.Log($"[{ModuleName}] Already initialized.");
+                SendLog.LogModule(ModuleName, "Already initialized.");
                 return;
             }
 
             if (isInitializing)
             {
-                SendLog.LogWarning($"[{ModuleName}] Initialization already in progress.");
+                SendLog.LogModule(ModuleName, "Initialization already in progress.", LogLevel.Warning);
                 await UTask.WaitUntil(() => !isInitializing);
                 return;
             }
 
             if (!enabled)
             {
-                SendLog.LogWarning($"[{ModuleName}] Module is disabled. Skipping initialization.");
+                SendLog.LogModule(ModuleName, "Module is disabled. Skipping initialization.", LogLevel.Warning);
                 return;
             }
 
@@ -55,11 +55,11 @@ namespace THEBADDEST.MonetizationApi
             {
                 await OnInitialize();
                 isInitialized = true;
-                SendLog.Log($"[{ModuleName}] Initialized successfully.");
+                SendLog.LogModule(ModuleName, "Initialized successfully.");
             }
             catch (System.Exception ex)
             {
-                SendLog.LogError($"[{ModuleName}] Initialization failed: {ex.Message}");
+                SendLog.LogModule(ModuleName, $"Initialization failed: {ex.Message}", LogLevel.Error);
                 throw;
             }
             finally
@@ -73,7 +73,6 @@ namespace THEBADDEST.MonetizationApi
         /// </summary>
         protected virtual async UTask OnInitialize()
         {
-            // Override in derived classes
             await UTask.CompletedTask;
         }
 
@@ -91,7 +90,7 @@ namespace THEBADDEST.MonetizationApi
             }
             catch (System.Exception ex)
             {
-                SendLog.LogError($"[{ModuleName}] Update failed: {ex.Message}");
+                SendLog.LogModule(ModuleName, $"Update failed: {ex.Message}", LogLevel.Error);
             }
         }
 
@@ -100,7 +99,6 @@ namespace THEBADDEST.MonetizationApi
         /// </summary>
         protected virtual void OnUpdateModule()
         {
-            // Override in derived classes
         }
 
         /// <inheritdoc/>
@@ -112,7 +110,7 @@ namespace THEBADDEST.MonetizationApi
             }
             catch (System.Exception ex)
             {
-                SendLog.LogError($"[{ModuleName}] Destroy failed: {ex.Message}");
+                SendLog.LogModule(ModuleName, $"Destroy failed: {ex.Message}", LogLevel.Error);
             }
         }
 
@@ -121,7 +119,6 @@ namespace THEBADDEST.MonetizationApi
         /// </summary>
         protected virtual void OnModuleDestroy()
         {
-            // Override in derived classes for cleanup
         }
 
         /// <inheritdoc/>

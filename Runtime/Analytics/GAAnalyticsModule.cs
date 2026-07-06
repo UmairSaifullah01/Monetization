@@ -26,6 +26,7 @@ namespace THEBADDEST.Analytics
 		// Cached loaded IDs
 		private string _cachedGameKey;
 		private string _cachedSecretKey;
+		private bool _gameAnalyticsReady;
 
 		private void LoadAnalyticsIdsFromJson()
 		{
@@ -56,26 +57,31 @@ namespace THEBADDEST.Analytics
 			}
 		}
 
-		public override async UTask Initialize()
+		protected override async UTask OnInitialize()
 		{
-			var configAsset = THEBADDEST.MonetizationApi.MonetizationConfig.Instance;
+			await base.OnInitialize();
+
+			var configAsset = MonetizationConfig.Instance;
 			if (!configAsset.EnableAnalytics)
 			{
 				SendLog.LogWarning("[Analytics] Analytics is disabled by MonetizationConfig.");
-				isInitialized = false;
 				return;
 			}
 
-			// Ensure keys are loaded before initialization
 			if (string.IsNullOrEmpty(_cachedGameKey) || string.IsNullOrEmpty(_cachedSecretKey))
 			{
 				LoadAnalyticsIdsFromJson();
 			}
 
-			// Use configAsset.EnableEventBatching, configAsset.BatchSize, configAsset.BatchTimeout for batching logic
 			GameAnalytics.Initialize();
-			isInitialized = true;
+			_gameAnalyticsReady = true;
 			SendLog.Log("[Analytics] Game Analytics initialized successfully.");
+		}
+
+		protected override void OnAdShown(AdShownEvent evt)
+		{
+			if (!_gameAnalyticsReady) return;
+			SendAdEvent(evt.AdType, evt.Placement, true);
 		}
 
 		public override void SendEvent(string name)
@@ -87,7 +93,7 @@ namespace THEBADDEST.Analytics
 				return;
 			}
 
-			if (!isInitialized)
+			if (!_gameAnalyticsReady)
 			{
 				SendLog.LogWarning("[Analytics] Cannot send event: Game Analytics not initialized.");
 				return;
@@ -99,7 +105,7 @@ namespace THEBADDEST.Analytics
 
 		public override void SendEvent(string name, string value)
 		{
-			if (!isInitialized)
+			if (!_gameAnalyticsReady)
 			{
 				SendLog.LogWarning("[Analytics] Cannot send event: Game Analytics not initialized.");
 				return;
@@ -119,7 +125,7 @@ namespace THEBADDEST.Analytics
 
 		public override void SendEvent(ProgressionStatus status, string eventName)
 		{
-			if (!isInitialized)
+			if (!_gameAnalyticsReady)
 			{
 				SendLog.LogWarning("[Analytics] Cannot send progression event: Game Analytics not initialized.");
 				return;
@@ -132,7 +138,7 @@ namespace THEBADDEST.Analytics
 
 		public override void SendDesignEvent(string category, string subCategory, string outcome, float value)
 		{
-			if (!isInitialized)
+			if (!_gameAnalyticsReady)
 			{
 				SendLog.LogWarning("[Analytics] Cannot send design event: Game Analytics not initialized.");
 				return;
@@ -146,7 +152,7 @@ namespace THEBADDEST.Analytics
 
 		public override void SendDesignEvent(string category, string subCategory, string outcome)
 		{
-			if (!isInitialized)
+			if (!_gameAnalyticsReady)
 			{
 				SendLog.LogWarning("[Analytics] Cannot send design event: Game Analytics not initialized.");
 				return;
@@ -160,7 +166,7 @@ namespace THEBADDEST.Analytics
 
 		public override void SendTransaction(string productId, string currencyCode, int quantity, double unitPrice, string receipt, string signature)
 		{
-			if (!isInitialized)
+			if (!_gameAnalyticsReady)
 			{
 				SendLog.LogWarning("[Analytics] Cannot send transaction: Game Analytics not initialized.");
 				return;
@@ -176,7 +182,7 @@ namespace THEBADDEST.Analytics
 
 		public override void SendEventLog(Dictionary<string, object> eventLog)
 		{
-			if (!isInitialized)
+			if (!_gameAnalyticsReady)
 			{
 				SendLog.LogWarning("[Analytics] Cannot send event log: Game Analytics not initialized.");
 				return;
@@ -254,7 +260,7 @@ namespace THEBADDEST.Analytics
 
 		public void SetUserProperty(string propertyName, string propertyValue)
 		{
-			if (!isInitialized)
+			if (!_gameAnalyticsReady)
 			{
 				SendLog.LogWarning("[Analytics] Cannot set user property: Game Analytics not initialized.");
 				return;

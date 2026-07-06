@@ -8,8 +8,47 @@ namespace THEBADDEST.MonetizationApi
 {
 
 
+	public static class AdMetricsTypes
+	{
+		public const string Interstitial = "Interstitial";
+		public const string InterstitialVideo = "InterstitialVideo";
+		public const string Rewarded = "Rewarded";
+		public const string Banner = "Banner";
+		public const string AppOpen = "AppOpen";
+	}
+
+	public enum AdEventType
+	{
+		LoadStarted,
+		LoadSucceeded,
+		LoadFailed,
+		ShowSucceeded,
+		ShowFailed
+	}
+
+	public struct AdMetricSnapshot
+	{
+		public int ShowCount;
+		public int ShowFailCount;
+		public int LoadCount;
+		public int LoadFailCount;
+		public DateTime? LastShownUtc;
+		public DateTime? LastLoadedUtc;
+		public float SecondsSinceLastShow;
+	}
+
+	internal class AdMetricData
+	{
+		public int ShowCount;
+		public int ShowFailCount;
+		public int LoadCount;
+		public int LoadFailCount;
+		public DateTime? LastShownUtc;
+		public DateTime? LastLoadedUtc;
+	}
+
 	/// <summary>
-	/// Singleton class for monitoring performance of operations and modules.
+	/// Singleton class for monitoring performance of operations and ad events.
 	/// </summary>
 	public class PerformanceMonitor
 	{
@@ -21,6 +60,7 @@ namespace THEBADDEST.MonetizationApi
 		private Dictionary<string, List<float>> operationDurations = new Dictionary<string, List<float>>();
 		private Dictionary<string, int> operationCounts = new Dictionary<string, int>();
 		private Dictionary<string, int> errorCounts = new Dictionary<string, int>();
+		private Dictionary<string, AdMetricData> adMetrics = new Dictionary<string, AdMetricData>();
 
 		public void StartOperation(string operationName)
 		{
@@ -47,6 +87,91 @@ namespace THEBADDEST.MonetizationApi
 		public void RecordError(string operationName)
 		{
 			errorCounts[operationName] = GetErrorCount(operationName) + 1;
+		}
+
+		public void RecordAdEvent(string adType, AdEventType eventType, string placement = null)
+		{
+			if (!adMetrics.TryGetValue(adType, out AdMetricData data))
+			{
+				data = new AdMetricData();
+				adMetrics[adType] = data;
+			}
+
+			string loadOperation = $"Ad.{adType}.Load";
+
+			switch (eventType)
+			{
+				case AdEventType.LoadStarted:
+					data.LoadCount++;
+					StartOperation(loadOperation);
+					break;
+				case AdEventType.LoadSucceeded:
+					data.LastLoadedUtc = DateTime.UtcNow;
+					EndOperation(loadOperation);
+					break;
+				case AdEventType.LoadFailed:
+					data.LoadFailCount++;
+					RecordError(loadOperation);
+					EndOperation(loadOperation);
+					break;
+				case AdEventType.ShowSucceeded:
+					data.ShowCount++;
+					data.LastShownUtc = DateTime.UtcNow;
+					break;
+				case AdEventType.ShowFailed:
+					data.ShowFailCount++;
+					break;
+			}
+
+			if (MonetizationConfig.Instance.EnablePerformanceLogging)
+			{
+				var snapshot = BuildSnapshot(data);
+				string placementInfo = string.IsNullOrEmpty(placement) ? "" : $", placement={placement}";
+				SendLog.LogDebug($"Ad {adType} {eventType} (shows={snapshot.ShowCount}, loads={snapshot.LoadCount}{placementInfo})");
+			}
+		}
+
+		public AdMetricSnapshot GetAdMetrics(string adType)
+		{
+			if (!adMetrics.TryGetValue(adType, out AdMetricData data))
+			{
+				return default;
+			}
+
+			return BuildSnapshot(data);
+		}
+
+		public IReadOnlyCollection<string> GetTrackedAdTypes() => adMetrics.Keys;
+
+		public void ResetAdMetrics(string adType = null)
+		{
+			if (string.IsNullOrEmpty(adType))
+			{
+				adMetrics.Clear();
+				return;
+			}
+
+			adMetrics.Remove(adType);
+		}
+
+		private static AdMetricSnapshot BuildSnapshot(AdMetricData data)
+		{
+			float secondsSinceLastShow = 0f;
+			if (data.LastShownUtc.HasValue)
+			{
+				secondsSinceLastShow = (float)(DateTime.UtcNow - data.LastShownUtc.Value).TotalSeconds;
+			}
+
+			return new AdMetricSnapshot
+			{
+				ShowCount = data.ShowCount,
+				ShowFailCount = data.ShowFailCount,
+				LoadCount = data.LoadCount,
+				LoadFailCount = data.LoadFailCount,
+				LastShownUtc = data.LastShownUtc,
+				LastLoadedUtc = data.LastLoadedUtc,
+				SecondsSinceLastShow = secondsSinceLastShow
+			};
 		}
 
 		public float GetAverageDuration(string operationName)
@@ -128,6 +253,17 @@ namespace THEBADDEST.MonetizationApi
 				float successRate = GetSuccessRate(operation);
 				SendLog.LogInfo($"{operation}: Avg={avg:F2}ms, Min={min:F2}ms, Max={max:F2}ms, Count={count}, Errors={errors}, Success={successRate:F1}%");
 			}
+
+			if (adMetrics.Count > 0)
+			{
+				SendLog.LogInfo("=== Ad Metrics ===");
+				foreach (string adType in adMetrics.Keys)
+				{
+					var snapshot = GetAdMetrics(adType);
+					string lastShown = snapshot.LastShownUtc?.ToString("u") ?? "never";
+					SendLog.LogInfo($"{adType}: Shows={snapshot.ShowCount}, ShowFails={snapshot.ShowFailCount}, Loads={snapshot.LoadCount}, LoadFails={snapshot.LoadFailCount}, LastShown={lastShown}");
+				}
+			}
 		}
 
 		public void Reset()
@@ -136,11 +272,9 @@ namespace THEBADDEST.MonetizationApi
 			operationDurations.Clear();
 			operationCounts.Clear();
 			errorCounts.Clear();
+			adMetrics.Clear();
 		}
 
-		/// <summary>
-		/// Monitors an async operation and records its performance.
-		/// </summary>
 		public async UTask MonitorAsyncOperation(string operationName, UTask operation)
 		{
 			StartOperation(operationName);
@@ -157,9 +291,6 @@ namespace THEBADDEST.MonetizationApi
 			}
 		}
 
-		/// <summary>
-		/// Monitors an async operation with a timeout. If the operation does not complete in time, throws TimeoutException.
-		/// </summary>
 		public async UTask<T> MonitorWithTimeout<T>(string operationName, UTask<T> operation, float timeoutSeconds)
 		{
 			StartOperation(operationName);

@@ -65,43 +65,49 @@ namespace THEBADDEST.Advertisement
 
 		public void Show()
 		{
-			// App open ads can be preloaded for up to 4 hours.
 			if (appOpenAd != null && appOpenAd.CanShowAd())
 			{
 				SendLog.Log("Showing app open ad.");
 				appOpenAd.Show();
+				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.AppOpen, AdEventType.ShowSucceeded, unitId);
+				EventBus.Publish(new AdShownEvent
+				{
+					AdType = AdMetricsTypes.AppOpen,
+					Placement = unitId,
+					Time = DateTime.Now
+				});
 			}
 			else
 			{
+				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.AppOpen, AdEventType.ShowFailed, unitId);
 				SendLog.LogWarning("App open ad is not ready yet.");
 			}
 		}
 
 		public void Load()
 		{
+			PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.AppOpen, AdEventType.LoadStarted, unitId);
 			var adRequest = new AdRequest();
 
-			// Send the request to load the ad.
 			AppOpenAd.Load(unitId, adRequest, (AppOpenAd ad, LoadAdError error) =>
 			{
-				// If the operation failed with a reason.
 				if (error != null)
 				{
+					PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.AppOpen, AdEventType.LoadFailed, unitId);
 					SendLog.LogError("App open ad failed to load: " + error);
 					OnAdLoadFailed?.Invoke();
 					return;
 				}
 
-				// If the operation failed for unknown reasons.
-				// This is an unexpected error, please report this bug if it happens.
 				if (ad == null)
 				{
-					Debug.Log("Unexpected error: App open ad load event fired with " + " null ad and null error.");
+					PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.AppOpen, AdEventType.LoadFailed, unitId);
+					Debug.Log("Unexpected error: App open ad load event fired with null ad and null error.");
 					return;
 				}
 
+				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.AppOpen, AdEventType.LoadSucceeded, unitId);
 				OnAdLoaded?.Invoke();
-				// The operation completed successfully.
 				Debug.Log("App open ad loaded with response : " + ad.GetResponseInfo());
 				appOpenAd          =  ad;
 				appOpenAd.OnAdPaid += info =>

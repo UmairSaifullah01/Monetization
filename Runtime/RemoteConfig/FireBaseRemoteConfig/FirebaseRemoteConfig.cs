@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Firebase.Extensions;
 using Firebase.RemoteConfig;
 using THEBADDEST.Tasks;
@@ -21,31 +20,34 @@ namespace THEBADDEST.RemoteConfigSystem
 		Firebase.RemoteConfig.FirebaseRemoteConfig firebaseRemoteConfig;
 		private object cachedConfig = null;
 		private DateTime lastFetchTime = DateTime.MinValue;
+		private bool _defaultsSetComplete;
 
 
-		public override async UTask Initialize()
+		protected override async UTask OnInitialize()
 		{
-			var configAsset = THEBADDEST.MonetizationApi.MonetizationConfig.Instance;
+			var configAsset = MonetizationConfig.Instance;
 			if (!configAsset.EnableRemoteConfig)
 			{
 				SendLog.LogWarning("[RemoteConfig] Remote Config is disabled by MonetizationConfig.");
-				IsInitialized = false;
-				return;
-			}
-			// Use configAsset.ConfigFetchTimeout and configAsset.EnableConfigCaching for fetch logic
-			await base.Initialize();
-			firebaseRemoteConfig = Firebase.RemoteConfig.FirebaseRemoteConfig.DefaultInstance;
-			if (firebaseRemoteConfig == null)
-			{
-				OnInitializeCompleted(IsInitialized);
 				return;
 			}
 
+			firebaseRemoteConfig = Firebase.RemoteConfig.FirebaseRemoteConfig.DefaultInstance;
+			if (firebaseRemoteConfig == null || variablesMapper == null)
+			{
+				RaiseSdkInitialized(false);
+				return;
+			}
+
+			_defaultsSetComplete = false;
 			firebaseRemoteConfig.SetDefaultsAsync(variablesMapper.GetDefaultValues()).ContinueWithOnMainThread(task =>
 			{
-				IsInitialized = true;
-				OnInitializeCompleted(IsInitialized);
+				bool success = task.IsCompleted && !task.IsFaulted && !task.IsCanceled;
+				RaiseSdkInitialized(success);
+				_defaultsSetComplete = true;
 			});
+
+			await UTask.WaitUntil(() => _defaultsSetComplete);
 		}
 
 		public override void Load()
@@ -68,7 +70,7 @@ namespace THEBADDEST.RemoteConfigSystem
 
 		public override void FetchConfig(Action<object> config)
 		{
-			var configAsset = THEBADDEST.MonetizationApi.MonetizationConfig.Instance;
+			var configAsset = MonetizationConfig.Instance;
 			if (configAsset.EnableConfigCaching && cachedConfig != null && (DateTime.Now - lastFetchTime).TotalSeconds < configAsset.ConfigFetchTimeout)
 			{
 				SendLog.LogInfo("[RemoteConfig] Returning cached config.");
@@ -106,7 +108,6 @@ namespace THEBADDEST.RemoteConfigSystem
 						firebaseRemoteConfig.ActivateAsync().ContinueWithOnMainThread(task =>
 						{
 							SendLog.Log($"Remote data loaded and ready (last fetch time {info.FetchTime}).");
-							// Load Data
 							Load();
 							cachedConfig = variablesMapper.GetDefaultValues();
 							lastFetchTime = DateTime.Now;

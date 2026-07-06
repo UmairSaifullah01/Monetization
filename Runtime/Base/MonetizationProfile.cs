@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using THEBADDEST.Tasks;
 using UnityEngine;
 
@@ -103,7 +104,9 @@ namespace THEBADDEST.MonetizationApi
 
 			if (failedModules.Count > 0)
 			{
-				SendLog.LogWarning($"Some modules failed to initialize: {string.Join(", ", failedModules)}");
+				var messages = failedModules.Select(m => $"Module failed to initialize: {m}").ToList();
+				messages.Insert(0, $"Some modules failed to initialize ({failedModules.Count}/{modules.Count}):");
+				SendLog.LogBatch(messages, LogLevel.Warning);
 			}
 			else
 			{
@@ -145,6 +148,22 @@ namespace THEBADDEST.MonetizationApi
 					moduleCache[module.GetType()] = module as IModule;
 				}
 			}
+		}
+
+		/// <summary>
+		/// Finds a module without requiring runtime initialization. Use in editor/build flows.
+		/// </summary>
+		public T FindModule<T>() where T : class, IModule
+		{
+			foreach (MonetizationModule module in modules)
+			{
+				if (module is T result)
+				{
+					return result;
+				}
+			}
+
+			return default;
 		}
 
 		/// <summary>

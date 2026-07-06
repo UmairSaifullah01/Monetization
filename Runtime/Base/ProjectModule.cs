@@ -144,6 +144,17 @@ namespace THEBADDEST.MonetizationApi
 			await UTask.CompletedTask;
 		}
 
+#if UNITY_EDITOR
+		/// <summary>
+		/// Reloads JSON settings and syncs to PlayerSettings without requiring runtime init.
+		/// </summary>
+		public void SyncProjectSettings()
+		{
+			LoadProjectSettingsFromJson();
+			OnUpdateModule();
+		}
+#endif
+
 		/// <summary>
 		/// Updates the module by syncing settings to Unity PlayerSettings.
 		/// </summary>

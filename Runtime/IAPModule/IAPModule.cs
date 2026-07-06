@@ -11,7 +11,6 @@ namespace THEBADDEST.MonetizationApi
 	{
 		[SerializeField] private IAPCatalog catalog = new IAPCatalog();
 		public IAPCatalog Catalog => catalog;
-		public bool IsInitialized { get; protected set; }
 		
 		protected Dictionary<string, Action> successCallbacks = new Dictionary<string, Action>();
 		protected Dictionary<string, Action> failCallbacks = new Dictionary<string, Action>();

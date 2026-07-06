@@ -56,9 +56,8 @@ namespace THEBADDEST.Advertisement
 	public interface IAdsModule : IModule
 	{
 
-		event Action<bool> OnInitialize;
-		
-		void   Init();
+		event Action<bool> onInitialize;
+
 		IAppAd FetchBanner(string placement = "default");
 
 

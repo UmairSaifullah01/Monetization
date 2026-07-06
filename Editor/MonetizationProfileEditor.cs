@@ -63,7 +63,7 @@ namespace THEBADDEST.MonetizationEditor
 			if (GUILayout.Button("Sync Project", GUILayout.Width(200), GUILayout.Height(40)))
 			{
 				serializedObject.ApplyModifiedProperties();
-				(serializedObject.targetObject as MonetizationProfile)?.UpdateModules();
+				(serializedObject.targetObject as MonetizationProfile)?.FindModule<ProjectModule>()?.SyncProjectSettings();
 			}
 
 			EditorGUILayout.Space();

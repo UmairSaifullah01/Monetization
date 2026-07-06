@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using GoogleMobileAds.Api;
 using GoogleMobileAds.Ump.Api;
+using THEBADDEST.Tasks;
 using UnityEngine;
-using UnityEngine.Serialization;
 using THEBADDEST.MonetizationApi;
 
 
@@ -131,8 +131,7 @@ namespace THEBADDEST.Advertisement
 		IAppRewardAd rewardedVideo;
 		IAppAd appOpenAd;
 
-
-		public event Action<bool> OnInitialize;
+		private bool _sdkInitComplete;
 
 		public bool CanRequestAds => ConsentInformation.CanRequestAds();
 
@@ -207,21 +206,17 @@ namespace THEBADDEST.Advertisement
 			}
 		}
 
-		public override void Init()
+		protected override async UTask OnInitialize()
 		{
-			var configAsset = THEBADDEST.MonetizationApi.MonetizationConfig.Instance;
+			var configAsset = MonetizationConfig.Instance;
 			if (!configAsset.EnableAds)
 			{
 				SendLog.LogWarning("[Ads] Ads are disabled by MonetizationConfig.");
-				isInitialized = false;
-				OnInitialize?.Invoke(false);
 				return;
 			}
 
-			// Load ad IDs from JSON
 			LoadAdIdsFromJson();
 
-			// Use test mode if enabled
 			if (configAsset.EnableTestMode)
 			{
 				SendLog.LogInfo("[Ads] Test mode enabled by MonetizationConfig.");
@@ -229,13 +224,19 @@ namespace THEBADDEST.Advertisement
 
 			SetupAllAds();
 			MobileAds.RaiseAdEventsOnUnityMainThread = true;
+
+			_sdkInitComplete = false;
 			if (CheckInternetState())
 			{
 				RequestConsent();
 			}
+			else
+			{
+				initialize?.Invoke(false);
+				_sdkInitComplete = true;
+			}
 
-			isInitialized = true;
-			OnInitialize?.Invoke(isInitialized);
+			await UTask.WaitUntil(() => _sdkInitComplete);
 		}
 
 
@@ -292,22 +293,22 @@ namespace THEBADDEST.Advertisement
 
 		void OnInitComplete(InitializationStatus status)
 		{
-			bool statusBool = status == null;
-			OnInitialize?.Invoke(statusBool);
-			SendLog.Log(statusBool ? "[ADS] Error Initialization Status..." : "[ADS] Initialization Status... Success");
+			bool failed = status == null;
+			initialize?.Invoke(!failed);
+			SendLog.Log(failed ? "[ADS] Error Initialization Status..." : "[ADS] Initialization Status... Success");
+			_sdkInitComplete = true;
 		}
 
 		void SetupAllAds()
 		{
-			// Update banner data unit ID if not already set
 			if (string.IsNullOrEmpty(GetBannerDataUnitId()))
 			{
 				SetBannerDataUnitId(BANNER_ID_KEY);
 			}
 
 			bannerView = new BannerAd(bannerData);
-			interstitial = new Interstitial_Ad(_cachedInterstitialId);
-			interstitialVideo = new Interstitial_Ad(_cachedInterstitialVideoId);
+			interstitial = new Interstitial_Ad(_cachedInterstitialId, AdMetricsTypes.Interstitial);
+			interstitialVideo = new Interstitial_Ad(_cachedInterstitialVideoId, AdMetricsTypes.InterstitialVideo);
 			rewardedVideo = new RewardedVideoAd(_cachedRewardedId);
 			appOpenAd = new AppOpenAdGoogle(_cachedAppOpenId);
 		}

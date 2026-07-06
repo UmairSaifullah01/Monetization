@@ -15,22 +15,14 @@ MonoBehaviour:
   enableDebugLogs: 1
   logLevel: 3
   enablePerformanceLogging: 0
-  initializationTimeout: 30
   maxRetryAttempts: 3
   retryDelaySeconds: 2
   checkInternetBeforeInit: 1
   validateModulesOnStart: 1
   enableAds: 1
   enableTestMode: 1
-  adLoadTimeout: 10
-  maxAdLoadAttempts: 3
   enableIAP: 1
-  enableReceiptValidation: 1
-  purchaseTimeout: 30
   enableAnalytics: 1
-  enableEventBatching: 1
-  batchSize: 10
-  batchTimeout: 5
   enableRemoteConfig: 1
   configFetchTimeout: 15
   enableConfigCaching: 1
