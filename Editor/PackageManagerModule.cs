@@ -103,6 +103,7 @@ namespace THEBADDEST.MonetizationEditor
             }
 
             DrawLegacyGameAnalyticsRow();
+            DrawFacebookRow();
             EditorGUILayout.EndVertical();
         }
 
@@ -163,9 +164,36 @@ namespace THEBADDEST.MonetizationEditor
                 MessageType.None);
         }
 
+        private void DrawFacebookRow()
+        {
+            EditorGUILayout.Space(6);
+            EditorGUILayout.LabelField("Facebook Analytics (.unitypackage)", EditorStyles.miniBoldLabel);
+            bool facebookEnabled = MonetizationLegacyDefineUtility.IsFacebookEnabled();
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Scripting define", GUILayout.Width(180));
+            EditorGUILayout.LabelField(facebookEnabled ? "Enabled" : "Disabled", GUILayout.Width(90));
+
+            EditorGUI.BeginDisabledGroup(facebookEnabled);
+            if (GUILayout.Button("Enable", GUILayout.Width(90)))
+            {
+                MonetizationLegacyDefineUtility.SetFacebookEnabled(true);
+            }
+            EditorGUI.EndDisabledGroup();
+
+            EditorGUI.BeginDisabledGroup(!facebookEnabled);
+            if (GUILayout.Button("Disable", GUILayout.Width(90)))
+            {
+                MonetizationLegacyDefineUtility.SetFacebookEnabled(false);
+            }
+            EditorGUI.EndDisabledGroup();
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.HelpBox(
+                "Enables the Facebook analytics module (defines MONETIZATION_FACEBOOK). Import the Facebook Unity SDK first, then enable this define.",
+                MessageType.None);
+        }
+
         private void DrawBulkActions()
         {
-            EditorGUILayout.LabelField("Bulk Actions", EditorStyles.boldLabel);
             EditorGUILayout.BeginVertical(GUI.skin.box);
 
             if (GUILayout.Button("Remove All Provider SDKs", GUILayout.Height(30)))

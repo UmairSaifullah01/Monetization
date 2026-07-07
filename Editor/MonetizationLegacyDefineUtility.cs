@@ -8,6 +8,7 @@ namespace THEBADDEST.MonetizationEditor
     public static class MonetizationLegacyDefineUtility
     {
         public const string GameAnalyticsDefine = "MONETIZATION_GAMEANALYTICS";
+        public const string FacebookDefine = "MONETIZATION_FACEBOOK";
 
         public static bool IsLegacyGameAnalyticsEnabled()
         {
@@ -17,6 +18,16 @@ namespace THEBADDEST.MonetizationEditor
         public static void SetLegacyGameAnalyticsEnabled(bool enabled)
         {
             SetDefine(GameAnalyticsDefine, enabled);
+        }
+
+        public static bool IsFacebookEnabled()
+        {
+            return HasDefine(FacebookDefine);
+        }
+
+        public static void SetFacebookEnabled(bool enabled)
+        {
+            SetDefine(FacebookDefine, enabled);
         }
 
         private static bool HasDefine(string define)

@@ -166,6 +166,10 @@ namespace THEBADDEST.MonetizationEditor
             {
                 MonetizationLegacyDefineUtility.SetLegacyGameAnalyticsEnabled(false);
             }
+            else if (providerKey == "analytics_facebook")
+            {
+                MonetizationLegacyDefineUtility.SetFacebookEnabled(false);
+            }
         }
 
         public static void UninstallAllProviders(InstallerConfig config)
@@ -209,6 +213,7 @@ namespace THEBADDEST.MonetizationEditor
             WriteManifest(manifest);
             DeleteAllExternalTgz();
             MonetizationLegacyDefineUtility.SetLegacyGameAnalyticsEnabled(false);
+            MonetizationLegacyDefineUtility.SetFacebookEnabled(false);
             ResolvePackages();
         }
 

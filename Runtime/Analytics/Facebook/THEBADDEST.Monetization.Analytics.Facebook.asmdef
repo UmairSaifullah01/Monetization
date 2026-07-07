@@ -14,7 +14,15 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
+    "defineConstraints": [
+        "MONETIZATION_FACEBOOK"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.facebook.unity",
+            "expression": "",
+            "define": "MONETIZATION_FACEBOOK"
+        }
+    ],
     "noEngineReferences": false
 }
