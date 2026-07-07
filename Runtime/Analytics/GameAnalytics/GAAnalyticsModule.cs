@@ -9,7 +9,7 @@ namespace THEBADDEST.Analytics
 {
 
 
-	public class GAAnalyticsModule : AnalyticsModule
+	public class GAAnalyticsModule : AnalyticsModule, IGAAnalyticsModule
 	{
 
 		private const string ANALYTICS_KEYS_CATEGORY = "GameAnalyticsKeys";
@@ -76,12 +76,6 @@ namespace THEBADDEST.Analytics
 			GameAnalytics.Initialize();
 			_gameAnalyticsReady = true;
 			SendLog.LogModule(ModuleName, "Game Analytics initialized successfully.");
-		}
-
-		protected override void OnAdShown(AdShownEvent evt)
-		{
-			if (!_gameAnalyticsReady) return;
-			SendAdEvent(evt.AdType, evt.Placement, true);
 		}
 
 		public override void SendEvent(string name)

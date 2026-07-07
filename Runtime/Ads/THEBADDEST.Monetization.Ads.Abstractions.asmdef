@@ -2,7 +2,8 @@
   "name": "THEBADDEST.Monetization.Ads.Abstractions",
   "rootNamespace": "THEBADDEST.Advertisement",
   "references": [
-    "THEBADDEST.Monetization.Core"
+    "THEBADDEST.Monetization.Core",
+    "THEBADDEST.UTask"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

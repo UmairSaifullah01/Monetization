@@ -223,6 +223,19 @@ namespace THEBADDEST.MonetizationApi
 		}
 
 		/// <summary>
+		/// Gets all modules assignable to the specified type.
+		/// </summary>
+		public IReadOnlyList<T> GetModules<T>() where T : class, IModule
+		{
+			if (!isInitialized)
+			{
+				return Array.Empty<T>();
+			}
+
+			return moduleRegistry.GetAll<T>();
+		}
+
+		/// <summary>
 		/// Updates all modules in the profile.
 		/// </summary>
 		public void UpdateModules()

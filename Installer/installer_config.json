@@ -10,6 +10,15 @@
         "com.google",
         "com.gameanalytics"
       ]
+    },
+    {
+      "name": "AppLovin MAX Unity",
+      "url": "https://unity.packages.applovin.com/",
+      "scopes": [
+        "com.applovin.mediation.ads",
+        "com.applovin.mediation.adapters",
+        "com.applovin.mediation.dsp"
+      ]
     }
   ],
   "providers": {
@@ -21,6 +30,15 @@
       "tgzPackages": {},
       "asmdef": "THEBADDEST.Monetization.Ads.Google",
       "moduleType": "THEBADDEST.Advertisement.GoogleAdsModule"
+    },
+    "ads_applovin": {
+      "label": "AppLovin MAX",
+      "packages": {
+        "com.applovin.mediation.ads": "8.6.4"
+      },
+      "tgzPackages": {},
+      "asmdef": "THEBADDEST.Monetization.Ads.AppLovin",
+      "moduleType": "THEBADDEST.Advertisement.AppLovinMaxAdsModule"
     },
     "analytics_gameanalytics": {
       "label": "GameAnalytics",
@@ -41,6 +59,22 @@
       },
       "asmdef": "THEBADDEST.Monetization.Analytics.Firebase",
       "moduleType": "THEBADDEST.Analytics.FAAnalyticsModule"
+    },
+    "analytics_facebook": {
+      "label": "Facebook Analytics",
+      "packages": {},
+      "tgzPackages": {},
+      "asmdef": "THEBADDEST.Monetization.Analytics.Facebook",
+      "moduleType": "THEBADDEST.Analytics.FacebookAnalyticsModule"
+    },
+    "analytics_tenjin": {
+      "label": "Tenjin Analytics",
+      "packages": {
+        "com.tenjin.unity-sdk": "https://github.com/tenjin/tenjin-unity-sdk.git#1.16.5"
+      },
+      "tgzPackages": {},
+      "asmdef": "THEBADDEST.Monetization.Analytics.Tenjin",
+      "moduleType": "THEBADDEST.Analytics.TenjinAnalyticsModule"
     },
     "iap_unity": {
       "label": "Unity IAP",

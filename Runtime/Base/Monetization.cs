@@ -59,6 +59,23 @@ namespace THEBADDEST.MonetizationApi
 			return profile.TryGetModule(out module);
 		}
 
+		public static IReadOnlyList<T> GetModules<T>() where T : class, IModule
+		{
+			if (!isInitialized)
+			{
+				SendLog.LogWarning("Monetization system not initialized. Call Initialize() first.");
+				return Array.Empty<T>();
+			}
+
+			if (profile == null)
+			{
+				SendLog.LogWarning("MonetizationProfile is null. Initialization may have failed.");
+				return Array.Empty<T>();
+			}
+
+			return profile.GetModules<T>();
+		}
+
 		public static async UTask Initialize(int retryAttempts = 0)
 		{
 			if (isInitialized)

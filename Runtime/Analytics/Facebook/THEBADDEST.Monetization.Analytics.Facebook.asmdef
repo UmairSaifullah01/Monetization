@@ -1,0 +1,20 @@
+{
+    "name": "THEBADDEST.Monetization.Analytics.Facebook",
+    "rootNamespace": "THEBADDEST.Analytics",
+    "references": [
+        "THEBADDEST.Monetization.Analytics.Abstractions",
+        "THEBADDEST.Monetization.Configuration",
+        "THEBADDEST.Monetization.Core",
+        "THEBADDEST.UTask",
+        "Facebook.Unity"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,27 @@
+{
+    "name": "THEBADDEST.Monetization.Analytics.Tenjin",
+    "rootNamespace": "THEBADDEST.Analytics",
+    "references": [
+        "THEBADDEST.Monetization.Analytics.Abstractions",
+        "THEBADDEST.Monetization.Configuration",
+        "THEBADDEST.Monetization.Core",
+        "THEBADDEST.UTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "MONETIZATION_TENJIN"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.tenjin.unity-sdk",
+            "expression": "",
+            "define": "MONETIZATION_TENJIN"
+        }
+    ],
+    "noEngineReferences": false
+}

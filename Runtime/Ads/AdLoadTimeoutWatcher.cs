@@ -3,7 +3,9 @@ using THEBADDEST.Tasks;
 
 namespace THEBADDEST.Advertisement
 {
-	internal static class AdLoadTimeoutWatcher
+
+
+	public static class AdLoadTimeoutWatcher
 	{
 		public static async UTask Watch(string adType, string unitId, System.Func<bool> isSettled)
 		{

@@ -16,18 +16,16 @@ namespace THEBADDEST.Analytics
 
 		protected override async UTask OnInitialize()
 		{
-			EventBus.Subscribe<AdShownEvent>(OnAdShown);
 			await UTask.CompletedTask;
 		}
 
 		protected override void OnModuleDestroy()
 		{
-			EventBus.Unsubscribe<AdShownEvent>(OnAdShown);
 		}
 
 		protected virtual void OnAdShown(AdShownEvent evt)
 		{
-			SendLog.LogModule(ModuleName, $"Ad shown: Type={evt.AdType}, Placement={evt.Placement}, Time={evt.Time}");
+			// Intentionally empty. Ad event routing is controlled by game-level orchestration.
 		}
 
 		public abstract void SendEvent(string name);

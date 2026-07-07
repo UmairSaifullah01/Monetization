@@ -25,5 +25,24 @@ namespace THEBADDEST.Analytics
 
 	}
 
+	public interface IGAAnalyticsModule : IAnalyticsModule
+	{
+	}
+
+	public interface IFirebaseAnalyticsModule : IAnalyticsModule
+	{
+	}
+
+	public interface IFacebookAnalyticsModule : IAnalyticsModule
+	{
+		void LogPurchase(float amount, string currency, Dictionary<string, object> parameters = null);
+	}
+
+	public interface ITenjinAnalyticsModule : IAnalyticsModule
+	{
+		void SendAdImpression(string adNetwork, double revenueUsd, string placement);
+		void SendPurchase(string productId, string currency, int quantity, double unitPrice);
+	}
+
 
 }

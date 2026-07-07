@@ -1,6 +1,7 @@
 {
   "AdKeys": {
     "AppId": "ca-app-pub-3940256099942544~3347511713",
+    "MaxSdkKey": "your-applovin-max-sdk-key",
     "BannerTop": "ca-app-pub-1234567890/banner_top",
     "BannerBottom": "ca-app-pub-1234567890/banner_bottom",
     "Rewarded": "ca-app-pub-1234567890/rewarded_video",
@@ -21,6 +22,14 @@
   "GameAnalyticsKeys": {
     "GameKey": "your-ga-game-key",
     "SecretKey": "your-ga-secret-key"
+  },
+  "FacebookKeys": {
+    "AppId": "your-facebook-app-id",
+    "ClientToken": "your-facebook-client-token"
+  },
+  "TenjinKeys": {
+    "AndroidApiKey": "your-tenjin-android-api-key",
+    "IosApiKey": "your-tenjin-ios-api-key"
   },
   "ProjectKeys": {
     "PackageName": "com.umgames.test",

@@ -10,6 +10,7 @@ namespace THEBADDEST.MonetizationApi
 		void Clear();
 		T Get<T>() where T : class, IModule;
 		bool TryGet<T>(out T module) where T : class, IModule;
+		IReadOnlyList<T> GetAll<T>() where T : class, IModule;
 		IReadOnlyList<IModule> All { get; }
 	}
 
@@ -61,6 +62,20 @@ namespace THEBADDEST.MonetizationApi
 		{
 			module = Get<T>();
 			return module != null;
+		}
+
+		public IReadOnlyList<T> GetAll<T>() where T : class, IModule
+		{
+			var matches = new List<T>();
+			for (int i = 0; i < _all.Count; i++)
+			{
+				if (_all[i] is T typedModule)
+				{
+					matches.Add(typedModule);
+				}
+			}
+
+			return matches;
 		}
 	}
 }

@@ -5,7 +5,7 @@ using THEBADDEST.Tasks;
 
 namespace THEBADDEST.Analytics
 {
-	public class FAAnalyticsModule : AnalyticsModule
+	public class FAAnalyticsModule : AnalyticsModule, IFirebaseAnalyticsModule
 	{
 		private FirebaseAnalyticsService _service;
 		private bool _firebaseReady;
@@ -27,12 +27,6 @@ namespace THEBADDEST.Analytics
 				RaiseSdkInitialized(success);
 			});
 			await _service.InitializeAsync();
-		}
-
-		protected override void OnAdShown(AdShownEvent evt)
-		{
-			if (!_firebaseReady) return;
-			SendAdEvent(evt.AdType, evt.Placement, true);
 		}
 
 		public override void SendEvent(string name)

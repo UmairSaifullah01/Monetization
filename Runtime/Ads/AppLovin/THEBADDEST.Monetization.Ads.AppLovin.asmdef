@@ -1,0 +1,28 @@
+{
+  "name": "THEBADDEST.Monetization.Ads.AppLovin",
+  "rootNamespace": "THEBADDEST.Advertisement",
+  "references": [
+    "THEBADDEST.Monetization.Ads.Abstractions",
+    "THEBADDEST.Monetization.Configuration",
+    "THEBADDEST.Monetization.Core",
+    "THEBADDEST.UTask",
+    "MaxSdk"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [
+    "MONETIZATION_APPLOVIN"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.applovin.mediation.ads",
+      "expression": "",
+      "define": "MONETIZATION_APPLOVIN"
+    }
+  ],
+  "noEngineReferences": false
+}

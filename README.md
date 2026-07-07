@@ -35,9 +35,12 @@ Monetization (Static Entry Point)
 | `THEBADDEST.Monetization.Configuration` | `JsonDataUtility/` | None |
 | `THEBADDEST.Monetization.Ads.Abstractions` | `Runtime/Ads/` | None |
 | `THEBADDEST.Monetization.Ads.Google` | `Runtime/Ads/Google/` | AdMob |
+| `THEBADDEST.Monetization.Ads.AppLovin` | `Runtime/Ads/AppLovin/` | AppLovin MAX |
 | `THEBADDEST.Monetization.IAP.Unity` | `Runtime/IAPModule/Unity/` | Unity Purchasing |
 | `THEBADDEST.Monetization.Analytics.GameAnalytics` | `Runtime/Analytics/GameAnalytics/` | GameAnalytics 7.10.6 |
 | `THEBADDEST.Monetization.Analytics.Firebase` | `Runtime/Analytics/Firebase/` | Firebase Analytics |
+| `THEBADDEST.Monetization.Analytics.Facebook` | `Runtime/Analytics/Facebook/` | Facebook Unity SDK |
+| `THEBADDEST.Monetization.Analytics.Tenjin` | `Runtime/Analytics/Tenjin/` | Tenjin SDK |
 | `THEBADDEST.Monetization.RemoteConfig.Firebase` | `Runtime/RemoteConfig/FireBaseRemoteConfig/` | Firebase Remote Config |
 | `THEBADDEST.Monetization.Database.Abstractions` | `Runtime/Database/` | None |
 | `THEBADDEST.Monetization.Database.Firebase` | `Runtime/Database/Firebase/` | Firebase Realtime Database |
@@ -51,6 +54,16 @@ Remove a provider assembly + UPM packages without breaking Core or Abstractions.
 ### 1. Setup Configuration
 
 Create a `MonetizationProfile` asset in your Resources folder and assign provider module assets (Ads, IAP, Analytics, Remote Config).
+
+If you use **AppLovin MAX**, also set the SDK key in `Resources/MonetizationKeys.json`:
+
+```json
+{
+  "AdKeys": {
+    "MaxSdkKey": "your-applovin-max-sdk-key"
+  }
+}
+```
 
 ### 2. Install (unified installer)
 
@@ -109,9 +122,11 @@ if (Monetization.TryGetModule<IIAPModule>(out var iap))
     iap.Purchase("product_id", OnSuccess, OnFail);
 }
 
-if (Monetization.TryGetModule<IAnalyticsModule>(out var analytics))
+Analytics.SendEvent("level_complete", AnalyticsProviders.GameAnalytics | AnalyticsProviders.Firebase);
+
+if (Monetization.TryGetModule<ITenjinAnalyticsModule>(out var tenjin))
 {
-    analytics.SendEvent("level_complete");
+    tenjin.SendAdImpression("applovin", 0.015d, "interstitial_home");
 }
 
 if (Monetization.TryGetModule<IRemoteConfig<object>>(out var remoteConfig))
@@ -140,6 +155,40 @@ if (Monetization.TryGetModule<IAdsModule>(out var ads))
     ads.OnSdkReady += success => Debug.Log($"AdMob ready: {success}");
 }
 ```
+
+## Multi-Provider Analytics Routing
+
+Use provider markers or the `Analytics` facade when different game flows should target different analytics SDKs.
+
+```csharp
+// Generic event to selected providers.
+Analytics.SendEvent("level_complete", AnalyticsProviders.GameAnalytics | AnalyticsProviders.Firebase);
+
+// Facebook-only purchase.
+if (Monetization.TryGetModule<IFacebookAnalyticsModule>(out var facebook))
+{
+    facebook.LogPurchase(4.99f, "USD");
+}
+
+// Tenjin-only ad impression.
+if (Monetization.TryGetModule<ITenjinAnalyticsModule>(out var tenjin))
+{
+    tenjin.SendAdImpression("applovin", 0.024d, "rewarded_level_end");
+}
+```
+
+For orchestration scripts (ad events, IAP forwarding, campaign callbacks), use:
+
+- `Monetization.GetModules<IAnalyticsModule>()` to iterate available analytics modules.
+- Marker interfaces (`IGAAnalyticsModule`, `IFirebaseAnalyticsModule`, `IFacebookAnalyticsModule`, `ITenjinAnalyticsModule`) for provider-specific behavior.
+
+Automatic ad-event routing was removed from base analytics modules so game code controls exactly where events are sent.
+
+## Provider Notes
+
+- `analytics_tenjin` installs via UPM Git URL: `https://github.com/tenjin/tenjin-unity-sdk.git#1.16.5`.
+- `analytics_facebook` is wired in installer/profile, but Meta's official Unity SDK is typically imported manually (`FacebookSDK.unitypackage`) unless you vendor your own tgz.
+- After these changes, re-export `Installer/MonetizationScripts.unitypackage` from Unity so bootstrap installers include the new modules.
 
 ## Swapping Providers
 
