@@ -20,7 +20,7 @@ namespace THEBADDEST.MonetizationEditor
 
 		public static void SyncFromJson()
 		{
-			JsonDataUtility.LoadData();
+			JsonDataUtility.Reload();
 
 			string packageName = JsonDataUtility.GetData(PROJECT_KEYS_CATEGORY, PACKAGE_NAME_KEY) ?? "com.games.gamename";
 			string version = JsonDataUtility.GetData(PROJECT_KEYS_CATEGORY, VERSION_KEY) ?? "1.0";

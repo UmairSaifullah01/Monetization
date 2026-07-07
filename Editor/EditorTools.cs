@@ -118,19 +118,24 @@ namespace THEBADDEST.MonetizationEditor
 			return System.AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes()).FirstOrDefault(t => t.Name == className);
 		}
 
-		public static System.Collections.Generic.IEnumerable<Type> GetInheritedClasses(Type givenType)
+		public static IEnumerable<Type> GetInheritedClasses(Type givenType)
 		{
-			//if you want the abstract classes drop the !TheType.IsAbstract but it is probably to instance so its a good idea to keep it.
-			return Assembly.GetAssembly(givenType).GetTypes().Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(givenType));
+			return GetAllTypesDerivedFrom(givenType)
+				.Where(t => t.IsClass && !t.IsAbstract && givenType.IsAssignableFrom(t));
+		}
+
+		public static IEnumerable<Type> GetAllTypesDerivedFrom(Type baseType)
+		{
+#if UNITY_EDITOR && UNITY_2019_2_OR_NEWER
+			return TypeCache.GetTypesDerivedFrom(baseType);
+#else
+			return GetAllAssemblyTypes().Where(t => t.IsSubclassOf(baseType));
+#endif
 		}
 
 		public static IEnumerable<Type> GetAllTypesDerivedFrom<TT>()
 		{
-			#if UNITY_EDITOR && UNITY_2019_2_OR_NEWER
-			return UnityEditor.TypeCache.GetTypesDerivedFrom<TT>();
-			#else
-            return GetAllAssemblyTypes().Where(t => t.IsSubclassOf(typeof(TT)));
-			#endif
+			return GetAllTypesDerivedFrom(typeof(TT));
 		}
 
 		public static T CreateScriptableInstance<T>(Type type, Object parent = null, bool hide = false) where T : ScriptableObject
@@ -418,9 +423,12 @@ namespace THEBADDEST.MonetizationEditor
 		
 		public static void DrawAllFields(object target, SerializedObject serializedObject, bool includeBaseTypeFields = false)
 		{
-			if(serializedObject == null) return;
-			
-			serializedObject?.Update();
+			if (target == null || serializedObject == null || serializedObject.targetObject == null)
+			{
+				return;
+			}
+
+			serializedObject.Update();
             
             // Track shown field names to avoid duplicates
             var shownFields = new HashSet<string>();
@@ -468,8 +476,10 @@ namespace THEBADDEST.MonetizationEditor
                     EditorGUILayout.EndHorizontal();
                 }
             }
-			if(serializedObject != null)
-				serializedObject?.ApplyModifiedProperties();
+			if (serializedObject.targetObject != null)
+			{
+				serializedObject.ApplyModifiedProperties();
+			}
         }
 
 		public static void DrawAddRemoveButton(Action addEvent, Action removeEvent)

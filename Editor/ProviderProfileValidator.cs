@@ -38,14 +38,6 @@ namespace THEBADDEST.MonetizationEditor
 				return warnings;
 			}
 
-			string manifestPath = Path.Combine(Directory.GetCurrentDirectory(), "Packages", "manifest.json");
-			Dictionary<string, object> manifestDeps = null;
-			if (File.Exists(manifestPath))
-			{
-				var manifest = MiniJSON.Json.Deserialize(File.ReadAllText(manifestPath)) as Dictionary<string, object>;
-				manifestDeps = manifest?["dependencies"] as Dictionary<string, object>;
-			}
-
 			foreach (var module in profile.modules)
 			{
 				if (module == null)
@@ -80,18 +72,6 @@ namespace THEBADDEST.MonetizationEditor
 					if (!string.IsNullOrEmpty(asmdefName) && !AsmdefExists(asmdefName))
 					{
 						warnings.Add($"Module '{module.ModuleName}' ({provider.Key}) references missing assembly '{asmdefName}'. Install the provider or remove the module from the profile.");
-					}
-				}
-
-				if (manifestDeps != null && provider.Value.TryGetValue("packages", out var packagesObj) &&
-				    packagesObj is Dictionary<string, object> packages)
-				{
-					foreach (var packagePair in packages)
-					{
-						if (!manifestDeps.ContainsKey(packagePair.Key))
-						{
-							warnings.Add($"Module '{module.ModuleName}' requires UPM package '{packagePair.Key}' which is not in manifest.json.");
-						}
 					}
 				}
 			}

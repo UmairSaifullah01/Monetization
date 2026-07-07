@@ -22,10 +22,10 @@ namespace THEBADDEST.MonetizationEditor
 	{
 
 		readonly SerializedProperty collectionProperty;
-		readonly IEnumerable<Type> editorTypes;
 		readonly SerializedObject serializedObject;
 		readonly Object target;
 		readonly string title;
+		readonly Type moduleBaseType;
 		EditorData<T>[] editorDataContainer;
 		int oldLength = -1;
 		static bool hide = false;
@@ -37,7 +37,7 @@ namespace THEBADDEST.MonetizationEditor
 			this.serializedObject = serializedObject;
 			this.title = title;
 			collectionProperty = this.serializedObject.FindProperty(collectionPropertyName);
-			editorTypes = EditorTools.GetInheritedClasses(collectionParentType);
+			moduleBaseType = collectionParentType;
 		}
 
 		public void OnInspectorGUI()
@@ -55,19 +55,22 @@ namespace THEBADDEST.MonetizationEditor
 			InitSubEditors();
 			for (int i = 0; i < editorDataContainer.Length; i++)
 			{
-				if (editorDataContainer[i].reference != null)
+				var editorData = editorDataContainer[i];
+				if (editorData.reference == null || editorData.serializedObject?.targetObject == null)
 				{
-					EditorGUILayout.BeginVertical(GUI.skin.box);
-					int cache = i;
-					editorDataContainer[i].folded = EditorTools.DrawHeaderFoldoutLessWithButton(editorDataContainer[i].reference.GetType().Name, editorDataContainer[i].folded, EditorGUIUtility.IconContent("Toolbar Minus"), () => RemoveType(cache));
-					if (editorDataContainer[i].folded)
-					{
-						EditorTools.DrawScript(editorDataContainer[i].reference);
-						EditorTools.DrawAllFields(editorDataContainer[i].reference, editorDataContainer[i].serializedObject, false);
-					}
-
-					EditorGUILayout.EndVertical();
+					continue;
 				}
+
+				EditorGUILayout.BeginVertical(GUI.skin.box);
+				int cache = i;
+				editorData.folded = EditorTools.DrawHeaderFoldoutLessWithButton(editorData.reference.GetType().Name, editorData.folded, EditorGUIUtility.IconContent("Toolbar Minus"), () => RemoveType(cache));
+				if (editorData.folded)
+				{
+					EditorTools.DrawScript(editorData.reference);
+					EditorTools.DrawAllFields(editorData.reference, editorData.serializedObject, false);
+				}
+
+				EditorGUILayout.EndVertical();
 			}
 
 			EditorTools.DrawAddRemoveButton(DrawAddMenu, DrawRemoveMenu);
@@ -89,14 +92,21 @@ namespace THEBADDEST.MonetizationEditor
 		void DrawAddMenu()
 		{
 			var menu = new GenericMenu();
-			var typeMap = editorTypes;
-			foreach (var kvp in typeMap)
+			int addableCount = 0;
+			foreach (var type in EditorTools.GetInheritedClasses(moduleBaseType))
 			{
-				var type = kvp;
-				var title = new GUIContent(type.Name);
-				bool exists = TypeExistInCollection(type);
-				if (!exists)
-					menu.AddItem(title, false, () => AddType(type));
+				if (TypeExistInCollection(type))
+				{
+					continue;
+				}
+
+				menu.AddItem(new GUIContent(type.Name), false, () => AddType(type));
+				addableCount++;
+			}
+
+			if (addableCount == 0)
+			{
+				menu.AddDisabledItem(new GUIContent("No module types found — install a provider assembly first"));
 			}
 
 			menu.ShowAsContext();
@@ -108,6 +118,11 @@ namespace THEBADDEST.MonetizationEditor
 			for (int i = 0; i < collectionProperty.arraySize; i++)
 			{
 				SerializedProperty arrayElementAtIndex = collectionProperty.GetArrayElementAtIndex(i);
+				if (arrayElementAtIndex.objectReferenceValue == null)
+				{
+					continue;
+				}
+
 				Type type = arrayElementAtIndex.objectReferenceValue.GetType();
 				var title = new GUIContent(type.Name);
 				int cachedI = i;
@@ -122,7 +137,8 @@ namespace THEBADDEST.MonetizationEditor
 			for (int i = 0; i < collectionProperty.arraySize; i++)
 			{
 				SerializedProperty arrayElementAtIndex = collectionProperty.GetArrayElementAtIndex(i);
-				if (arrayElementAtIndex.objectReferenceValue.GetType() == type)
+				if (arrayElementAtIndex.objectReferenceValue != null &&
+				    arrayElementAtIndex.objectReferenceValue.GetType() == type)
 				{
 					return true;
 				}
@@ -140,6 +156,7 @@ namespace THEBADDEST.MonetizationEditor
 			var serializedProp = collectionProperty.GetArrayElementAtIndex(collectionProperty.arraySize - 1);
 			serializedProp.objectReferenceValue = newItem;
 			serializedObject.ApplyModifiedProperties();
+			InvalidateSubEditors();
 			if (EditorUtility.IsPersistent(target))
 			{
 				EditorUtility.SetDirty(target);
@@ -150,28 +167,76 @@ namespace THEBADDEST.MonetizationEditor
 		void RemoveType(int id)
 		{
 			serializedObject.Update();
+			if (id < 0 || id >= collectionProperty.arraySize)
+			{
+				return;
+			}
+
 			var property = collectionProperty.GetArrayElementAtIndex(id);
 			var instance = property.objectReferenceValue;
 			property.objectReferenceValue = null;
-			collectionProperty.DeleteArrayElementAtIndex(id);
 			serializedObject.ApplyModifiedProperties();
-			Undo.DestroyObjectImmediate(instance);
+			collectionProperty.DeleteArrayElementAtIndex(id);
+			if (id < collectionProperty.arraySize && collectionProperty.GetArrayElementAtIndex(id).objectReferenceValue == null)
+			{
+				collectionProperty.DeleteArrayElementAtIndex(id);
+			}
+
+			serializedObject.ApplyModifiedProperties();
+			if (instance != null)
+			{
+				Undo.DestroyObjectImmediate(instance);
+			}
+
+			InvalidateSubEditors();
 			EditorUtility.SetDirty(target);
 			AssetDatabase.SaveAssets();
+			GUIUtility.ExitGUI();
+		}
+
+		void InvalidateSubEditors()
+		{
+			oldLength = -1;
+			editorDataContainer = null;
 		}
 
 		void InitSubEditors()
 		{
 			int count = collectionProperty.arraySize;
-			if (count != oldLength)
+			bool needsRebuild = count != oldLength || editorDataContainer == null || editorDataContainer.Length != count;
+
+			if (!needsRebuild)
 			{
-				oldLength = count;
-				editorDataContainer = new EditorData<T>[count];
 				for (int j = 0; j < count; j++)
 				{
-					SerializedProperty element = collectionProperty.GetArrayElementAtIndex(j);
-					editorDataContainer[j] = new EditorData<T>() { reference = element.objectReferenceValue as T, serializedObject = new SerializedObject(element.objectReferenceValue) };
+					var element = collectionProperty.GetArrayElementAtIndex(j);
+					var obj = element.objectReferenceValue as T;
+					if (editorDataContainer[j].reference != obj ||
+					    editorDataContainer[j].serializedObject == null ||
+					    editorDataContainer[j].serializedObject.targetObject == null)
+					{
+						needsRebuild = true;
+						break;
+					}
 				}
+			}
+
+			if (!needsRebuild)
+			{
+				return;
+			}
+
+			oldLength = count;
+			editorDataContainer = new EditorData<T>[count];
+			for (int j = 0; j < count; j++)
+			{
+				SerializedProperty element = collectionProperty.GetArrayElementAtIndex(j);
+				var obj = element.objectReferenceValue;
+				editorDataContainer[j] = new EditorData<T>()
+				{
+					reference = obj as T,
+					serializedObject = obj != null ? new SerializedObject(obj) : null
+				};
 			}
 		}
 

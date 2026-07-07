@@ -23,11 +23,11 @@
     "SecretKey": "your-ga-secret-key"
   },
   "ProjectKeys": {
-    "PackageName": "com.games.abcd",
+    "PackageName": "com.umgames.test",
     "Version": "1.0",
     "BundleVersionCode": "1",
-    "MinApiLevel": "22",
-    "TargetApiLevel": "35",
+    "MinApiLevel": "26",
+    "TargetApiLevel": "36",
     "UseKeyStore": "true",
     "KeyStorePath": "Assets/Keystore/user.keystore",
     "KeyAliasName": "user",
