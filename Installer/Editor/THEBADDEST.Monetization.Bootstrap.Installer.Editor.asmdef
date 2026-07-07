@@ -1,11 +1,7 @@
 {
-  "name": "THEBADDEST.Monetization.Installer.Editor",
+  "name": "THEBADDEST.Monetization.Bootstrap.Installer.Editor",
   "rootNamespace": "Installer",
-  "references": [
-    "THEBADDEST.Monetization.Configuration",
-    "THEBADDEST.Monetization.Core",
-    "THEBADDEST.Monetization.Editor"
-  ],
+  "references": [],
   "includePlatforms": [
     "Editor"
   ],

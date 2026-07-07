@@ -45,9 +45,21 @@ Remove a provider assembly + UPM packages without breaking Core or Abstractions.
 
 Create a `MonetizationProfile` asset in your Resources folder and assign provider module assets (Ads, IAP, Analytics, Remote Config).
 
-### 2. Install Dependencies
+### 2. Install (unified installer)
 
-Open `Tools → Monetization → Installer`. Select optional SDK providers (AdMob, GameAnalytics, Unity IAP, Firebase Remote Config) and click **Install**.
+**Bootstrap (empty project):** Copy `Assets/Monetization/Installer/` + `Assets/Monetization/Logo/`, then open `Tools → Monetization → Installer` and click **Install Monetization**.
+
+The installer:
+
+1. Imports `MonetizationScripts.unitypackage`
+2. Reads `Installer/installer_config.json` and installs **core** UPM packages + registries (UTask)
+3. Opens the **Package Manager** panel in the same window after compilation
+
+**Package Manager (same menu after install):** Install or uninstall SDK providers from `installer_config.json`. Local Firebase archives are copied from `Installer/Dependencies/*.tgz` per config.
+
+Provider assemblies compile only when their UPM package is present (`versionDefines` + `defineConstraints`). See [`Installer/EXPORT.md`](Installer/EXPORT.md) for unitypackage export rules.
+
+**Maintainers only:** Dev utilities (e.g. generate `installer_config.json` from manifest) live in [`Dev/`](Dev/) and are excluded from bootstrap and unitypackage exports. Menu: `Tools → Monetization Dev`.
 
 ### 3. Initialize the System
 

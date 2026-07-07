@@ -14,7 +14,15 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
+    "defineConstraints": [
+        "MONETIZATION_GAMEANALYTICS"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.gameanalytics.sdk",
+            "expression": "",
+            "define": "MONETIZATION_GAMEANALYTICS"
+        }
+    ],
     "noEngineReferences": false
 }

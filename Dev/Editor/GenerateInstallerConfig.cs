@@ -1,14 +1,21 @@
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace Installer
+namespace THEBADDEST.MonetizationDev
 {
-    public class GenerateInstallerConfig
+    /// <summary>
+    /// Maintainer-only utility. Not shipped in bootstrap or MonetizationScripts.unitypackage.
+    /// </summary>
+    public static class GenerateInstallerConfig
     {
-        [MenuItem("Tools/Monetization/Generate Installer Config From Manifest")]
+        private const string FirebaseProviderKey = "remoteconfig_firebase";
+        private static readonly Regex TgzVersionSuffix = new Regex(@"-\d+\.\d+(\.\d+)?(\.\d+)?$", RegexOptions.Compiled);
+
+        [MenuItem("Tools/Monetization Dev/Generate Installer Config From Manifest")]
         public static void GenerateInstallerConfigFile()
         {
             string manifestPath = Path.Combine(Directory.GetCurrentDirectory(), "Packages", "manifest.json");
@@ -42,6 +49,7 @@ namespace Installer
 
             var tgzToPackageId = BuildTgzMapping(dependencies, tgzFolder);
             UpdateProviderTgzPackages(config, tgzToPackageId);
+            SeedFirebaseTgzFromDependencies(config, tgzFolder);
 
             string json = MiniJSON.Json.Serialize(config);
             File.WriteAllText(configPath, json);
@@ -52,7 +60,7 @@ namespace Installer
         private static Dictionary<string, string> BuildTgzMapping(Dictionary<string, object> dependencies, string tgzFolder)
         {
             var tgzToPackageId = new Dictionary<string, string>();
-            if (!Directory.Exists(tgzFolder) || dependencies == null)
+            if (!Directory.Exists(tgzFolder))
             {
                 return tgzToPackageId;
             }
@@ -60,14 +68,29 @@ namespace Installer
             foreach (var file in Directory.GetFiles(tgzFolder, "*.tgz"))
             {
                 string fileName = Path.GetFileName(file);
-                string fileValue = $"file:../ExternalPackages/{fileName}";
-                foreach (var kvp in dependencies)
+                if (tgzToPackageId.ContainsKey(fileName))
                 {
-                    if (kvp.Value.ToString() == fileValue)
+                    continue;
+                }
+
+                string fileValue = $"file:../ExternalPackages/{fileName}";
+                bool mappedFromManifest = false;
+                if (dependencies != null)
+                {
+                    foreach (var kvp in dependencies)
                     {
-                        tgzToPackageId[fileName] = kvp.Key;
-                        break;
+                        if (kvp.Value.ToString() == fileValue)
+                        {
+                            tgzToPackageId[fileName] = kvp.Key;
+                            mappedFromManifest = true;
+                            break;
+                        }
                     }
+                }
+
+                if (!mappedFromManifest && TryParsePackageIdFromTgzFileName(fileName, out string packageId))
+                {
+                    tgzToPackageId[fileName] = packageId;
                 }
             }
 
@@ -107,6 +130,68 @@ namespace Installer
                     }
                 }
             }
+        }
+
+        private static void SeedFirebaseTgzFromDependencies(Dictionary<string, object> config, string tgzFolder)
+        {
+            if (!Directory.Exists(tgzFolder) || !(config["providers"] is Dictionary<string, object> providers))
+            {
+                return;
+            }
+
+            if (!providers.TryGetValue(FirebaseProviderKey, out var providerObj) ||
+                !(providerObj is Dictionary<string, object> providerDict))
+            {
+                return;
+            }
+
+            if (!(providerDict["tgzPackages"] is Dictionary<string, string> providerTgz))
+            {
+                providerTgz = new Dictionary<string, string>();
+                providerDict["tgzPackages"] = providerTgz;
+            }
+
+            foreach (var file in Directory.GetFiles(tgzFolder, "*.tgz"))
+            {
+                string fileName = Path.GetFileName(file);
+                if (!IsFirebaseRemoteConfigDependency(fileName))
+                {
+                    continue;
+                }
+
+                if (!TryParsePackageIdFromTgzFileName(fileName, out string packageId))
+                {
+                    continue;
+                }
+
+                providerTgz[fileName] = packageId;
+            }
+        }
+
+        private static bool IsFirebaseRemoteConfigDependency(string fileName)
+        {
+            return fileName.StartsWith("com.google.external-dependency-manager") ||
+                   fileName.StartsWith("com.google.firebase.app-") ||
+                   fileName.StartsWith("com.google.firebase.remote-config-");
+        }
+
+        private static bool TryParsePackageIdFromTgzFileName(string fileName, out string packageId)
+        {
+            packageId = null;
+            string baseName = Path.GetFileNameWithoutExtension(fileName);
+            if (string.IsNullOrEmpty(baseName))
+            {
+                return false;
+            }
+
+            var match = TgzVersionSuffix.Match(baseName);
+            if (!match.Success)
+            {
+                return false;
+            }
+
+            packageId = baseName.Substring(0, match.Index);
+            return !string.IsNullOrEmpty(packageId);
         }
     }
 }

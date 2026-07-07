@@ -14,7 +14,15 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
+    "defineConstraints": [
+        "MONETIZATION_FIREBASE_RC"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.google.firebase.remote-config",
+            "expression": "",
+            "define": "MONETIZATION_FIREBASE_RC"
+        }
+    ],
     "noEngineReferences": false
 }

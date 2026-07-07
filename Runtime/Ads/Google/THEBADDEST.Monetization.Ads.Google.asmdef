@@ -5,7 +5,8 @@
         "THEBADDEST.Monetization.Ads.Abstractions",
         "THEBADDEST.Monetization.Configuration",
         "THEBADDEST.Monetization.Core",
-        "THEBADDEST.UTask"
+        "THEBADDEST.UTask",
+        "GoogleMobileAds"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -13,7 +14,15 @@
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,
-    "defineConstraints": [],
-    "versionDefines": [],
+    "defineConstraints": [
+        "MONETIZATION_ADMOB"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.google.ads.mobile",
+            "expression": "",
+            "define": "MONETIZATION_ADMOB"
+        }
+    ],
     "noEngineReferences": false
 }
