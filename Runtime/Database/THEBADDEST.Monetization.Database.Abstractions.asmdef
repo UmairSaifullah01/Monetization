@@ -1,0 +1,17 @@
+{
+    "name": "THEBADDEST.Monetization.Database.Abstractions",
+    "rootNamespace": "THEBADDEST.Database",
+    "references": [
+        "THEBADDEST.Monetization.Core",
+        "THEBADDEST.UTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,28 @@
+{
+    "name": "THEBADDEST.Monetization.Database.Firebase",
+    "rootNamespace": "THEBADDEST.Database",
+    "references": [
+        "THEBADDEST.Monetization.Database.Abstractions",
+        "THEBADDEST.Monetization.Core",
+        "THEBADDEST.UTask",
+        "Firebase.App",
+        "Firebase.Database"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "MONETIZATION_FIREBASE_DB"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.google.firebase.database",
+            "expression": "",
+            "define": "MONETIZATION_FIREBASE_DB"
+        }
+    ],
+    "noEngineReferences": false
+}

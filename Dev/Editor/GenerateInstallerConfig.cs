@@ -12,8 +12,16 @@ namespace THEBADDEST.MonetizationDev
     /// </summary>
     public static class GenerateInstallerConfig
     {
-        private const string FirebaseProviderKey = "remoteconfig_firebase";
         private static readonly Regex TgzVersionSuffix = new Regex(@"-\d+\.\d+(\.\d+)?(\.\d+)?$", RegexOptions.Compiled);
+
+        private static readonly Dictionary<string, System.Func<string, bool>> FirebaseProviderFilters =
+            new Dictionary<string, System.Func<string, bool>>
+            {
+                { "remoteconfig_firebase", IsFirebaseRemoteConfigDependency },
+                { "analytics_firebase", IsFirebaseAnalyticsDependency },
+                { "database_firebase", IsFirebaseDatabaseDependency },
+                { "storage_firebase", IsFirebaseStorageDependency }
+            };
 
         [MenuItem("Tools/Monetization Dev/Generate Installer Config From Manifest")]
         public static void GenerateInstallerConfigFile()
@@ -139,40 +147,66 @@ namespace THEBADDEST.MonetizationDev
                 return;
             }
 
-            if (!providers.TryGetValue(FirebaseProviderKey, out var providerObj) ||
-                !(providerObj is Dictionary<string, object> providerDict))
+            foreach (var providerFilter in FirebaseProviderFilters)
             {
-                return;
-            }
-
-            if (!(providerDict["tgzPackages"] is Dictionary<string, string> providerTgz))
-            {
-                providerTgz = new Dictionary<string, string>();
-                providerDict["tgzPackages"] = providerTgz;
-            }
-
-            foreach (var file in Directory.GetFiles(tgzFolder, "*.tgz"))
-            {
-                string fileName = Path.GetFileName(file);
-                if (!IsFirebaseRemoteConfigDependency(fileName))
+                if (!providers.TryGetValue(providerFilter.Key, out var providerObj) ||
+                    !(providerObj is Dictionary<string, object> providerDict))
                 {
                     continue;
                 }
 
-                if (!TryParsePackageIdFromTgzFileName(fileName, out string packageId))
+                if (!(providerDict["tgzPackages"] is Dictionary<string, string> providerTgz))
                 {
-                    continue;
+                    providerTgz = new Dictionary<string, string>();
+                    providerDict["tgzPackages"] = providerTgz;
                 }
 
-                providerTgz[fileName] = packageId;
+                foreach (var file in Directory.GetFiles(tgzFolder, "*.tgz"))
+                {
+                    string fileName = Path.GetFileName(file);
+                    if (!providerFilter.Value(fileName))
+                    {
+                        continue;
+                    }
+
+                    if (!TryParsePackageIdFromTgzFileName(fileName, out string packageId))
+                    {
+                        continue;
+                    }
+
+                    providerTgz[fileName] = packageId;
+                }
             }
+        }
+
+        private static bool IsFirebaseBaseDependency(string fileName)
+        {
+            return fileName.StartsWith("com.google.external-dependency-manager") ||
+                   fileName.StartsWith("com.google.firebase.app-");
         }
 
         private static bool IsFirebaseRemoteConfigDependency(string fileName)
         {
-            return fileName.StartsWith("com.google.external-dependency-manager") ||
-                   fileName.StartsWith("com.google.firebase.app-") ||
+            return IsFirebaseBaseDependency(fileName) ||
                    fileName.StartsWith("com.google.firebase.remote-config-");
+        }
+
+        private static bool IsFirebaseAnalyticsDependency(string fileName)
+        {
+            return IsFirebaseBaseDependency(fileName) ||
+                   fileName.StartsWith("com.google.firebase.analytics-");
+        }
+
+        private static bool IsFirebaseDatabaseDependency(string fileName)
+        {
+            return IsFirebaseBaseDependency(fileName) ||
+                   fileName.StartsWith("com.google.firebase.database-");
+        }
+
+        private static bool IsFirebaseStorageDependency(string fileName)
+        {
+            return IsFirebaseBaseDependency(fileName) ||
+                   fileName.StartsWith("com.google.firebase.storage-");
         }
 
         private static bool TryParsePackageIdFromTgzFileName(string fileName, out string packageId)

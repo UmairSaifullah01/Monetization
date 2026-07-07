@@ -18,8 +18,10 @@ Monetization (Static Entry Point)
 ├── MonetizationProfile (Configuration)
 │   ├── IAdsModule provider (e.g. GoogleAdsModule)
 │   ├── IIAPModule provider (e.g. UnityIAPModule)
-│   ├── IAnalyticsModule provider (e.g. GAAnalyticsModule)
-│   └── IRemoteConfig provider (e.g. FirebaseRemoteConfig)
+│   ├── IAnalyticsModule provider (e.g. GAAnalyticsModule, FAAnalyticsModule)
+│   ├── IRemoteConfig provider (e.g. FirebaseRemoteConfig)
+│   ├── IDatabaseModule provider (e.g. FirebaseDatabaseModule)
+│   └── IStorageModule provider (e.g. FirebaseStorageModule)
 ├── MonetizationConfig (Settings)
 ├── ModuleRegistry (interface-keyed cache)
 └── PerformanceMonitor (Metrics)
@@ -34,8 +36,13 @@ Monetization (Static Entry Point)
 | `THEBADDEST.Monetization.Ads.Abstractions` | `Runtime/Ads/` | None |
 | `THEBADDEST.Monetization.Ads.Google` | `Runtime/Ads/Google/` | AdMob |
 | `THEBADDEST.Monetization.IAP.Unity` | `Runtime/IAPModule/Unity/` | Unity Purchasing |
-| `THEBADDEST.Monetization.Analytics.GameAnalytics` | `Runtime/Analytics/GameAnalytics/` | GameAnalytics |
-| `THEBADDEST.Monetization.RemoteConfig.Firebase` | `Runtime/RemoteConfig/FireBaseRemoteConfig/` | Firebase |
+| `THEBADDEST.Monetization.Analytics.GameAnalytics` | `Runtime/Analytics/GameAnalytics/` | GameAnalytics 7.10.6 |
+| `THEBADDEST.Monetization.Analytics.Firebase` | `Runtime/Analytics/Firebase/` | Firebase Analytics |
+| `THEBADDEST.Monetization.RemoteConfig.Firebase` | `Runtime/RemoteConfig/FireBaseRemoteConfig/` | Firebase Remote Config |
+| `THEBADDEST.Monetization.Database.Abstractions` | `Runtime/Database/` | None |
+| `THEBADDEST.Monetization.Database.Firebase` | `Runtime/Database/Firebase/` | Firebase Realtime Database |
+| `THEBADDEST.Monetization.Storage.Abstractions` | `Runtime/Storage/` | None |
+| `THEBADDEST.Monetization.Storage.Firebase` | `Runtime/Storage/Firebase/` | Firebase Cloud Storage |
 
 Remove a provider assembly + UPM packages without breaking Core or Abstractions.
 
@@ -110,6 +117,16 @@ if (Monetization.TryGetModule<IAnalyticsModule>(out var analytics))
 if (Monetization.TryGetModule<IRemoteConfig<object>>(out var remoteConfig))
 {
     remoteConfig.FetchConfig(config => Debug.Log("Config loaded"));
+}
+
+if (Monetization.TryGetModule<IDatabaseModule>(out var database))
+{
+    database.SetValue("players/1/score", 100, success => Debug.Log($"Saved: {success}"));
+}
+
+if (Monetization.TryGetModule<IStorageModule>(out var storage))
+{
+    storage.UploadBytes("avatars/user.png", imageBytes, success => Debug.Log($"Uploaded: {success}"));
 }
 ```
 

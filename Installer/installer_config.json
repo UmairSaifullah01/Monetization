@@ -25,11 +25,22 @@
     "analytics_gameanalytics": {
       "label": "GameAnalytics",
       "packages": {
-        "com.gameanalytics.sdk": "7.10.4"
+        "com.gameanalytics.sdk": "7.10.6"
       },
       "tgzPackages": {},
       "asmdef": "THEBADDEST.Monetization.Analytics.GameAnalytics",
       "moduleType": "THEBADDEST.Analytics.GAAnalyticsModule"
+    },
+    "analytics_firebase": {
+      "label": "Firebase Analytics",
+      "packages": {},
+      "tgzPackages": {
+        "com.google.external-dependency-manager-1.2.187.tgz": "com.google.external-dependency-manager",
+        "com.google.firebase.app-13.12.0.tgz": "com.google.firebase.app",
+        "com.google.firebase.analytics-13.12.0.tgz": "com.google.firebase.analytics"
+      },
+      "asmdef": "THEBADDEST.Monetization.Analytics.Firebase",
+      "moduleType": "THEBADDEST.Analytics.FAAnalyticsModule"
     },
     "iap_unity": {
       "label": "Unity IAP",
@@ -44,12 +55,34 @@
       "label": "Firebase Remote Config",
       "packages": {},
       "tgzPackages": {
-        "com.google.external-dependency-manager-1.2.183.tgz": "com.google.external-dependency-manager",
-        "com.google.firebase.app-12.5.0.tgz": "com.google.firebase.app",
-        "com.google.firebase.remote-config-12.5.0.tgz": "com.google.firebase.remote-config"
+        "com.google.external-dependency-manager-1.2.187.tgz": "com.google.external-dependency-manager",
+        "com.google.firebase.app-13.12.0.tgz": "com.google.firebase.app",
+        "com.google.firebase.remote-config-13.12.0.tgz": "com.google.firebase.remote-config"
       },
       "asmdef": "THEBADDEST.Monetization.RemoteConfig.Firebase",
       "moduleType": "THEBADDEST.RemoteConfigSystem.FirebaseRemoteConfig"
+    },
+    "database_firebase": {
+      "label": "Firebase Realtime Database",
+      "packages": {},
+      "tgzPackages": {
+        "com.google.external-dependency-manager-1.2.187.tgz": "com.google.external-dependency-manager",
+        "com.google.firebase.app-13.12.0.tgz": "com.google.firebase.app",
+        "com.google.firebase.database-13.12.0.tgz": "com.google.firebase.database"
+      },
+      "asmdef": "THEBADDEST.Monetization.Database.Firebase",
+      "moduleType": "THEBADDEST.Database.FirebaseDatabaseModule"
+    },
+    "storage_firebase": {
+      "label": "Firebase Cloud Storage",
+      "packages": {},
+      "tgzPackages": {
+        "com.google.external-dependency-manager-1.2.187.tgz": "com.google.external-dependency-manager",
+        "com.google.firebase.app-13.12.0.tgz": "com.google.firebase.app",
+        "com.google.firebase.storage-13.12.0.tgz": "com.google.firebase.storage"
+      },
+      "asmdef": "THEBADDEST.Monetization.Storage.Firebase",
+      "moduleType": "THEBADDEST.Storage.FirebaseStorageModule"
     }
   }
 }

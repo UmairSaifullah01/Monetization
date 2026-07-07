@@ -45,7 +45,9 @@ namespace THEBADDEST.MonetizationEditor
 				"THEBADDEST.Monetization.Ads.Abstractions",
 				"THEBADDEST.Monetization.IAP.Abstractions",
 				"THEBADDEST.Monetization.Analytics.Abstractions",
-				"THEBADDEST.Monetization.RemoteConfig.Abstractions"
+				"THEBADDEST.Monetization.RemoteConfig.Abstractions",
+				"THEBADDEST.Monetization.Database.Abstractions",
+				"THEBADDEST.Monetization.Storage.Abstractions"
 			};
 
 			sb.AppendLine("\nCore + Abstractions (must always compile):");

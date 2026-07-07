@@ -1,7 +1,7 @@
+using System;
 using System.Collections.Generic;
 using THEBADDEST.MonetizationApi;
 using THEBADDEST.Tasks;
-using System;
 
 
 namespace THEBADDEST.Analytics
@@ -10,6 +10,9 @@ namespace THEBADDEST.Analytics
 
 	public abstract class AnalyticsModule : MonetizationModule, IAnalyticsModule
 	{
+		public event Action<bool> OnSdkReady;
+
+		protected void RaiseSdkInitialized(bool success) => OnSdkReady?.Invoke(success);
 
 		protected override async UTask OnInitialize()
 		{

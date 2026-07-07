@@ -40,6 +40,14 @@ namespace THEBADDEST.MonetizationApi
         [Tooltip("Enable caching of remote config data.")]
         [SerializeField] private bool enableConfigCaching = true;
 
+        [Header("Database Settings")]
+        [Tooltip("Enable or disable database modules.")]
+        [SerializeField] private bool enableDatabase = true;
+
+        [Header("Storage Settings")]
+        [Tooltip("Enable or disable cloud storage modules.")]
+        [SerializeField] private bool enableStorage = true;
+
         public bool EnableDebugLogs => enableDebugLogs;
         public LogLevel LogLevel => logLevel;
         public bool EnablePerformanceLogging => enablePerformanceLogging;
@@ -59,6 +67,9 @@ namespace THEBADDEST.MonetizationApi
         public bool EnableRemoteConfig => enableRemoteConfig;
         public float ConfigFetchTimeout => configFetchTimeout;
         public bool EnableConfigCaching => enableConfigCaching;
+
+        public bool EnableDatabase => enableDatabase;
+        public bool EnableStorage => enableStorage;
 
         private static MonetizationConfig instance;
         public static MonetizationConfig Instance
@@ -106,6 +117,12 @@ namespace THEBADDEST.MonetizationApi
                 case "remoteconfig":
                     enableRemoteConfig = enabled;
                     break;
+                case "database":
+                    enableDatabase = enabled;
+                    break;
+                case "storage":
+                    enableStorage = enabled;
+                    break;
                 default:
                     SendLog.LogWarning($"Unknown module: {moduleName}");
                     break;
@@ -120,6 +137,8 @@ namespace THEBADDEST.MonetizationApi
                 "iap" => enableIAP,
                 "analytics" => enableAnalytics,
                 "remoteconfig" => enableRemoteConfig,
+                "database" => enableDatabase,
+                "storage" => enableStorage,
                 _ => false
             };
         }

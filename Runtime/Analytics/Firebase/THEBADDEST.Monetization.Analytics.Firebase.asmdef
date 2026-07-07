@@ -1,0 +1,29 @@
+{
+    "name": "THEBADDEST.Monetization.Analytics.Firebase",
+    "rootNamespace": "THEBADDEST.Analytics",
+    "references": [
+        "THEBADDEST.Monetization.Analytics.Abstractions",
+        "THEBADDEST.Monetization.Configuration",
+        "THEBADDEST.Monetization.Core",
+        "THEBADDEST.UTask",
+        "Firebase.App",
+        "Firebase.Analytics"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "MONETIZATION_FIREBASE_ANALYTICS"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.google.firebase.analytics",
+            "expression": "",
+            "define": "MONETIZATION_FIREBASE_ANALYTICS"
+        }
+    ],
+    "noEngineReferences": false
+}
