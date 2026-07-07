@@ -56,6 +56,7 @@ namespace THEBADDEST.MonetizationEditor
 		protected override void OnGUIUpdate()
 		{
 			DrawTitle();
+			ProviderProfileValidator.DrawWarnings(target as MonetizationProfile);
 			DrawCollections();
 			EditorGUILayout.Space(10);
 			EditorGUILayout.BeginHorizontal();
@@ -63,12 +64,47 @@ namespace THEBADDEST.MonetizationEditor
 			if (GUILayout.Button("Sync Project", GUILayout.Width(200), GUILayout.Height(40)))
 			{
 				serializedObject.ApplyModifiedProperties();
-				(serializedObject.targetObject as MonetizationProfile)?.FindModule<ProjectModule>()?.SyncProjectSettings();
+				ProjectSettingsSync.SyncFromJson();
+			}
+
+			if (GUILayout.Button("Sync IAP Catalog", GUILayout.Width(200), GUILayout.Height(40)))
+			{
+				serializedObject.ApplyModifiedProperties();
+				SyncIapCatalogFromJson();
 			}
 
 			EditorGUILayout.Space();
 			EditorGUILayout.EndHorizontal();
 			EditorUtility.SetDirty(target as MonetizationProfile);
+		}
+
+		private void SyncIapCatalogFromJson()
+		{
+			var profile = target as MonetizationProfile;
+			if (profile == null)
+			{
+				return;
+			}
+
+			int synced = 0;
+			foreach (var module in profile.modules)
+			{
+				if (module is IAPModule iapModule)
+				{
+					iapModule.ApplyCatalogFromJson();
+					synced++;
+					EditorUtility.SetDirty(module);
+				}
+			}
+
+			if (synced > 0)
+			{
+				Debug.Log($"Synced IAP catalog from MonetizationKeys.json for {synced} module(s).");
+			}
+			else
+			{
+				Debug.LogWarning("No IAPModule found in profile to sync.");
+			}
 		}
 
 	}

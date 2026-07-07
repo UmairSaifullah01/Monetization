@@ -1,0 +1,20 @@
+{
+    "name": "THEBADDEST.Monetization.RemoteConfig.Firebase",
+    "rootNamespace": "THEBADDEST.RemoteConfigSystem",
+    "references": [
+        "THEBADDEST.Monetization.RemoteConfig.Abstractions",
+        "THEBADDEST.Monetization.Core",
+        "THEBADDEST.UTask",
+        "Firebase.App",
+        "Firebase.RemoteConfig"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

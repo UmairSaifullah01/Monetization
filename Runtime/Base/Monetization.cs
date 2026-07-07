@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using THEBADDEST.Tasks;
 using UnityEngine;
 
@@ -20,6 +21,9 @@ namespace THEBADDEST.MonetizationApi
 		public static bool IsInitialized => isInitialized;
 		public static bool IsInitializing => isInitializing;
 
+		public static IReadOnlyList<string> FailedModules =>
+			profile != null ? profile.FailedModules : Array.Empty<string>();
+
 		public static T GetModule<T>() where T : class, IModule
 		{
 			if (!isInitialized)
@@ -35,6 +39,24 @@ namespace THEBADDEST.MonetizationApi
 			}
 
 			return profile.GetModule<T>();
+		}
+
+		public static bool TryGetModule<T>(out T module) where T : class, IModule
+		{
+			module = default;
+			if (!isInitialized)
+			{
+				SendLog.LogWarning("Monetization system not initialized. Call Initialize() first.");
+				return false;
+			}
+
+			if (profile == null)
+			{
+				SendLog.LogWarning("MonetizationProfile is null. Initialization may have failed.");
+				return false;
+			}
+
+			return profile.TryGetModule(out module);
 		}
 
 		public static async UTask Initialize(int retryAttempts = 0)
@@ -66,6 +88,13 @@ namespace THEBADDEST.MonetizationApi
 
 				profile = profileObject;
 				await profile.Initialize();
+
+				if (profile.FailedModules.Count > 0)
+				{
+					string summary = string.Join("; ", profile.FailedModules);
+					SendLog.LogBatch(new List<string> { $"Monetization module failures: {summary}" }, LogLevel.Warning);
+					OnError?.Invoke(summary);
+				}
 
 				isInitialized = true;
 				isInitializing = false;

@@ -16,9 +16,7 @@ MonoBehaviour:
   moduleName: GoogleAdsModule
   adKeysReference: ca-app-pub-3940256099942544~3347511713,ca-app-pub-1234567890/banner_top,ca-app-pub-1234567890/banner_bottom,ca-app-pub-1234567890/rewarded_video,ca-app-pub-1234567890/interstitial,ca-app-pub-1234567890/interstitial_video,ca-app-pub-1234567890/app_open
   bannerData:
-    m_UnitId: 
-    m_Type: 0
-    m_Position: 0
+    m_UnitIdKey: BannerTop
   testDeviceIds:
   - SIMULATOR
   - 96e23e80653bb28980d3f40beb58915c
@@ -35,7 +33,6 @@ MonoBehaviour:
   m_Name: MonetizationProfile
   m_EditorClassIdentifier: 
   modules:
-  - {fileID: 4231573040318023295}
   - {fileID: 3777136110397901725}
   - {fileID: -90354930909938287}
   - {fileID: 8165067903822880473}
@@ -55,21 +52,6 @@ MonoBehaviour:
   enabled: 1
   moduleName: GAAnalyticsModule
   analyticsKeysReference: your-ga-game-key,your-ga-secret-key
---- !u!114 &4231573040318023295
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ac9b29bb29675490ab7c8073dfb30a72, type: 3}
-  m_Name: ProjectModule
-  m_EditorClassIdentifier: 
-  enabled: 1
-  moduleName: ProjectModule
-  projectKeysReference: com.games.abcd,1.0,1,22,35,true,Assets/Keystore/user.keystore,user,123456,123456
 --- !u!114 &5045826046289508288
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -84,7 +66,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enabled: 1
   moduleName: FirebaseRemoteConfig
-  m_VariablesMapper: {fileID: 0}
+  m_VariablesMapper: {fileID: 11400000, guid: ab47966dd76c54d4d8ea93c12f5e314c, type: 2}
 --- !u!114 &8165067903822880473
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -100,4 +82,36 @@ MonoBehaviour:
   enabled: 1
   moduleName: UnityIAPModule
   catalog:
-    items: []
+    items:
+    - productId: remove_ads
+      price: 0.99
+      consumable: 0
+      alreadyPurchased: 0
+    - productId: gems_small_pack
+      price: 0.99
+      consumable: 1
+      alreadyPurchased: 0
+    - productId: gems_medium_pack
+      price: 0.99
+      consumable: 1
+      alreadyPurchased: 0
+    - productId: gems_large_pack
+      price: 0.99
+      consumable: 1
+      alreadyPurchased: 0
+    - productId: coins_small_pack
+      price: 0.99
+      consumable: 1
+      alreadyPurchased: 0
+    - productId: coins_large_pack
+      price: 0.99
+      consumable: 1
+      alreadyPurchased: 0
+    - productId: premium_subscription_monthly
+      price: 0.99
+      consumable: 0
+      alreadyPurchased: 0
+    - productId: pro_subscription_yearly
+      price: 0.99
+      consumable: 0
+      alreadyPurchased: 0

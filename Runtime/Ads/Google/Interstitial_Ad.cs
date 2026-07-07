@@ -20,6 +20,7 @@ namespace THEBADDEST.Advertisement
 		InterstitialAd        interstitialAd;
 		string                unitId;
 		string                adType;
+		bool                  _loadSettled;
 
 		public Interstitial_Ad(string unitId, string adType = AdMetricsTypes.Interstitial)
 		{
@@ -61,20 +62,23 @@ namespace THEBADDEST.Advertisement
 			else
 			{
 				PerformanceMonitor.Instance.RecordAdEvent(adType, AdEventType.ShowFailed, unitId);
-				SendLog.LogError("Interstitial ad is not ready yet.");
+				SendLog.LogModule(GoogleAdsLog.Module, "Interstitial ad is not ready yet.", LogLevel.Error);
 			}
 		}
 
 		public void Load()
 		{
+			_loadSettled = false;
 			PerformanceMonitor.Instance.RecordAdEvent(adType, AdEventType.LoadStarted, unitId);
+			AdLoadTimeoutWatcher.Watch(adType, unitId, () => _loadSettled);
 			var adRequest = new AdRequest();
 			InterstitialAd.Load(unitId, adRequest, (InterstitialAd ad, LoadAdError error) =>
 			{
+				_loadSettled = true;
 				if (error != null)
 				{
 					PerformanceMonitor.Instance.RecordAdEvent(adType, AdEventType.LoadFailed, unitId);
-					SendLog.LogError("Interstitial ad failed to load: " + error);
+					SendLog.LogModule(GoogleAdsLog.Module, "Interstitial ad failed to load: " + error, LogLevel.Error);
 					OnAdLoadFailed?.Invoke();
 					return;
 				}
@@ -82,7 +86,7 @@ namespace THEBADDEST.Advertisement
 				if (ad == null)
 				{
 					PerformanceMonitor.Instance.RecordAdEvent(adType, AdEventType.LoadFailed, unitId);
-					SendLog.LogError("Unexpected error: Interstitial load event fired with null ad and null error.");
+					SendLog.LogModule(GoogleAdsLog.Module, "Unexpected error: Interstitial load event fired with null ad and null error.", LogLevel.Error);
 					return;
 				}
 

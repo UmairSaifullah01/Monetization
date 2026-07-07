@@ -19,6 +19,7 @@ namespace THEBADDEST.Advertisement
 		object IAppAd.               ad => ad;
 		public AppOpenAd             appOpenAd;
 		string                       unitId;
+		bool                         _loadSettled;
 
 		public AppOpenAdGoogle(string unitId)
 		{
@@ -52,7 +53,7 @@ namespace THEBADDEST.Advertisement
 		{
 			if (appOpenAd != null)
 			{
-				SendLog.Log("Destroying app open ad instance.");
+				SendLog.LogModule(GoogleAdsLog.Module, "Destroying app open ad instance.");
 				appOpenAd.Destroy();
 				appOpenAd = null;
 			}
@@ -67,7 +68,7 @@ namespace THEBADDEST.Advertisement
 		{
 			if (appOpenAd != null && appOpenAd.CanShowAd())
 			{
-				SendLog.Log("Showing app open ad.");
+				SendLog.LogModule(GoogleAdsLog.Module, "Showing app open ad.");
 				appOpenAd.Show();
 				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.AppOpen, AdEventType.ShowSucceeded, unitId);
 				EventBus.Publish(new AdShownEvent
@@ -80,21 +81,24 @@ namespace THEBADDEST.Advertisement
 			else
 			{
 				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.AppOpen, AdEventType.ShowFailed, unitId);
-				SendLog.LogWarning("App open ad is not ready yet.");
+				SendLog.LogModule(GoogleAdsLog.Module, "App open ad is not ready yet.", LogLevel.Warning);
 			}
 		}
 
 		public void Load()
 		{
+			_loadSettled = false;
 			PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.AppOpen, AdEventType.LoadStarted, unitId);
+			AdLoadTimeoutWatcher.Watch(AdMetricsTypes.AppOpen, unitId, () => _loadSettled);
 			var adRequest = new AdRequest();
 
 			AppOpenAd.Load(unitId, adRequest, (AppOpenAd ad, LoadAdError error) =>
 			{
+				_loadSettled = true;
 				if (error != null)
 				{
 					PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.AppOpen, AdEventType.LoadFailed, unitId);
-					SendLog.LogError("App open ad failed to load: " + error);
+					SendLog.LogModule(GoogleAdsLog.Module, "App open ad failed to load: " + error, LogLevel.Error);
 					OnAdLoadFailed?.Invoke();
 					return;
 				}
@@ -102,13 +106,13 @@ namespace THEBADDEST.Advertisement
 				if (ad == null)
 				{
 					PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.AppOpen, AdEventType.LoadFailed, unitId);
-					Debug.Log("Unexpected error: App open ad load event fired with null ad and null error.");
+					SendLog.LogModule(GoogleAdsLog.Module, "Unexpected error: App open ad load event fired with null ad and null error.", LogLevel.Error);
 					return;
 				}
 
 				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.AppOpen, AdEventType.LoadSucceeded, unitId);
 				OnAdLoaded?.Invoke();
-				Debug.Log("App open ad loaded with response : " + ad.GetResponseInfo());
+				SendLog.LogModule(GoogleAdsLog.Module, "App open ad loaded with response : " + ad.GetResponseInfo());
 				appOpenAd          =  ad;
 				appOpenAd.OnAdPaid += info =>
 				{

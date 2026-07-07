@@ -21,6 +21,7 @@ MonoBehaviour:
   validateModulesOnStart: 1
   enableAds: 1
   enableTestMode: 1
+  adLoadTimeout: 30
   enableIAP: 1
   enableAnalytics: 1
   enableRemoteConfig: 1

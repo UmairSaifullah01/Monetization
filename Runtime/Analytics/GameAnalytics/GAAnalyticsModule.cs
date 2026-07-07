@@ -49,11 +49,11 @@ namespace THEBADDEST.Analytics
 			if (!string.IsNullOrEmpty(_cachedGameKey) && !string.IsNullOrEmpty(_cachedSecretKey))
 			{
 				GameAnalytics.SettingsGA.SetKeys(_cachedGameKey, _cachedSecretKey);
-				SendLog.Log("[GAAnalyticsModule] Game Analytics keys set successfully.");
+				SendLog.LogModule(ModuleName, "Game Analytics keys set successfully.");
 			}
 			else
 			{
-				SendLog.LogWarning("[GAAnalyticsModule] Game Analytics keys not found in JSON. Please configure keys in MonetizationKeys.json under GameAnalyticsKeys category.");
+				SendLog.LogModule(ModuleName, "Game Analytics keys not found in JSON. Configure keys in MonetizationKeys.json under GameAnalyticsKeys.", LogLevel.Warning);
 			}
 		}
 
@@ -64,7 +64,7 @@ namespace THEBADDEST.Analytics
 			var configAsset = MonetizationConfig.Instance;
 			if (!configAsset.EnableAnalytics)
 			{
-				SendLog.LogWarning("[Analytics] Analytics is disabled by MonetizationConfig.");
+				SendLog.LogModule(ModuleName, "Analytics is disabled by MonetizationConfig.", LogLevel.Warning);
 				return;
 			}
 
@@ -75,7 +75,7 @@ namespace THEBADDEST.Analytics
 
 			GameAnalytics.Initialize();
 			_gameAnalyticsReady = true;
-			SendLog.Log("[Analytics] Game Analytics initialized successfully.");
+			SendLog.LogModule(ModuleName, "Game Analytics initialized successfully.");
 		}
 
 		protected override void OnAdShown(AdShownEvent evt)
@@ -86,28 +86,28 @@ namespace THEBADDEST.Analytics
 
 		public override void SendEvent(string name)
 		{
-			var configAsset = THEBADDEST.MonetizationApi.MonetizationConfig.Instance;
+			var configAsset = MonetizationConfig.Instance;
 			if (!configAsset.EnableAnalytics)
 			{
-				SendLog.LogWarning("[Analytics] Analytics is disabled by MonetizationConfig. Event not sent.");
+				SendLog.LogModule(ModuleName, "Analytics is disabled by MonetizationConfig. Event not sent.", LogLevel.Warning);
 				return;
 			}
 
 			if (!_gameAnalyticsReady)
 			{
-				SendLog.LogWarning("[Analytics] Cannot send event: Game Analytics not initialized.");
+				SendLog.LogModule(ModuleName, "Cannot send event: Game Analytics not initialized.", LogLevel.Warning);
 				return;
 			}
 
 			GameAnalytics.NewDesignEvent(name);
-			SendLog.Log($"[Analytics] Event sent: {name}");
+			SendLog.LogModule(ModuleName, $"Event sent: {name}");
 		}
 
 		public override void SendEvent(string name, string value)
 		{
 			if (!_gameAnalyticsReady)
 			{
-				SendLog.LogWarning("[Analytics] Cannot send event: Game Analytics not initialized.");
+				SendLog.LogModule(ModuleName, "Cannot send event: Game Analytics not initialized.", LogLevel.Warning);
 				return;
 			}
 
@@ -115,11 +115,11 @@ namespace THEBADDEST.Analytics
 			if (float.TryParse(value, out customFields))
 			{
 				GameAnalytics.NewDesignEvent(name, customFields);
-				SendLog.Log($"[Analytics] Event sent: {name} with value: {customFields}");
+				SendLog.LogModule(ModuleName, $"Event sent: {name} with value: {customFields}");
 			}
 			else
 			{
-				SendLog.LogWarning($"[Analytics] Cannot convert value to float: {value}");
+				SendLog.LogModule(ModuleName, $"Cannot convert value to float: {value}", LogLevel.Warning);
 			}
 		}
 
@@ -127,68 +127,62 @@ namespace THEBADDEST.Analytics
 		{
 			if (!_gameAnalyticsReady)
 			{
-				SendLog.LogWarning("[Analytics] Cannot send progression event: Game Analytics not initialized.");
+				SendLog.LogModule(ModuleName, "Cannot send progression event: Game Analytics not initialized.", LogLevel.Warning);
 				return;
 			}
 
 			GAProgressionStatus gaStatus = ConvertToGAProgressionStatus(status);
 			GameAnalytics.NewProgressionEvent(gaStatus, eventName);
-			SendLog.Log($"[Analytics] Progression event sent: {status} - {eventName}");
+			SendLog.LogModule(ModuleName, $"Progression event sent: {status} - {eventName}");
 		}
 
 		public override void SendDesignEvent(string category, string subCategory, string outcome, float value)
 		{
 			if (!_gameAnalyticsReady)
 			{
-				SendLog.LogWarning("[Analytics] Cannot send design event: Game Analytics not initialized.");
+				SendLog.LogModule(ModuleName, "Cannot send design event: Game Analytics not initialized.", LogLevel.Warning);
 				return;
 			}
 
-			// Create a hierarchical event name
 			string eventName = $"{category}:{subCategory}:{outcome}";
 			GameAnalytics.NewDesignEvent(eventName, value);
-			SendLog.Log($"[Analytics] Design event sent: {eventName} with value: {value}");
+			SendLog.LogModule(ModuleName, $"Design event sent: {eventName} with value: {value}");
 		}
 
 		public override void SendDesignEvent(string category, string subCategory, string outcome)
 		{
 			if (!_gameAnalyticsReady)
 			{
-				SendLog.LogWarning("[Analytics] Cannot send design event: Game Analytics not initialized.");
+				SendLog.LogModule(ModuleName, "Cannot send design event: Game Analytics not initialized.", LogLevel.Warning);
 				return;
 			}
 
-			// Create a hierarchical event name
 			string eventName = $"{category}:{subCategory}:{outcome}";
 			GameAnalytics.NewDesignEvent(eventName);
-			SendLog.Log($"[Analytics] Design event sent: {eventName}");
+			SendLog.LogModule(ModuleName, $"Design event sent: {eventName}");
 		}
 
 		public override void SendTransaction(string productId, string currencyCode, int quantity, double unitPrice, string receipt, string signature)
 		{
 			if (!_gameAnalyticsReady)
 			{
-				SendLog.LogWarning("[Analytics] Cannot send transaction: Game Analytics not initialized.");
+				SendLog.LogModule(ModuleName, "Cannot send transaction: Game Analytics not initialized.", LogLevel.Warning);
 				return;
 			}
 
-			// Convert to float for Game Analytics
 			int amount = (int)(unitPrice * quantity);
-
-			// Send business event for transaction
 			GameAnalytics.NewBusinessEvent(currencyCode, amount, productId, quantity.ToString(), receipt, null);
-			SendLog.Log($"[Analytics] Transaction sent: {productId} - {amount} {currencyCode}");
+			SendLog.LogModule(ModuleName, $"Transaction sent: {productId} - {amount} {currencyCode}");
 		}
 
 		public override void SendEventLog(Dictionary<string, object> eventLog)
 		{
 			if (!_gameAnalyticsReady)
 			{
-				SendLog.LogWarning("[Analytics] Cannot send event log: Game Analytics not initialized.");
+				SendLog.LogModule(ModuleName, "Cannot send event log: Game Analytics not initialized.", LogLevel.Warning);
 				return;
 			}
 
-			// Convert dictionary to custom event
 			foreach (var kvp in eventLog)
 			{
 				string eventName = kvp.Key;
@@ -206,10 +200,9 @@ namespace THEBADDEST.Analytics
 				{
 					GameAnalytics.NewDesignEvent(eventName, (float)doubleValue);
 				}
-				// Note: GameAnalytics doesn't support string values directly in NewDesignEvent
 			}
 
-			SendLog.Log($"[Analytics] Event log sent with {eventLog.Count} events");
+			SendLog.LogModule(ModuleName, $"Event log sent with {eventLog.Count} events");
 		}
 
 		private GAProgressionStatus ConvertToGAProgressionStatus(ProgressionStatus status)
@@ -262,12 +255,12 @@ namespace THEBADDEST.Analytics
 		{
 			if (!_gameAnalyticsReady)
 			{
-				SendLog.LogWarning("[Analytics] Cannot set user property: Game Analytics not initialized.");
+				SendLog.LogModule(ModuleName, "Cannot set user property: Game Analytics not initialized.", LogLevel.Warning);
 				return;
 			}
 
 			GameAnalytics.SetCustomDimension01(propertyName);
-			SendLog.Log($"[Analytics] User property set: {propertyName} = {propertyValue}");
+			SendLog.LogModule(ModuleName, $"User property set: {propertyName} = {propertyValue}");
 		}
 
 	}

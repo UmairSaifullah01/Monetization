@@ -11,26 +11,31 @@ namespace THEBADDEST.Advertisement
 
 		public static void ShowBanner(this IAdsModule module, string placement = "default")
 		{
+			if (module == null) { SendLog.LogWarning("Ads module not available."); return; }
 			module.FetchBanner(placement).Show();
 		}
 
 		public static void HideBanner(this IAdsModule module, string placement = "default")
 		{
+			if (module == null) { SendLog.LogWarning("Ads module not available."); return; }
 			module.FetchBanner(placement).Hide();
 		}
 
 		public static void ShowInterstitial(this IAdsModule module, string placement = "default")
 		{
+			if (module == null) { SendLog.LogWarning("Ads module not available."); return; }
 			module.FetchInterstitial(placement).Show();
 		}
 
 		public static void LoadInterstitial(this IAdsModule module, string placement = "default")
 		{
+			if (module == null) { SendLog.LogWarning("Ads module not available."); return; }
 			module.FetchInterstitial(placement).Load();
 		}
 
 		public static void ShowRewarded(this IAdsModule module, string placement = "default", Action<object> onRewarded = null, Action onFailed = null)
 		{
+			if (module == null) { SendLog.LogWarning("Ads module not available."); onFailed?.Invoke(); return; }
 			IAppRewardAd appRewardAd = module.FetchRewarded(placement);
 			appRewardAd.OnAdLoadFailed+= OnAdLoadFailed;
 			void OnAdLoadFailed()
@@ -48,6 +53,7 @@ namespace THEBADDEST.Advertisement
 		
 		public static void LoadRewarded(this IAdsModule module, string placement = "default")
 		{
+			if (module == null) { SendLog.LogWarning("Ads module not available."); return; }
 			module.FetchRewarded(placement).Load();
 		}
 
@@ -56,6 +62,9 @@ namespace THEBADDEST.Advertisement
 	public interface IAdsModule : IModule
 	{
 
+		event Action<bool> OnSdkReady;
+
+		[Obsolete("Use OnSdkReady. Will be removed in a future version.")]
 		event Action<bool> onInitialize;
 
 		IAppAd FetchBanner(string placement = "default");

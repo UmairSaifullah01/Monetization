@@ -1,0 +1,17 @@
+{
+  "name": "THEBADDEST.Monetization.IAP.Abstractions",
+  "rootNamespace": "THEBADDEST.MonetizationApi",
+  "references": [
+    "THEBADDEST.Monetization.Core",
+    "THEBADDEST.Monetization.Configuration"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

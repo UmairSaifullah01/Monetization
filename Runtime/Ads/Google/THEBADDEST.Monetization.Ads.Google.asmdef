@@ -1,0 +1,19 @@
+{
+    "name": "THEBADDEST.Monetization.Ads.Google",
+    "rootNamespace": "THEBADDEST.Advertisement",
+    "references": [
+        "THEBADDEST.Monetization.Ads.Abstractions",
+        "THEBADDEST.Monetization.Configuration",
+        "THEBADDEST.Monetization.Core",
+        "THEBADDEST.UTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -1,0 +1,20 @@
+{
+    "name": "THEBADDEST.Monetization.Analytics.GameAnalytics",
+    "rootNamespace": "THEBADDEST.Analytics",
+    "references": [
+        "THEBADDEST.Monetization.Analytics.Abstractions",
+        "THEBADDEST.Monetization.Configuration",
+        "THEBADDEST.Monetization.Core",
+        "THEBADDEST.UTask",
+        "GameAnalyticsSDK"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

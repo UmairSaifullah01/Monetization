@@ -1,0 +1,23 @@
+{
+    "name": "THEBADDEST.Monetization.Editor",
+    "rootNamespace": "THEBADDEST.MonetizationEditor",
+    "references": [
+        "THEBADDEST.Monetization.Core",
+        "THEBADDEST.Monetization.Configuration",
+        "THEBADDEST.Monetization.Ads.Abstractions",
+        "THEBADDEST.Monetization.Analytics.Abstractions",
+        "THEBADDEST.Monetization.RemoteConfig.Abstractions",
+        "THEBADDEST.Monetization.IAP.Abstractions"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

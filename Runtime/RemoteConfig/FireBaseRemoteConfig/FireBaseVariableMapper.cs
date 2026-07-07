@@ -50,7 +50,7 @@ namespace THEBADDEST.RemoteConfigSystem
 					throw new ArgumentOutOfRangeException();
 			}
 		
-				SendLog.Log($"[Remote Config Var] Name: {remoteVariable.type} | Type: {remoteVariable.type} | Value: {remoteVariableValue}");
+				SendLog.LogModule("FirebaseRemoteConfig", $"Name: {remoteVariable.type} | Type: {remoteVariable.type} | Value: {remoteVariableValue}");
 			
 		}
 

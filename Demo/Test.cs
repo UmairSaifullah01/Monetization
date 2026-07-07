@@ -1,17 +1,12 @@
 using System;
-using System.Collections;
 using THEBADDEST.Advertisement;
 using UnityEngine;
 using THEBADDEST.MonetizationApi;
 
-
 namespace THEBADDEST.RemoteConfigSystem.Demo
 {
-
-
 	public class Test : MonoBehaviour
 	{
-
 		void Awake()
 		{
 			Init();
@@ -26,24 +21,26 @@ namespace THEBADDEST.RemoteConfigSystem.Demo
 		void OnInitialize(bool init)
 		{
 			SendLog.Log($"Initialized {init}");
-			Monetization.GetModule<IAdsModule>().LoadInterstitial();
+			if (Monetization.TryGetModule<IAdsModule>(out var ads))
+			{
+				ads.LoadInterstitial();
+			}
 		}
 
 		public void ShowInterstitial()
 		{
-			Monetization.GetModule<IAdsModule>().ShowInterstitial();
+			if (Monetization.TryGetModule<IAdsModule>(out var ads))
+			{
+				ads.ShowInterstitial();
+			}
 		}
+
 		public void Fetch()
 		{
-			// remoteConfig.Reference.FetchConfig(OnFetchConfig);
 		}
 
 		void OnFetchConfig(object config)
 		{
-			// Debug.Log($"FetchConfig {config}");
 		}
-
 	}
-
-
 }

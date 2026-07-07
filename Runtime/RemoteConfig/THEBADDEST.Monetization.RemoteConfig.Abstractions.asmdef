@@ -1,0 +1,16 @@
+{
+  "name": "THEBADDEST.Monetization.RemoteConfig.Abstractions",
+  "rootNamespace": "THEBADDEST.RemoteConfigSystem",
+  "references": [
+    "THEBADDEST.Monetization.Core"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

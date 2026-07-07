@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,9 +19,11 @@ namespace THEBADDEST.MonetizationApi
 		public List<MonetizationModule> modules = new List<MonetizationModule>();
 
 		private bool isInitialized = false;
-		private Dictionary<System.Type, IModule> moduleCache = new Dictionary<System.Type, IModule>();
+		private readonly ModuleRegistry moduleRegistry = new ModuleRegistry();
+		private readonly List<string> failedModules = new List<string>();
 
 		public bool IsInitialized => isInitialized;
+		public IReadOnlyList<string> FailedModules => failedModules;
 
 		/// <summary>
 		/// Checks if the device has internet connectivity.
@@ -28,7 +31,6 @@ namespace THEBADDEST.MonetizationApi
 		public static bool IsInternetAvailable()
 		{
 #if UNITY_EDITOR
-			// In editor, always return true for testing
 			return true;
 #else
 			return Application.internetReachability != NetworkReachability.NotReachable;
@@ -57,7 +59,6 @@ namespace THEBADDEST.MonetizationApi
 			}
 
 			var config = MonetizationConfig.Instance;
-
 			config.ApplySendLogConfiguration();
 
 			if (config.CheckInternetBeforeInit && !IsInternetAvailable())
@@ -71,8 +72,9 @@ namespace THEBADDEST.MonetizationApi
 				RemoveDuplicateModules();
 			}
 
+			failedModules.Clear();
+			var succeeded = new List<MonetizationModule>();
 			var initializationTasks = new List<UTask>();
-			var failedModules = new List<string>();
 
 			foreach (MonetizationModule module in modules)
 			{
@@ -82,41 +84,60 @@ namespace THEBADDEST.MonetizationApi
 					continue;
 				}
 
-				try
-				{
-					var task = module.Initialize();
-					initializationTasks.Add(task);
-				}
-				catch (System.Exception ex)
-				{
-					failedModules.Add(module.GetType().Name);
-					SendLog.LogError($"Failed to initialize {module.GetType().Name}: {ex.Message}");
-				}
+				initializationTasks.Add(InitModuleSafe(module, failedModules, succeeded));
 			}
 
-			// Wait for all modules to initialize
 			await UTask.WhenAll(initializationTasks.ToArray());
 
-			// Build module cache for faster lookups
-			BuildModuleCache();
-
+			BuildModuleCache(succeeded);
 			isInitialized = true;
 
 			if (failedModules.Count > 0)
 			{
-				var messages = failedModules.Select(m => $"Module failed to initialize: {m}").ToList();
+				var messages = failedModules.Select(m => m).ToList();
 				messages.Insert(0, $"Some modules failed to initialize ({failedModules.Count}/{modules.Count}):");
 				SendLog.LogBatch(messages, LogLevel.Warning);
+
+				if (succeeded.Count == 0)
+				{
+					SendLog.LogBatch(new List<string> { "All modules failed to initialize. Monetization cache is empty." }, LogLevel.Error);
+				}
 			}
-			else
+			else if (succeeded.Count > 0)
 			{
-				SendLog.Log($"All {modules.Count} modules initialized successfully.");
+				SendLog.Log($"All {succeeded.Count} modules initialized successfully.");
+			}
+		}
+
+		private static async UTask InitModuleSafe(MonetizationModule module, List<string> failed, List<MonetizationModule> succeeded)
+		{
+			if (module == null)
+			{
+				return;
+			}
+
+			try
+			{
+				await module.Initialize();
+				if (module.IsInitialized)
+				{
+					succeeded.Add(module);
+				}
+				else
+				{
+					failed.Add($"{module.GetType().Name}: initialization did not complete");
+				}
+			}
+			catch (Exception ex)
+			{
+				failed.Add($"{module.GetType().Name}: {ex.Message}");
+				SendLog.LogModule(module.ModuleName, ex.Message, LogLevel.Error);
 			}
 		}
 
 		private void RemoveDuplicateModules()
 		{
-			var typeToModule = new Dictionary<System.Type, MonetizationModule>();
+			var typeToModule = new Dictionary<Type, MonetizationModule>();
 			var toRemove = new List<MonetizationModule>();
 			foreach (var module in modules)
 			{
@@ -138,14 +159,14 @@ namespace THEBADDEST.MonetizationApi
 			}
 		}
 
-		private void BuildModuleCache()
+		private void BuildModuleCache(IReadOnlyList<MonetizationModule> succeeded)
 		{
-			moduleCache.Clear();
-			foreach (var module in modules)
+			moduleRegistry.Clear();
+			foreach (var module in succeeded)
 			{
 				if (module != null)
 				{
-					moduleCache[module.GetType()] = module as IModule;
+					moduleRegistry.Register(module);
 				}
 			}
 		}
@@ -177,23 +198,28 @@ namespace THEBADDEST.MonetizationApi
 				return default;
 			}
 
-			// Try cache first for better performance
-			if (moduleCache.TryGetValue(typeof(T), out var cachedModule))
+			var module = moduleRegistry.Get<T>();
+			if (module != null)
 			{
-				return cachedModule as T;
-			}
-
-			// Fallback to linear search
-			foreach (MonetizationModule module in modules)
-			{
-				if (module is T result)
-				{
-					return result;
-				}
+				return module;
 			}
 
 			SendLog.LogWarning($"Module of type {typeof(T).Name} not found in profile.");
 			return default;
+		}
+
+		/// <summary>
+		/// Tries to get a module of the specified type without logging errors.
+		/// </summary>
+		public bool TryGetModule<T>(out T module) where T : class, IModule
+		{
+			module = default;
+			if (!isInitialized)
+			{
+				return false;
+			}
+
+			return moduleRegistry.TryGet(out module);
 		}
 
 		/// <summary>
@@ -216,7 +242,8 @@ namespace THEBADDEST.MonetizationApi
 		public void Reset()
 		{
 			isInitialized = false;
-			moduleCache.Clear();
+			failedModules.Clear();
+			moduleRegistry.Clear();
 		}
 
 	}

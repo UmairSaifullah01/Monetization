@@ -1,0 +1,20 @@
+{
+  "name": "THEBADDEST.Monetization.Installer.Editor",
+  "rootNamespace": "Installer",
+  "references": [
+    "THEBADDEST.Monetization.Configuration",
+    "THEBADDEST.Monetization.Core",
+    "THEBADDEST.Monetization.Editor"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

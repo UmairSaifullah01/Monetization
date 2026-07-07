@@ -1,0 +1,16 @@
+{
+  "name": "THEBADDEST.Monetization.Ads.Abstractions",
+  "rootNamespace": "THEBADDEST.Advertisement",
+  "references": [
+    "THEBADDEST.Monetization.Core"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

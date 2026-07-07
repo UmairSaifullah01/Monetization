@@ -70,7 +70,7 @@ namespace THEBADDEST.Advertisement
 		{
 			if (bannerView != null && !isDisplaying)
 			{
-				SendLog.Log("Showing banner ad.");
+				SendLog.LogModule(GoogleAdsLog.Module, "Showing banner ad.");
 				bannerView.Show();
 				isDisplaying = true;
 				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Banner, AdEventType.ShowSucceeded, bannerData.unitId);
@@ -97,13 +97,12 @@ namespace THEBADDEST.Advertisement
 
 			if (config.EnableTestMode)
 			{
-				SendLog.LogInfo("[BannerAd] Test mode enabled by MonetizationConfig.");
+				SendLog.LogModule(GoogleAdsLog.Module, "Test mode enabled by MonetizationConfig.");
 			}
 
 			PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Banner, AdEventType.LoadStarted, bannerData.unitId);
 			var adRequest = new AdRequest();
 			bannerView?.LoadAd(adRequest);
-			isDisplaying = true;
 		}
 
 		public void Hide()

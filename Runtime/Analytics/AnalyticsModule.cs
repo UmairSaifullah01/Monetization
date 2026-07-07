@@ -24,7 +24,7 @@ namespace THEBADDEST.Analytics
 
 		protected virtual void OnAdShown(AdShownEvent evt)
 		{
-			SendLog.Log($"[Analytics] Ad shown: Type={evt.AdType}, Placement={evt.Placement}, Time={evt.Time}");
+			SendLog.LogModule(ModuleName, $"Ad shown: Type={evt.AdType}, Placement={evt.Placement}, Time={evt.Time}");
 		}
 
 		public abstract void SendEvent(string name);

@@ -22,14 +22,6 @@
     "GameKey": "your-ga-game-key",
     "SecretKey": "your-ga-secret-key"
   },
-  "FirebaseKeys": {
-    "FirebaseProjectId": "your-firebase-project-id"
-  },
-  "RemoteConfigKeys": {
-    "RemoteConfigUrl": "https://your-remote-config-url.com/config",
-    "ApiKey": "your-api-key",
-    "Environment": "production"
-  },
   "ProjectKeys": {
     "PackageName": "com.games.abcd",
     "Version": "1.0",
@@ -39,7 +31,7 @@
     "UseKeyStore": "true",
     "KeyStorePath": "Assets/Keystore/user.keystore",
     "KeyAliasName": "user",
-    "KeyStorePassword": "123456",
-    "KeyAliasPassword": "123456"
+    "KeyStorePassword": "",
+    "KeyAliasPassword": ""
   }
 }

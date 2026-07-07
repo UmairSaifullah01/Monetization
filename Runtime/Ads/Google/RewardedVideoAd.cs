@@ -22,6 +22,8 @@ namespace THEBADDEST.Advertisement
 		
 		
 		string                unitId;
+		bool                  _loadSettled;
+
 		public RewardedVideoAd(string unitId)
 		{
 			this.unitId = unitId;
@@ -36,7 +38,7 @@ namespace THEBADDEST.Advertisement
 		{
 			if (rewardedAd != null)
 			{
-				SendLog.Log("Destroying rewarded ad instance.");
+				SendLog.LogModule(GoogleAdsLog.Module, "Destroying rewarded ad instance.");
 				rewardedAd.Destroy();
 				rewardedAd = null;
 			}
@@ -51,10 +53,10 @@ namespace THEBADDEST.Advertisement
 		{
 			if (rewardedAd != null && rewardedAd.CanShowAd())
 			{
-				SendLog.Log("Showing rewarded ad.");
+				SendLog.LogModule(GoogleAdsLog.Module, "Showing rewarded ad.");
 				rewardedAd.Show((Reward reward) =>
 				{
-					SendLog.Log($"Rewarded ad granted a reward: {reward.Amount} {reward.Type}");
+					SendLog.LogModule(GoogleAdsLog.Module, $"Rewarded ad granted a reward: {reward.Amount} {reward.Type}");
 					OnRewardClaimed?.Invoke(reward);
 				});
 				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Rewarded, AdEventType.ShowSucceeded, unitId);
@@ -67,22 +69,25 @@ namespace THEBADDEST.Advertisement
 			else
 			{
 				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Rewarded, AdEventType.ShowFailed, unitId);
-				SendLog.LogError("Rewarded ad is not ready yet.");
+				SendLog.LogModule(GoogleAdsLog.Module, "Rewarded ad is not ready yet.", LogLevel.Error);
 				OnRewardFailed?.Invoke();
 			}
 		}
 
 		public void Load()
 		{
+			_loadSettled = false;
 			PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Rewarded, AdEventType.LoadStarted, unitId);
+			AdLoadTimeoutWatcher.Watch(AdMetricsTypes.Rewarded, unitId, () => _loadSettled);
 			var adRequest = new AdRequest();
 
 			RewardedAd.Load(unitId, adRequest, (RewardedAd ad, LoadAdError error) =>
 			{
+				_loadSettled = true;
 				if (error != null)
 				{
 					PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Rewarded, AdEventType.LoadFailed, unitId);
-					SendLog.LogError("Rewarded ad failed to load: " + error);
+					SendLog.LogModule(GoogleAdsLog.Module, "Rewarded ad failed to load: " + error, LogLevel.Error);
 					OnAdLoadFailed?.Invoke();
 					OnRewardFailed?.Invoke();
 					return;
@@ -92,12 +97,12 @@ namespace THEBADDEST.Advertisement
 				{
 					PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Rewarded, AdEventType.LoadFailed, unitId);
 					OnRewardFailed?.Invoke();
-					SendLog.LogError("Unexpected error: Rewarded load event fired with null ad and null error.");
+					SendLog.LogModule(GoogleAdsLog.Module, "Unexpected error: Rewarded load event fired with null ad and null error.", LogLevel.Error);
 					return;
 				}
 
 				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Rewarded, AdEventType.LoadSucceeded, unitId);
-				SendLog.Log("Rewarded ad loaded successfully. Response: " + ad.GetResponseInfo());
+				SendLog.LogModule(GoogleAdsLog.Module, "Rewarded ad loaded successfully. Response: " + ad.GetResponseInfo());
 				rewardedAd = ad;
 				
 			});
@@ -112,10 +117,10 @@ namespace THEBADDEST.Advertisement
 		{
 			if (rewardedAd != null && rewardedAd.CanShowAd())
 			{
-				SendLog.Log("Showing rewarded ad.");
+				SendLog.LogModule(GoogleAdsLog.Module, "Showing rewarded ad.");
 				rewardedAd.Show((Reward reward) =>
 				{
-					SendLog.Log($"Rewarded ad granted a reward: {reward.Amount} {reward.Type}");
+					SendLog.LogModule(GoogleAdsLog.Module, $"Rewarded ad granted a reward: {reward.Amount} {reward.Type}");
 					onRewardClaimed?.Invoke(reward);
 				});
 				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Rewarded, AdEventType.ShowSucceeded, unitId);
@@ -129,7 +134,7 @@ namespace THEBADDEST.Advertisement
 			{
 				PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Rewarded, AdEventType.ShowFailed, unitId);
 				OnRewardFailed?.Invoke();
-				SendLog.LogError("Rewarded ad is not ready yet.");
+				SendLog.LogModule(GoogleAdsLog.Module, "Rewarded ad is not ready yet.", LogLevel.Error);
 			}
 		}
 

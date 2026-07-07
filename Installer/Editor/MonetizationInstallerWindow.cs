@@ -4,7 +4,8 @@ using UnityEngine;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-// For MiniJSON
+using THEBADDEST.MonetizationApi;
+using THEBADDEST.MonetizationEditor;
 using UnityEditor.PackageManager;
 
 namespace Installer
@@ -23,6 +24,7 @@ namespace Installer
         private Texture2D logoTexture;
         private string configPath;
         private InstallerConfig installerConfig;
+        private Dictionary<string, bool> providerSelection = new Dictionary<string, bool>();
 
         private void OnEnable()
         {
@@ -31,6 +33,19 @@ namespace Installer
             unityPackagePath = Path.Combine(Application.dataPath, "Monetization/Installer/MonetizationScripts.unitypackage");
             configPath = Path.Combine(Application.dataPath, "Monetization/Installer/installer_config.json");
             installerConfig = InstallerConfig.Load(configPath);
+            RefreshProviderSelection();
+        }
+
+        private void RefreshProviderSelection()
+        {
+            if (installerConfig?.providers == null) return;
+            foreach (var key in installerConfig.providers.Keys)
+            {
+                if (!providerSelection.ContainsKey(key))
+                {
+                    providerSelection[key] = true;
+                }
+            }
         }
 
         [MenuItem("Tools/Monetization/Installer")]
@@ -93,6 +108,29 @@ namespace Installer
             GUILayout.EndHorizontal();
             GUILayout.Space(10);
 
+            if (installerConfig?.providers != null && installerConfig.providers.Count > 0)
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
+                GUILayout.BeginVertical(GUI.skin.box, GUILayout.Width(420));
+                GUILayout.Label("Optional SDK Providers", EditorStyles.boldLabel);
+                foreach (var kvp in installerConfig.providers)
+                {
+                    if (!providerSelection.ContainsKey(kvp.Key))
+                    {
+                        providerSelection[kvp.Key] = true;
+                    }
+                    providerSelection[kvp.Key] = EditorGUILayout.ToggleLeft(
+                        string.IsNullOrEmpty(kvp.Value.label) ? kvp.Key : kvp.Value.label,
+                        providerSelection[kvp.Key]);
+                }
+                GUILayout.EndVertical();
+                GUILayout.FlexibleSpace();
+                GUILayout.EndHorizontal();
+                DrawProfileWarnings();
+                GUILayout.Space(10);
+            }
+
             if (isInstalling)
             {
                 GUILayout.BeginHorizontal();
@@ -133,6 +171,27 @@ namespace Installer
             EditorGUI.EndDisabledGroup();
         }
 
+        private void DrawProfileWarnings()
+        {
+            var profile = Resources.Load<MonetizationProfile>("MonetizationProfile");
+            if (profile == null)
+            {
+                return;
+            }
+
+            var warnings = ProviderProfileValidator.Validate(profile);
+            if (warnings.Count == 0)
+            {
+                return;
+            }
+
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            EditorGUILayout.HelpBox(string.Join("\n", warnings), MessageType.Warning, true);
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+        }
+
         private int installStep = 0;
         private string[] tgzFilesCache;
         private string projectExternalCache;
@@ -168,10 +227,10 @@ namespace Installer
                         manifestCache = MiniJSON.Json.Deserialize(manifestTextCache) as Dictionary<string, object>;
                         dependenciesCache = manifestCache["dependencies"] as Dictionary<string, object>;
 
-                        // Add packages from config only
+                        // Add packages from config (core + selected providers)
                         if (installerConfig != null)
                         {
-                            foreach (var kvp in installerConfig.packages)
+                            foreach (var kvp in installerConfig.GetPackagesForInstall(providerSelection))
                             {
                                 dependenciesCache[kvp.Key] = kvp.Value;
                             }
@@ -217,10 +276,10 @@ namespace Installer
                             }
                         }
 
-                        // Add .tgz packages from config (correct name as key, file path as value)
-                        if (installerConfig != null && installerConfig.tgzPackages != null)
+                        // Add .tgz packages from config (selected providers)
+                        if (installerConfig != null)
                         {
-                            foreach (var kvp in installerConfig.tgzPackages)
+                            foreach (var kvp in installerConfig.GetTgzPackagesForInstall(providerSelection))
                             {
                                 string fileName = kvp.Key;
                                 string packageName = kvp.Value;
@@ -281,20 +340,15 @@ namespace Installer
             // Remove all packages from config
             if (installerConfig != null)
             {
-                foreach (var kvp in installerConfig.packages)
+                foreach (var kvp in installerConfig.GetAllPackages())
                 {
                     if (dependencies.ContainsKey(kvp.Key))
                         dependencies.Remove(kvp.Key);
                 }
-            }
-
-            // Remove all .tgz file dependencies from config
-            if (installerConfig != null && installerConfig.tgzPackages != null)
-            {
-                foreach (var tgzKey in installerConfig.tgzPackages)
+                foreach (var kvp in installerConfig.GetAllTgzPackages())
                 {
-                    if (dependencies.ContainsKey(tgzKey.Key))
-                        dependencies.Remove(tgzKey.Key);
+                    if (dependencies.ContainsKey(kvp.Value))
+                        dependencies.Remove(kvp.Value);
                 }
             }
 
@@ -337,11 +391,96 @@ namespace Installer
 }
 
 [Serializable]
+    public class ProviderConfig
+    {
+        public string label;
+        public Dictionary<string, string> packages = new Dictionary<string, string>();
+        public Dictionary<string, string> tgzPackages = new Dictionary<string, string>();
+        public string asmdef;
+        public string moduleType;
+    }
+
+    [Serializable]
     public class InstallerConfig
     {
+        public Dictionary<string, string> corePackages = new Dictionary<string, string>();
         public Dictionary<string, string> packages = new Dictionary<string, string>();
         public List<RegistryConfig> registries = new List<RegistryConfig>();
-        public Dictionary<string, string> tgzPackages = new Dictionary<string, string>(); // Always contains [filename, packagename] pairs
+        public Dictionary<string, string> tgzPackages = new Dictionary<string, string>();
+        public Dictionary<string, ProviderConfig> providers = new Dictionary<string, ProviderConfig>();
+
+        public IEnumerable<KeyValuePair<string, string>> GetPackagesForInstall(Dictionary<string, bool> selection)
+        {
+            foreach (var kvp in corePackages)
+            {
+                yield return kvp;
+            }
+
+            if (providers == null || providers.Count == 0)
+            {
+                foreach (var kvp in packages)
+                {
+                    yield return kvp;
+                }
+                yield break;
+            }
+
+            foreach (var provider in providers)
+            {
+                if (selection != null && selection.TryGetValue(provider.Key, out bool enabled) && !enabled)
+                {
+                    continue;
+                }
+
+                if (provider.Value?.packages == null) continue;
+                foreach (var kvp in provider.Value.packages)
+                {
+                    yield return kvp;
+                }
+            }
+        }
+
+        public IEnumerable<KeyValuePair<string, string>> GetTgzPackagesForInstall(Dictionary<string, bool> selection)
+        {
+            if (providers == null || providers.Count == 0)
+            {
+                foreach (var kvp in tgzPackages)
+                {
+                    yield return kvp;
+                }
+                yield break;
+            }
+
+            foreach (var provider in providers)
+            {
+                if (selection != null && selection.TryGetValue(provider.Key, out bool enabled) && !enabled)
+                {
+                    continue;
+                }
+
+                if (provider.Value?.tgzPackages == null) continue;
+                foreach (var kvp in provider.Value.tgzPackages)
+                {
+                    yield return kvp;
+                }
+            }
+        }
+
+        public IEnumerable<KeyValuePair<string, string>> GetAllPackages()
+        {
+            foreach (var kvp in GetPackagesForInstall(null))
+            {
+                yield return kvp;
+            }
+        }
+
+        public IEnumerable<KeyValuePair<string, string>> GetAllTgzPackages()
+        {
+            foreach (var kvp in GetTgzPackagesForInstall(null))
+            {
+                yield return kvp;
+            }
+        }
 
         public static InstallerConfig Load(string path)
         {
@@ -353,16 +492,10 @@ namespace Installer
 
             var config = new InstallerConfig();
 
-            // Load packages
-            if (dict.TryGetValue("packages", out var packagesObj) && packagesObj is Dictionary<string, object> pkgDict)
-            {
-                foreach (var kvp in pkgDict)
-                {
-                    config.packages[kvp.Key] = kvp.Value.ToString();
-                }
-            }
+            LoadStringDictionary(dict, "corePackages", config.corePackages);
+            LoadStringDictionary(dict, "packages", config.packages);
+            LoadStringDictionary(dict, "tgzPackages", config.tgzPackages);
 
-            // Load registries
             if (dict.TryGetValue("registries", out var registriesObj) && registriesObj is List<object> regList)
             {
                 foreach (var item in regList)
@@ -380,19 +513,52 @@ namespace Installer
                 }
             }
 
-            // Load tgzPackages (support both dict and list of pairs)
-            if (dict.TryGetValue("tgzPackages", out var tgzObj))
+            if (dict.TryGetValue("providers", out var providersObj) && providersObj is Dictionary<string, object> providersDict)
             {
-                if (tgzObj is Dictionary<string, object> tgzDict)
+                foreach (var providerPair in providersDict)
                 {
-                    foreach (var kvp in tgzDict)
+                    if (providerPair.Value is Dictionary<string, object> providerDict)
                     {
-                        config.tgzPackages[kvp.Key] = kvp.Value.ToString();
+                        var provider = new ProviderConfig
+                        {
+                            label = providerDict.TryGetValue("label", out var labelObj) ? labelObj.ToString() : providerPair.Key,
+                            asmdef = providerDict.TryGetValue("asmdef", out var asmdefObj) ? asmdefObj.ToString() : null,
+                            moduleType = providerDict.TryGetValue("moduleType", out var moduleObj) ? moduleObj.ToString() : null
+                        };
+
+                        if (providerDict.TryGetValue("packages", out var packagesObj) && packagesObj is Dictionary<string, object> packagesDict)
+                        {
+                            foreach (var kvp in packagesDict)
+                            {
+                                provider.packages[kvp.Key] = kvp.Value.ToString();
+                            }
+                        }
+
+                        if (providerDict.TryGetValue("tgzPackages", out var tgzObj) && tgzObj is Dictionary<string, object> tgzDict)
+                        {
+                            foreach (var kvp in tgzDict)
+                            {
+                                provider.tgzPackages[kvp.Key] = kvp.Value.ToString();
+                            }
+                        }
+
+                        config.providers[providerPair.Key] = provider;
                     }
                 }
             }
 
             return config;
+        }
+
+        private static void LoadStringDictionary(Dictionary<string, object> dict, string key, Dictionary<string, string> target)
+        {
+            if (dict.TryGetValue(key, out var obj) && obj is Dictionary<string, object> source)
+            {
+                foreach (var kvp in source)
+                {
+                    target[kvp.Key] = kvp.Value.ToString();
+                }
+            }
         }
     }
 

@@ -1,0 +1,20 @@
+{
+    "name": "THEBADDEST.Monetization.IAP.Unity",
+    "rootNamespace": "THEBADDEST.MonetizationApi",
+    "references": [
+        "THEBADDEST.Monetization.IAP.Abstractions",
+        "THEBADDEST.Monetization.Core",
+        "UnityEngine.Purchasing",
+        "THEBADDEST.UTask",
+        "UnityEngine.Purchasing.Stores"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

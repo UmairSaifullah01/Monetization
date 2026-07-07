@@ -11,6 +11,11 @@ namespace THEBADDEST.MonetizationApi
 	{
 		[SerializeField] private IAPCatalog catalog = new IAPCatalog();
 		public IAPCatalog Catalog => catalog;
+
+		public void ApplyCatalogFromJson()
+		{
+			IAPCatalogLoader.ApplyToCatalog(catalog);
+		}
 		
 		protected Dictionary<string, Action> successCallbacks = new Dictionary<string, Action>();
 		protected Dictionary<string, Action> failCallbacks = new Dictionary<string, Action>();
@@ -26,7 +31,7 @@ namespace THEBADDEST.MonetizationApi
             IAPItem item = catalog.Find(i => i.productId == productId);
             if (item == null)
             {
-                SendLog.LogWarning($"[IAP] Product with ID '{productId}' not found in catalog.");
+                SendLog.LogModule(ModuleName, $"Product with ID '{productId}' not found in catalog.", LogLevel.Warning);
                 return "0.00";
             }
             return item.price.ToString("0.00");
@@ -37,7 +42,7 @@ namespace THEBADDEST.MonetizationApi
             IAPItem item = catalog.Find(i => i.productId == productId);
             if (item == null)
             {
-                SendLog.LogWarning($"[IAP] Product with ID '{productId}' not found in catalog.");
+                SendLog.LogModule(ModuleName, $"Product with ID '{productId}' not found in catalog.", LogLevel.Warning);
                 return "0.00";
             }
             return item.price.ToString("0.00");
@@ -48,13 +53,13 @@ namespace THEBADDEST.MonetizationApi
             IAPItem item = catalog.Find(i => i.productId == productId);
             if (item == null)
             {
-                SendLog.LogWarning($"[IAP] Product with ID '{productId}' not found in catalog.");
+                SendLog.LogModule(ModuleName, $"Product with ID '{productId}' not found in catalog.", LogLevel.Warning);
                 return 0f;
             }
             GetProductPriceAndCurrencyCode(productId, out string currencyCode, out double price);
             if (item.price <= 0)
             {
-                SendLog.LogWarning($"[IAP] Invalid price for product '{productId}'. Cannot calculate conversion.");
+                SendLog.LogModule(ModuleName, $"Invalid price for product '{productId}'. Cannot calculate conversion.", LogLevel.Warning);
                 return 0f;
             }
             double d = price / Convert.ToDouble(item.price);
@@ -66,7 +71,7 @@ namespace THEBADDEST.MonetizationApi
             IAPItem item = catalog.Find(i => i.productId == productId);
             if (item == null)
             {
-                SendLog.LogWarning($"[IAP] Product with ID '{productId}' not found in catalog.");
+                SendLog.LogModule(ModuleName, $"Product with ID '{productId}' not found in catalog.", LogLevel.Warning);
                 currencyCode = "USD";
                 price = 0.0;
                 return;

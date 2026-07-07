@@ -31,6 +31,7 @@ namespace THEBADDEST.MonetizationApi
 		public int ShowCount;
 		public int ShowFailCount;
 		public int LoadCount;
+		public int LoadSuccessCount;
 		public int LoadFailCount;
 		public DateTime? LastShownUtc;
 		public DateTime? LastLoadedUtc;
@@ -42,6 +43,7 @@ namespace THEBADDEST.MonetizationApi
 		public int ShowCount;
 		public int ShowFailCount;
 		public int LoadCount;
+		public int LoadSuccessCount;
 		public int LoadFailCount;
 		public DateTime? LastShownUtc;
 		public DateTime? LastLoadedUtc;
@@ -106,6 +108,7 @@ namespace THEBADDEST.MonetizationApi
 					StartOperation(loadOperation);
 					break;
 				case AdEventType.LoadSucceeded:
+					data.LoadSuccessCount++;
 					data.LastLoadedUtc = DateTime.UtcNow;
 					EndOperation(loadOperation);
 					break;
@@ -167,6 +170,7 @@ namespace THEBADDEST.MonetizationApi
 				ShowCount = data.ShowCount,
 				ShowFailCount = data.ShowFailCount,
 				LoadCount = data.LoadCount,
+				LoadSuccessCount = data.LoadSuccessCount,
 				LoadFailCount = data.LoadFailCount,
 				LastShownUtc = data.LastShownUtc,
 				LastLoadedUtc = data.LastLoadedUtc,
@@ -261,7 +265,7 @@ namespace THEBADDEST.MonetizationApi
 				{
 					var snapshot = GetAdMetrics(adType);
 					string lastShown = snapshot.LastShownUtc?.ToString("u") ?? "never";
-					SendLog.LogInfo($"{adType}: Shows={snapshot.ShowCount}, ShowFails={snapshot.ShowFailCount}, Loads={snapshot.LoadCount}, LoadFails={snapshot.LoadFailCount}, LastShown={lastShown}");
+					SendLog.LogInfo($"{adType}: Shows={snapshot.ShowCount}, ShowFails={snapshot.ShowFailCount}, Loads={snapshot.LoadCount}, LoadSuccess={snapshot.LoadSuccessCount}, LoadFails={snapshot.LoadFailCount}, LastShown={lastShown}");
 				}
 			}
 		}

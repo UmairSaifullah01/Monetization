@@ -2,8 +2,6 @@ using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
-using System.Linq;
-using THEBADDEST.MonetizationApi;
 
 namespace THEBADDEST.MonetizationEditor
 {
@@ -13,27 +11,8 @@ namespace THEBADDEST.MonetizationEditor
 
         public void OnPreprocessBuild(BuildReport report)
         {
-            // Find MonetizationProfile asset
-            var profile = AssetDatabase.FindAssets("t:MonetizationProfile")
-                .Select(guid => AssetDatabase.LoadAssetAtPath<MonetizationProfile>(AssetDatabase.GUIDToAssetPath(guid)))
-                .FirstOrDefault();
-            if (profile != null)
-            {
-                Debug.Log("[Monetization] Syncing project settings before build...");
-                var projectModule = profile.FindModule<ProjectModule>();
-                if (projectModule != null)
-                {
-                    projectModule.SyncProjectSettings();
-                }
-                else
-                {
-                    Debug.LogWarning("[Monetization] ProjectModule not found in profile. Project settings will not be synced.");
-                }
-            }
-            else
-            {
-                Debug.LogWarning("[Monetization] MonetizationProfile not found before build.");
-            }
+            Debug.Log("[Monetization] Syncing project settings before build...");
+            ProjectSettingsSync.SyncFromJson();
         }
 
         public void OnPostprocessBuild(BuildReport report)

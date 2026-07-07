@@ -21,6 +21,8 @@ namespace THEBADDEST.MonetizationApi
         [SerializeField] private bool enableAds = true;
         [Tooltip("Enable test mode for ads (use test ad units).")]
         [SerializeField] private bool enableTestMode = true;
+        [Tooltip("Timeout in seconds for ad load operations.")]
+        [SerializeField] private float adLoadTimeout = 30f;
 
         [Header("IAP Settings")]
         [Tooltip("Enable or disable all in-app purchase modules.")]
@@ -48,6 +50,7 @@ namespace THEBADDEST.MonetizationApi
 
         public bool EnableAds => enableAds;
         public bool EnableTestMode => enableTestMode;
+        public float AdLoadTimeout => adLoadTimeout;
 
         public bool EnableIAP => enableIAP;
 

@@ -1,9 +1,6 @@
 {
-  "packages": {
-    "com.thebaddest.utask": "https://github.com/UmairSaifullah01/UTask.git",
-    "com.unity.purchasing": "4.10.0",
-    "com.gameanalytics.sdk": "7.10.4",
-    "com.google.ads.mobile": "10.3.0"
+  "corePackages": {
+    "com.thebaddest.utask": "https://github.com/UmairSaifullah01/UTask.git"
   },
   "registries": [
     {
@@ -15,11 +12,44 @@
       ]
     }
   ],
-  "tgzPackages": {
-    "com.google.external-dependency-manager-1.2.183.tgz": "com.google.external-dependency-manager",
-    "com.google.firebase.app-12.5.0.tgz": "com.google.firebase.app",
-    "com.google.firebase.auth-12.5.0.tgz": "com.google.firebase.auth",
-    "com.google.firebase.database-12.5.0.tgz": "com.google.firebase.database",
-    "com.google.firebase.remote-config-12.5.0.tgz": "com.google.firebase.remote-config"
+  "providers": {
+    "ads_google": {
+      "label": "Google AdMob",
+      "packages": {
+        "com.google.ads.mobile": "10.3.0"
+      },
+      "tgzPackages": {},
+      "asmdef": "THEBADDEST.Monetization.Ads.Google",
+      "moduleType": "THEBADDEST.Advertisement.GoogleAdsModule"
+    },
+    "analytics_gameanalytics": {
+      "label": "GameAnalytics",
+      "packages": {
+        "com.gameanalytics.sdk": "7.10.4"
+      },
+      "tgzPackages": {},
+      "asmdef": "THEBADDEST.Monetization.Analytics.GameAnalytics",
+      "moduleType": "THEBADDEST.Analytics.GAAnalyticsModule"
+    },
+    "iap_unity": {
+      "label": "Unity IAP",
+      "packages": {
+        "com.unity.purchasing": "4.10.0"
+      },
+      "tgzPackages": {},
+      "asmdef": "THEBADDEST.Monetization.IAP.Unity",
+      "moduleType": "THEBADDEST.MonetizationApi.UnityIAPModule"
+    },
+    "remoteconfig_firebase": {
+      "label": "Firebase Remote Config",
+      "packages": {},
+      "tgzPackages": {
+        "com.google.external-dependency-manager-1.2.183.tgz": "com.google.external-dependency-manager",
+        "com.google.firebase.app-12.5.0.tgz": "com.google.firebase.app",
+        "com.google.firebase.remote-config-12.5.0.tgz": "com.google.firebase.remote-config"
+      },
+      "asmdef": "THEBADDEST.Monetization.RemoteConfig.Firebase",
+      "moduleType": "THEBADDEST.RemoteConfigSystem.FirebaseRemoteConfig"
+    }
   }
 }

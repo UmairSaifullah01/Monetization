@@ -4,12 +4,11 @@ A comprehensive Unity monetization framework that provides a modular, extensible
 
 ## Features
 
-- **Modular Architecture**: Easy to add new ad networks, analytics providers, or IAP platforms
+- **Modular Architecture**: Hot-swappable SDK providers via isolated asmdefs and installer groups
+- **Resilient Initialization**: Failed modules are logged and skipped; remaining modules continue
 - **Async/Await Support**: Modern async patterns for better performance
-- **Error Handling**: Comprehensive error handling with retry mechanisms
-- **Performance Monitoring**: Built-in performance tracking and reporting
+- **Performance Monitoring**: Built-in ad metrics (`LoadSuccessCount`, show counts, last show time)
 - **Configuration Management**: Centralized configuration with runtime updates
-- **Enhanced Logging**: Multi-level logging system with filtering
 - **ScriptableObject Configuration**: Runtime configuration without code changes
 
 ## Architecture Overview
@@ -17,33 +16,38 @@ A comprehensive Unity monetization framework that provides a modular, extensible
 ```
 Monetization (Static Entry Point)
 ├── MonetizationProfile (Configuration)
-│   ├── AdsModule (Google Ads, etc.)
-│   ├── IAPModule (Unity IAP, etc.)
-│   ├── AnalyticsModule (Game Analytics, etc.)
-│   └── RemoteConfigModule (Firebase, etc.)
+│   ├── IAdsModule provider (e.g. GoogleAdsModule)
+│   ├── IIAPModule provider (e.g. UnityIAPModule)
+│   ├── IAnalyticsModule provider (e.g. GAAnalyticsModule)
+│   └── IRemoteConfig provider (e.g. FirebaseRemoteConfig)
 ├── MonetizationConfig (Settings)
+├── ModuleRegistry (interface-keyed cache)
 └── PerformanceMonitor (Metrics)
 ```
+
+### Assembly layout
+
+| Assembly | Folder | SDK refs |
+|----------|--------|----------|
+| `THEBADDEST.Monetization.Core` | `Runtime/Base/` | None |
+| `THEBADDEST.Monetization.Configuration` | `JsonDataUtility/` | None |
+| `THEBADDEST.Monetization.Ads.Abstractions` | `Runtime/Ads/` | None |
+| `THEBADDEST.Monetization.Ads.Google` | `Runtime/Ads/Google/` | AdMob |
+| `THEBADDEST.Monetization.IAP.Unity` | `Runtime/IAPModule/Unity/` | Unity Purchasing |
+| `THEBADDEST.Monetization.Analytics.GameAnalytics` | `Runtime/Analytics/GameAnalytics/` | GameAnalytics |
+| `THEBADDEST.Monetization.RemoteConfig.Firebase` | `Runtime/RemoteConfig/FireBaseRemoteConfig/` | Firebase |
+
+Remove a provider assembly + UPM packages without breaking Core or Abstractions.
 
 ## Quick Start
 
 ### 1. Setup Configuration
 
-Create a `MonetizationProfile` asset in your Resources folder:
+Create a `MonetizationProfile` asset in your Resources folder and assign provider module assets (Ads, IAP, Analytics, Remote Config).
 
-```csharp
-// Create via menu: Assets > Create > Monetization > MonetizationProfile
-// Add your modules (Ads, IAP, Analytics, RemoteConfig)
-```
+### 2. Install Dependencies
 
-### 2. Install Dependencies (Recommended)
-
-Open the Monetization Installer from the Unity Editor:
-
-- Go to `Tools → Monetization → Installer`
-- Click the **Install** button. The installer will automatically fetch and install all required dependencies for you.
-
-No manual manifest editing required!
+Open `Tools → Monetization → Installer`. Select optional SDK providers (AdMob, GameAnalytics, Unity IAP, Firebase Remote Config) and click **Install**.
 
 ### 3. Initialize the System
 
@@ -55,233 +59,150 @@ public class GameManager : MonoBehaviour
 {
     async void Start()
     {
-        // Subscribe to initialization events
         Monetization.OnInitialize += OnMonetizationInitialized;
-        Monetization.OnError += OnMonetizationError;
-
-        // Initialize the system
         await Monetization.Initialize();
     }
 
     void OnMonetizationInitialized(bool success)
     {
-        if (success)
+        if (!success) return;
+
+        if (Monetization.TryGetModule<IAdsModule>(out var ads))
         {
-            Debug.Log("Monetization system ready!");
-            ShowAds();
+            ads.LoadInterstitial();
         }
     }
-
-    void OnMonetizationError(string error)
-    {
-        Debug.LogError($"Monetization error: {error}");
-    }
 }
 ```
 
-### 3. Use Modules
+### 4. Use Modules Safely
+
+Prefer `TryGetModule` so missing providers never throw:
 
 ```csharp
-// Get modules
-var adsModule = Monetization.GetModule<IAdsModule>();
-var iapModule = Monetization.GetModule<IIAPModule>();
-var analyticsModule = Monetization.GetModule<IAnalyticsModule>();
-var remoteConfig = Monetization.GetModule<IRemoteConfig<object>>();
+if (Monetization.TryGetModule<IAdsModule>(out var ads))
+{
+    ads.ShowInterstitial();
+}
 
-// Show ads
-adsModule.ShowInterstitial();
-adsModule.ShowRewarded("reward_placement",
-    reward => Debug.Log("Reward claimed!"),
-    () => Debug.Log("Ad failed"));
+if (Monetization.TryGetModule<IIAPModule>(out var iap))
+{
+    iap.Purchase("product_id", OnSuccess, OnFail);
+}
 
-// Make purchases
-iapModule.Purchase("product_id",
-    () => Debug.Log("Purchase successful!"),
-    () => Debug.Log("Purchase failed"));
+if (Monetization.TryGetModule<IAnalyticsModule>(out var analytics))
+{
+    analytics.SendEvent("level_complete");
+}
 
-// Send analytics
-analyticsModule.SendEvent("level_complete");
-analyticsModule.SendDesignEvent("Gameplay", "Level", "Complete", 1.0f);
-
-// Fetch remote config
-remoteConfig.FetchConfig(config => Debug.Log("Config loaded"));
+if (Monetization.TryGetModule<IRemoteConfig<object>>(out var remoteConfig))
+{
+    remoteConfig.FetchConfig(config => Debug.Log("Config loaded"));
+}
 ```
 
-## Module Types
+## SDK Events
 
-### Ads Module
-
-- **Google Ads**: Full Google Mobile Ads integration with consent management
-- **Extensible**: Easy to add other ad networks (Facebook, Unity Ads, etc.)
-
-### IAP Module
-
-- **Unity IAP**: Complete Unity In-App Purchasing integration
-- **Receipt Validation**: Built-in receipt validation
-- **Product Management**: Easy product catalog management
-
-### Analytics Module
-
-- **Game Analytics**: Full Game Analytics integration
-- **Event Batching**: Automatic event batching for better performance
-- **Custom Events**: Support for custom event types
-
-### Remote Config Module
-
-- **Firebase Remote Config**: Complete Firebase integration
-- **Variable Mapping**: Easy remote variable management
-- **Caching**: Built-in caching for offline support
-
-## Configuration
-
-### MonetizationConfig
-
-Centralized configuration for all modules:
+Provider SDK readiness uses `OnSdkReady` (not lifecycle `OnInitialize()`):
 
 ```csharp
-var config = MonetizationConfig.Instance;
-
-// Runtime configuration
-config.SetLogLevel(LogLevel.Debug);
-config.EnableModule("ads", true);
-config.EnableModule("iap", false);
-
-// Validation
-if (config.ValidateConfiguration())
+if (Monetization.TryGetModule<IAdsModule>(out var ads))
 {
-    Debug.Log("Configuration is valid");
+    ads.OnSdkReady += success => Debug.Log($"AdMob ready: {success}");
 }
 ```
 
-### Performance Monitoring
+## Swapping Providers
+
+To replace AdMob with another network:
+
+1. Add a new folder + asmdef implementing `IAdsModule` (reference `Ads.Abstractions` only).
+2. Add an installer provider entry in `Installer/installer_config.json`.
+3. Swap the module asset on `MonetizationProfile`.
+4. Game code stays on `TryGetModule<IAdsModule>()` — no Core changes.
+
+## Performance Monitoring
 
 ```csharp
-var monitor = PerformanceMonitor.Instance;
+var snapshot = PerformanceMonitor.Instance.GetAdMetrics(AdMetricsTypes.Interstitial);
+Debug.Log($"Shows={snapshot.ShowCount}, LoadSuccess={snapshot.LoadSuccessCount}");
 
-// Monitor operations
-monitor.StartOperation("ad_load");
-// ... perform operation
-monitor.EndOperation("ad_load");
-
-// Get statistics
-float avgDuration = monitor.GetAverageDuration("ad_load");
-float successRate = monitor.GetSuccessRate("ad_load");
-
-// Generate report
-monitor.LogPerformanceReport();
+if (Monetization.TryGetModule<IAdsModule>(out var ads))
+{
+    int showCount = ads.GetInterstitialShowCount();
+}
 ```
 
-## Error Handling
+Ad loads respect `MonetizationConfig.AdLoadTimeout` via built-in timeout watchers.
 
-The system includes comprehensive error handling:
+## Resilient Initialization
+
+If a module fails during init, remaining modules still initialize. Check failures via:
 
 ```csharp
-try
+await Monetization.Initialize();
+foreach (string failure in Monetization.FailedModules)
 {
-    await Monetization.Initialize();
-}
-catch (TimeoutException ex)
-{
-    Debug.LogError("Initialization timed out");
-}
-catch (Exception ex)
-{
-    Debug.LogError($"Initialization failed: {ex.Message}");
+    Debug.LogWarning(failure);
 }
 ```
 
-## Best Practices
+`Monetization.OnError` fires with a summary when any module fails (non-throwing).
 
-### 1. Initialization
+## Hot-Swap Checklist
 
-- Always check `Monetization.IsInitialized` before using modules
-- Subscribe to `OnInitialize` and `OnError` events
-- Use try-catch blocks for error handling
+1. Open `Tools → Monetization → Validate Hot-Swap Readiness` after changing providers.
+2. Remove provider folder/asmdef + uninstall UPM packages via Installer.
+3. Remove or swap the module asset on `MonetizationProfile`.
+4. Confirm game code uses `TryGetModule<T>()` only — never concrete provider types.
+5. Core + Abstractions must compile with zero SDK references.
 
-### 2. Module Usage
+## GameAnalytics UPM Note
 
-- Cache module references for better performance
-- Check module availability before use
-- Handle null returns from `GetModule<T>()`
+Install GameAnalytics via the Monetization Installer (`com.gameanalytics.sdk` from OpenUPM). The legacy `.unitypackage` GA SDK has no asmdef and cannot be referenced from provider assemblies.
 
-### 3. Configuration
+## Troubleshooting
 
-- Validate configuration before initialization
-- Use appropriate log levels for production
-- Enable only necessary modules
+| Issue | Fix |
+|-------|-----|
+| `TryGetModule<IAdsModule>` returns false | Install `ads_google` provider; assign `GoogleAdsModule` on profile |
+| IAP catalog empty | Click **Sync IAP Catalog** on profile inspector or populate `IAPKeys` in `MonetizationKeys.json` |
+| Firebase RC mapper missing | Assign `Content/FireBaseVariableMapper.asset` on `FirebaseRemoteConfig` module |
+| Profile warns about missing asmdef | Re-install provider via Installer or remove module from profile |
+| GA compile errors after install | Use UPM `com.gameanalytics.sdk`, not legacy unitypackage |
 
-### 4. Performance
+## Project Settings Sync
 
-- Monitor critical operations
-- Use async/await patterns
-- Implement proper error handling
+Project settings (package name, version, keystore) sync from `MonetizationKeys.json` via:
+
+- **Editor**: Sync Project button on Monetization Profile inspector
+- **Build**: `BuildProcessor` calls `ProjectSettingsSync.SyncFromJson()` automatically
+
+Store keystore passwords locally in `MonetizationKeys.json` under `ProjectKeys` (template ships with empty passwords).
 
 ## Extending the System
 
 ### Adding a New Ad Network
 
 ```csharp
-[CreateAssetMenu(menuName = "Monetization/AdsModule/FacebookAds", fileName = "FacebookAdsModule", order = 11)]
-public class FacebookAdsModule : AdsModule
+public class AppLovinAdsModule : AdsModule
 {
-    public override void Init()
+    protected override async UTask OnInitialize()
     {
-        // Initialize Facebook Ads SDK
+        // Initialize SDK, then RaiseAdsSdkReady(true);
+        await UTask.CompletedTask;
     }
 
-    public override IAppAd FetchBanner(string placement = "default")
-    {
-        return new FacebookBannerAd(placement);
-    }
-
-    // Implement other ad types...
+    public override IAppAd FetchInterstitial(string placement = "default") { /* ... */ }
+    // Implement other IAdsModule methods
 }
-```
-
-### Adding a New Analytics Provider
-
-```csharp
-[CreateAssetMenu(menuName = "Monetization/AnalyticsModule/FirebaseAnalytics", fileName = "FirebaseAnalyticsModule", order = 12)]
-public class FirebaseAnalyticsModule : AnalyticsModule
-{
-    public override void SendEvent(string name)
-    {
-        // Send to Firebase Analytics
-    }
-
-    // Implement other methods...
-}
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Module not found**: Ensure the module is added to the MonetizationProfile
-2. **Initialization fails**: Check configuration and network connectivity
-3. **Ads not showing**: Verify ad unit IDs and consent status
-4. **IAP not working**: Check product configuration and store setup
-
-### Debug Mode
-
-Enable debug logging for troubleshooting:
-
-```csharp
-SendLog.CurrentLogLevel = LogLevel.Debug;
-SendLog.Enabled = true;
 ```
 
 ## Version History
 
-- **v4.0b**: Enhanced error handling, performance monitoring, configuration management
-- **v3.0**: Added async/await support and improved module architecture
-- **v2.0**: Modular design with interface-based architecture
-- **v1.0**: Initial release with basic monetization features
+- **v4.0b Phase 2**: Asmdef split, hot-swappable providers, resilient init, `TryGetModule`, `OnSdkReady`, runtime services
+- **v4.0b Phase 1**: Unified lifecycle, ad metrics, editor-safe module lookup
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support
-
-For support and questions, please refer to the documentation or create an issue in the repository.
+MIT License — see LICENSE for details.

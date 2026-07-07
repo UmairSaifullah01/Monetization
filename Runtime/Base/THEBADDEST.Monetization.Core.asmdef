@@ -1,0 +1,16 @@
+{
+    "name": "THEBADDEST.Monetization.Core",
+    "rootNamespace": "THEBADDEST.MonetizationApi",
+    "references": [
+        "THEBADDEST.UTask"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
