@@ -1,3 +1,11 @@
-Installer/MonetizationScripts.unitypackage
+# Ignore all Unity package files
 *.unitypackage
+*.unitypackage.meta
+
+# Ignore all tgz package files
 *.tgz
+*.tgz.meta
+
+# (Optional) Specific file
+Installer/MonetizationScripts.unitypackage
+Installer/MonetizationScripts.unitypackage.meta
