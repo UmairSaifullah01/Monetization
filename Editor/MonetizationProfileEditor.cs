@@ -14,7 +14,6 @@ namespace THEBADDEST.MonetizationApi.Editor
 		protected override string collectionTitle => "Modules";
 		protected override string collectionPropertyName => "modules";
 
-		bool generalSettingsFoldout = true;
 		private Texture2D logoTexture;
 		private void OnEnable()
 		{
@@ -53,19 +52,13 @@ namespace THEBADDEST.MonetizationApi.Editor
 		private void DrawGeneralSettings()
 		{
 			EditorGUILayout.BeginVertical(EditorTools.Window);
-			generalSettingsFoldout = EditorGUILayout.Foldout(generalSettingsFoldout, "General Settings", true, EditorTools.BoldFoldout);
-			if (generalSettingsFoldout)
-			{
-				EditorGUI.indentLevel++;
-				DrawProp("enableDebugLogs");
-				DrawProp("logLevel");
-				DrawProp("enablePerformanceLogging");
-				DrawProp("maxRetryAttempts");
-				DrawProp("retryDelaySeconds");
-				DrawProp("checkInternetBeforeInit");
-				DrawProp("validateModulesOnStart");
-				EditorGUI.indentLevel--;
-			}
+			DrawProp("enableDebugLogs");
+			DrawProp("logLevel");
+			DrawProp("enablePerformanceLogging");
+			DrawProp("maxRetryAttempts");
+			DrawProp("retryDelaySeconds");
+			DrawProp("checkInternetBeforeInit");
+			DrawProp("validateModulesOnStart");
 			EditorGUILayout.EndVertical();
 			EditorGUILayout.Space(8);
 		}

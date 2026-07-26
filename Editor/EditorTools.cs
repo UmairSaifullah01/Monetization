@@ -471,64 +471,56 @@ namespace THEBADDEST.MonetizationApi.Editor
 			}
 
 			serializedObject.Update();
-            
-            // Track shown field names to avoid duplicates
-            var shownFields = new HashSet<string>();
-            var skip = skipFieldNames != null ? new HashSet<string>(skipFieldNames) : null;
-            
-            // Draw base class fields first if requested
-            if (includeBaseTypeFields)
-            {
-                Type baseType = target.GetType().BaseType;
-                if (baseType != null)
-                {
-                    var baseFields = baseType.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)
-                        .Where(t => (t.IsPublic && !Attribute.IsDefined(t, typeof(NonSerializedAttribute)) && !Attribute.IsDefined(t, typeof(HideInInspector))) ||
-                                   Attribute.IsDefined(t, typeof(SerializeField)));
-                    
-                    foreach (var field in baseFields)
-                    {
-                        if (skip != null && skip.Contains(field.Name))
-                        {
-                            continue;
-                        }
-                        SerializedProperty property = serializedObject?.FindProperty(field.Name);
-                        if (property != null)
-                        {
-                            EditorGUILayout.BeginHorizontal();
-							GUILayout.Space(10); // Add 10 pixels of padding on the right
-                            EditorGUILayout.PropertyField(property, true);
-                            EditorGUILayout.EndHorizontal();
-                            shownFields.Add(field.Name);
-                        }
-                    }
-                }
-            }
 
-            // Draw current class fields, skipping any that were already shown from base class
-            var fields = target.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)
-                .Where(t => (t.IsPublic && !Attribute.IsDefined(t, typeof(NonSerializedAttribute)) && !Attribute.IsDefined(t, typeof(HideInInspector))) ||
-                           Attribute.IsDefined(t, typeof(SerializeField)));
-                
-            foreach (var field in fields)
-            {
-                if (shownFields.Contains(field.Name)) continue;
-                if (skip != null && skip.Contains(field.Name)) continue;
-                
-                SerializedProperty property = serializedObject.FindProperty(field.Name);
-                if (property != null)
-                {
-                    EditorGUILayout.BeginHorizontal();
-					GUILayout.Space(10);
-                    EditorGUILayout.PropertyField(property, true);
-                    EditorGUILayout.EndHorizontal();
-                }
-            }
+			var shownFields = new HashSet<string>();
+			var skip = skipFieldNames != null ? new HashSet<string>(skipFieldNames) : null;
+
+			if (includeBaseTypeFields)
+			{
+				var typeChain = new List<Type>();
+				for (Type type = target.GetType().BaseType;
+				     type != null && type != typeof(ScriptableObject) && type != typeof(UnityEngine.Object) && type != typeof(object);
+				     type = type.BaseType)
+				{
+					typeChain.Add(type);
+				}
+
+				// Draw from root base downward (e.g. MonetizationModule → AdsModule)
+				for (int i = typeChain.Count - 1; i >= 0; i--)
+				{
+					DrawSerializedFieldsOfType(typeChain[i], serializedObject, shownFields, skip);
+				}
+			}
+
+			DrawSerializedFieldsOfType(target.GetType(), serializedObject, shownFields, skip);
+
 			if (serializedObject.targetObject != null)
 			{
 				serializedObject.ApplyModifiedProperties();
 			}
-        }
+		}
+
+		private static void DrawSerializedFieldsOfType(Type type, SerializedObject serializedObject, HashSet<string> shownFields, HashSet<string> skip)
+		{
+			var fields = type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)
+				.Where(t => (t.IsPublic && !Attribute.IsDefined(t, typeof(NonSerializedAttribute)) && !Attribute.IsDefined(t, typeof(HideInInspector))) ||
+				            Attribute.IsDefined(t, typeof(SerializeField)));
+
+			foreach (var field in fields)
+			{
+				if (shownFields.Contains(field.Name)) continue;
+				if (skip != null && skip.Contains(field.Name)) continue;
+
+				SerializedProperty property = serializedObject.FindProperty(field.Name);
+				if (property == null) continue;
+
+				EditorGUILayout.BeginHorizontal();
+				GUILayout.Space(10);
+				EditorGUILayout.PropertyField(property, true);
+				EditorGUILayout.EndHorizontal();
+				shownFields.Add(field.Name);
+			}
+		}
 
 		public static void DrawAddRemoveButton(Action addEvent, Action removeEvent)
 		{

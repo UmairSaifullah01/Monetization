@@ -89,7 +89,7 @@ namespace THEBADDEST.MonetizationApi.Editor
 				if (editorData.folded)
 				{
 					EditorTools.DrawScript(editorData.reference);
-					EditorTools.DrawAllFields(editorData.reference, editorData.serializedObject, false, skipFieldNames: new[] { "enabled" });
+					EditorTools.DrawAllFields(editorData.reference, editorData.serializedObject, includeBaseTypeFields: true, skipFieldNames: new[] { "enabled","moduleName" });
 				}
 
 				EditorGUILayout.EndVertical();
