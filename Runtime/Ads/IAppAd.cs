@@ -1,7 +1,7 @@
 using System;
 
 
-namespace THEBADDEST.Advertisement
+namespace THEBADDEST.MonetizationApi.Ads
 {
 
 	public class AdValue

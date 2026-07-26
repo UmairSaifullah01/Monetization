@@ -2,7 +2,7 @@ using System;
 using THEBADDEST.MonetizationApi;
 
 
-namespace THEBADDEST.Advertisement
+namespace THEBADDEST.MonetizationApi.Ads
 {
 
 
@@ -66,6 +66,10 @@ namespace THEBADDEST.Advertisement
 
 		[Obsolete("Use OnSdkReady. Will be removed in a future version.")]
 		event Action<bool> onInitialize;
+
+		bool EnableTestMode { get; }
+
+		float AdLoadTimeout { get; }
 
 		IAppAd FetchBanner(string placement = "default");
 

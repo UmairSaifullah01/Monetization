@@ -1,25 +1,24 @@
 using System;
 using System.Collections.Generic;
+using THEBADDEST.MonetizationApi.Ads;
 using THEBADDEST.Tasks;
 using UnityEngine;
 
-
 namespace THEBADDEST.MonetizationApi
 {
-
-
 	public static class Monetization
 	{
-
 		public static event Action<bool> OnInitialize;
 		public static event Action<string> OnError;
 
 		private static MonetizationProfile profile;
+		private static IModuleContext context;
 		private static bool isInitializing = false;
 		private static bool isInitialized = false;
 
 		public static bool IsInitialized => isInitialized;
 		public static bool IsInitializing => isInitializing;
+		public static IModuleContext Context => context;
 
 		public static IReadOnlyList<string> FailedModules =>
 			profile != null ? profile.FailedModules : Array.Empty<string>();
@@ -93,7 +92,7 @@ namespace THEBADDEST.MonetizationApi
 
 			isInitializing = true;
 
-			var config = MonetizationConfig.Instance;
+			MonetizationProfile settingsForRetry = null;
 
 			try
 			{
@@ -104,7 +103,15 @@ namespace THEBADDEST.MonetizationApi
 				}
 
 				profile = profileObject;
-				await profile.Initialize();
+				settingsForRetry = profile;
+				profile.ApplySendLogConfiguration();
+
+				var catalog = CatalogFactory.Create();
+				var metrics = new AdMetrics(profile);
+				PerformanceMonitor.AdMetrics = metrics;
+				context = new ModuleContext(profile, catalog, metrics);
+
+				await profile.Initialize(context);
 
 				if (profile.FailedModules.Count > 0)
 				{
@@ -127,11 +134,13 @@ namespace THEBADDEST.MonetizationApi
 				SendLog.LogError(errorMessage);
 				OnError?.Invoke(errorMessage);
 
-				// Retry logic
-				if (retryAttempts < config.MaxRetryAttempts)
+				int maxRetries = settingsForRetry != null ? settingsForRetry.MaxRetryAttempts : 3;
+				float retryDelay = settingsForRetry != null ? settingsForRetry.RetryDelaySeconds : 2f;
+
+				if (retryAttempts < maxRetries)
 				{
-					SendLog.LogWarning($"Retrying initialization in {config.RetryDelaySeconds} seconds... (Attempt {retryAttempts + 1}/{config.MaxRetryAttempts})");
-					await UTask.Delay(config.RetryDelaySeconds);
+					SendLog.LogWarning($"Retrying initialization in {retryDelay} seconds... (Attempt {retryAttempts + 1}/{maxRetries})");
+					await UTask.Delay(retryDelay);
 					await Initialize(retryAttempts + 1);
 				}
 				else
@@ -148,10 +157,10 @@ namespace THEBADDEST.MonetizationApi
 			isInitialized = false;
 			isInitializing = false;
 			profile = null;
+			context = null;
+			PerformanceMonitor.AdMetrics = NullAdMetrics.Instance;
 			OnInitialize = null;
 			OnError = null;
 		}
 	}
-
-
 }

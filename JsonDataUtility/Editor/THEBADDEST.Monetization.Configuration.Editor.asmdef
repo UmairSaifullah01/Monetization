@@ -1,8 +1,9 @@
 {
   "name": "THEBADDEST.Monetization.Configuration.Editor",
-  "rootNamespace": "THEBADDEST.MonetizationApi",
+  "rootNamespace": "THEBADDEST.MonetizationApi.Editor",
   "references": [
-    "THEBADDEST.Monetization.Configuration"
+    "THEBADDEST.Monetization.Configuration",
+    "THEBADDEST.Monetization.Core"
   ],
   "includePlatforms": [
     "Editor"

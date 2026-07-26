@@ -1,7 +1,7 @@
 using System;
 using THEBADDEST.MonetizationApi;
 
-namespace THEBADDEST.Database
+namespace THEBADDEST.MonetizationApi.Database
 {
 	public interface IDatabaseModule : IModule
 	{

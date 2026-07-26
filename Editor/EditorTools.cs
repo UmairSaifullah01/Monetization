@@ -10,7 +10,7 @@ using Object = UnityEngine.Object;
 #endif
 
 
-namespace THEBADDEST.MonetizationEditor
+namespace THEBADDEST.MonetizationApi.Editor
 {
 
 
@@ -288,6 +288,48 @@ namespace THEBADDEST.MonetizationEditor
 			return state;
 		}
 
+		public static bool DrawHeaderFoldoutWithEnableAndRemove(string title, bool state, bool enabled, out bool newEnabled, Action onRemove)
+		{
+			var backgroundRect = GUILayoutUtility.GetRect(1f, 17f);
+			var foldoutRect = backgroundRect;
+			foldoutRect.y += 1f;
+			foldoutRect.width = 13f;
+			foldoutRect.height = 13f;
+
+			float removeSize = 30f;
+			float enableWidth = 55f;
+			var removeRect = backgroundRect;
+			removeRect.x = backgroundRect.xMax - removeSize;
+			removeRect.width = removeSize;
+			removeRect.height = backgroundRect.height;
+
+			var enableRect = backgroundRect;
+			enableRect.x = removeRect.x - enableWidth - 2f;
+			enableRect.width = enableWidth;
+			enableRect.height = backgroundRect.height;
+
+			var labelRect = backgroundRect;
+			labelRect.xMin += 16f;
+			labelRect.xMax = enableRect.x - 4f;
+
+			newEnabled = GUI.Toggle(enableRect, enabled, enabled ? "On" : "Off", EditorStyles.miniButton);
+			if (GUI.Button(removeRect, EditorGUIUtility.IconContent("Toolbar Minus"), EditorStyles.miniButton))
+			{
+				onRemove?.Invoke();
+			}
+
+			EditorGUI.LabelField(labelRect, title, EditorStyles.boldLabel);
+			state = GUI.Toggle(foldoutRect, state, GUIContent.none, EditorStyles.foldout);
+			var e = Event.current;
+			if (e.type == EventType.MouseDown && labelRect.Contains(e.mousePosition) && e.button == 0)
+			{
+				state = !state;
+				e.Use();
+			}
+
+			return state;
+		}
+
 		public static bool DrawHeaderFoldoutLessWithButton(string title, bool state, GUIContent buttonTitle, Action onButtonClick)
 		{
 			var backgroundRect = GUILayoutUtility.GetRect(1f, 17f);
@@ -421,7 +463,7 @@ namespace THEBADDEST.MonetizationEditor
 			// EditorGUI.EndDisabledGroup();
 		}
 		
-		public static void DrawAllFields(object target, SerializedObject serializedObject, bool includeBaseTypeFields = false)
+		public static void DrawAllFields(object target, SerializedObject serializedObject, bool includeBaseTypeFields = false, string[] skipFieldNames = null)
 		{
 			if (target == null || serializedObject == null || serializedObject.targetObject == null)
 			{
@@ -432,6 +474,7 @@ namespace THEBADDEST.MonetizationEditor
             
             // Track shown field names to avoid duplicates
             var shownFields = new HashSet<string>();
+            var skip = skipFieldNames != null ? new HashSet<string>(skipFieldNames) : null;
             
             // Draw base class fields first if requested
             if (includeBaseTypeFields)
@@ -445,6 +488,10 @@ namespace THEBADDEST.MonetizationEditor
                     
                     foreach (var field in baseFields)
                     {
+                        if (skip != null && skip.Contains(field.Name))
+                        {
+                            continue;
+                        }
                         SerializedProperty property = serializedObject?.FindProperty(field.Name);
                         if (property != null)
                         {
@@ -466,6 +513,7 @@ namespace THEBADDEST.MonetizationEditor
             foreach (var field in fields)
             {
                 if (shownFields.Contains(field.Name)) continue;
+                if (skip != null && skip.Contains(field.Name)) continue;
                 
                 SerializedProperty property = serializedObject.FindProperty(field.Name);
                 if (property != null)

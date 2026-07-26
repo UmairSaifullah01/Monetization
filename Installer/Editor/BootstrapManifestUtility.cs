@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.PackageManager;
 
-namespace Installer
+namespace THEBADDEST.MonetizationApi.Installer
 {
     public static class BootstrapManifestUtility
     {

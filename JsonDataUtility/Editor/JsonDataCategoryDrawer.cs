@@ -3,7 +3,7 @@ using UnityEditor;
 using System.Collections.Generic;
 using THEBADDEST.MonetizationApi;
 
-namespace THEBADDEST.MonetizationEditor
+namespace THEBADDEST.MonetizationApi.Editor
 {
     [CustomPropertyDrawer(typeof(JsonDataCategoryAttribute))]
     public class JsonDataCategoryDrawer : PropertyDrawer

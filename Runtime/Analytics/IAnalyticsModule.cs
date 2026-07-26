@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using THEBADDEST.MonetizationApi;
 
 
-namespace THEBADDEST.Analytics
+namespace THEBADDEST.MonetizationApi.Analytics
 {
 
 

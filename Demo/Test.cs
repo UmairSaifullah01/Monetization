@@ -1,9 +1,9 @@
 using System;
-using THEBADDEST.Advertisement;
+using THEBADDEST.MonetizationApi.Ads;
 using UnityEngine;
 using THEBADDEST.MonetizationApi;
 
-namespace THEBADDEST.RemoteConfigSystem.Demo
+namespace THEBADDEST.MonetizationApi.Demo
 {
 	public class Test : MonoBehaviour
 	{

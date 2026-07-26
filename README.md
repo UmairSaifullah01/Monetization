@@ -1,61 +1,128 @@
 # Monetization System
 
-A comprehensive Unity monetization framework that provides a modular, extensible architecture for ads, in-app purchases, analytics, and remote configuration.
+A modular Unity monetization framework for ads, IAP, analytics, remote config, database, and storage. Game code depends only on **Core + Abstractions**; SDK providers are hot-swappable behind interfaces.
 
 ## Features
 
-- **Modular Architecture**: Hot-swappable SDK providers via isolated asmdefs and installer groups
-- **Resilient Initialization**: Failed modules are logged and skipped; remaining modules continue
-- **Async/Await Support**: Modern async patterns for better performance
-- **Performance Monitoring**: Built-in ad metrics (`LoadSuccessCount`, show counts, last show time)
-- **Configuration Management**: Centralized configuration with runtime updates
-- **ScriptableObject Configuration**: Runtime configuration without code changes
+- **Modular providers** — isolated asmdefs, installer groups, optional UPM packages
+- **Resilient init** — failed modules are logged and skipped; others continue
+- **Async/await** — `UTask`-based initialization and ad flows
+- **ScriptableObject config** — settings and modules live on `MonetizationProfile`
+- **Safe module lookup** — prefer `TryGetModule<T>()` so missing providers never throw
+- **Ad metrics** — load/show counts and timeouts via `IAdMetrics` / `PerformanceMonitor`
 
-## Architecture Overview
+---
+
+## Architecture
 
 ```
-Monetization (Static Entry Point)
-├── MonetizationProfile (Configuration)
-│   ├── IAdsModule provider (e.g. GoogleAdsModule)
-│   ├── IIAPModule provider (e.g. UnityIAPModule)
-│   ├── IAnalyticsModule provider (e.g. GAAnalyticsModule, FAAnalyticsModule)
-│   ├── IRemoteConfig provider (e.g. FirebaseRemoteConfig)
-│   ├── IDatabaseModule provider (e.g. FirebaseDatabaseModule)
-│   └── IStorageModule provider (e.g. FirebaseStorageModule)
-├── MonetizationConfig (Settings)
-├── ModuleRegistry (interface-keyed cache)
-└── PerformanceMonitor (Metrics)
+Monetization (static facade)
+├── MonetizationProfile          // IMonetizationSettings + module list
+│   ├── IAdsModule               // Google / AppLovin MAX
+│   ├── IIAPModule               // Unity IAP
+│   ├── IAnalyticsModule(+)      // GA / Firebase / Facebook / Tenjin
+│   ├── IRemoteConfig<T>         // Firebase Remote Config
+│   ├── IDatabaseModule          // Firebase Realtime Database
+│   └── IStorageModule           // Firebase Cloud Storage
+├── IModuleContext               // Settings + Catalog + AdMetrics
+├── ModuleRegistry               // interface-keyed cache
+└── CatalogFactory               // JsonKeyValueCatalog → MonetizationKeys.json
 ```
 
-### Assembly layout
+### Runtime initialization flow
 
-| Assembly | Folder | SDK refs |
-|----------|--------|----------|
-| `THEBADDEST.Monetization.Core` | `Runtime/Base/` | None |
-| `THEBADDEST.Monetization.Configuration` | `JsonDataUtility/` | None |
-| `THEBADDEST.Monetization.Ads.Abstractions` | `Runtime/Ads/` | None |
-| `THEBADDEST.Monetization.Ads.Google` | `Runtime/Ads/Google/` | AdMob |
-| `THEBADDEST.Monetization.Ads.AppLovin` | `Runtime/Ads/AppLovin/` | AppLovin MAX |
-| `THEBADDEST.Monetization.IAP.Unity` | `Runtime/IAPModule/Unity/` | Unity Purchasing |
-| `THEBADDEST.Monetization.Analytics.GameAnalytics` | `Runtime/Analytics/GameAnalytics/` | GameAnalytics 7.10.6 |
-| `THEBADDEST.Monetization.Analytics.Firebase` | `Runtime/Analytics/Firebase/` | Firebase Analytics |
-| `THEBADDEST.Monetization.Analytics.Facebook` | `Runtime/Analytics/Facebook/` | Facebook Unity SDK |
-| `THEBADDEST.Monetization.Analytics.Tenjin` | `Runtime/Analytics/Tenjin/` | Tenjin SDK |
-| `THEBADDEST.Monetization.RemoteConfig.Firebase` | `Runtime/RemoteConfig/FireBaseRemoteConfig/` | Firebase Remote Config |
-| `THEBADDEST.Monetization.Database.Abstractions` | `Runtime/Database/` | None |
-| `THEBADDEST.Monetization.Database.Firebase` | `Runtime/Database/Firebase/` | Firebase Realtime Database |
-| `THEBADDEST.Monetization.Storage.Abstractions` | `Runtime/Storage/` | None |
-| `THEBADDEST.Monetization.Storage.Firebase` | `Runtime/Storage/Firebase/` | Firebase Cloud Storage |
+```mermaid
+flowchart TD
+  A[Monetization.Initialize] --> B[Resources.Load MonetizationProfile]
+  B --> C[Apply logging from IMonetizationSettings]
+  C --> D[CatalogFactory.Create + AdMetrics]
+  D --> E[Build IModuleContext]
+  E --> F[Profile.Initialize — parallel modules]
+  F --> G{Module OK?}
+  G -->|Yes| H[Register in ModuleRegistry]
+  G -->|No| I[Record FailedModules — continue]
+  H --> J[IsInitialized = true]
+  I --> J
+  J --> K[OnInitialize true]
+  K --> L[Game: TryGetModule T]
+```
 
-Remove a provider assembly + UPM packages without breaking Core or Abstractions.
+### Install / bootstrap flow
 
-## Quick Start
+```mermaid
+flowchart TD
+  A[Copy Installer/ + Logo/ into Assets] --> B[Tools → Monetization → Installer]
+  B --> C{Core already present?}
+  C -->|No| D[Import MonetizationScripts.unitypackage]
+  D --> E[Read installer_config.json]
+  E --> F[Install corePackages + registries]
+  F --> G[Unity recompiles Core / Editor]
+  G --> H[Open Package Manager panel]
+  C -->|Yes| H
+  H --> I[Install / uninstall SDK providers]
+  I --> J[Assign module assets on MonetizationProfile]
+  J --> K[Fill Resources/MonetizationKeys.json]
+  K --> L[Call Monetization.Initialize in game]
+```
 
-### 1. Setup Configuration
+---
 
-Create a `MonetizationProfile` asset in your Resources folder and assign provider module assets (Ads, IAP, Analytics, Remote Config).
+## Providers
 
-If you use **AppLovin MAX**, also set the SDK key in `Resources/MonetizationKeys.json`:
+| Category | Interface | Installer id | Module |
+|----------|-----------|--------------|--------|
+| Ads | `IAdsModule` | `ads_google` | `GoogleAdsModule` |
+| Ads | `IAdsModule` | `ads_applovin` | `AppLovinMaxAdsModule` |
+| IAP | `IIAPModule` | `iap_unity` | `UnityIAPModule` |
+| Analytics | `IAnalyticsModule` / markers | `analytics_gameanalytics` | `GAAnalyticsModule` |
+| Analytics | | `analytics_firebase` | `FAAnalyticsModule` |
+| Analytics | | `analytics_facebook` | `FacebookAnalyticsModule` |
+| Analytics | | `analytics_tenjin` | `TenjinAnalyticsModule` |
+| Remote Config | `IRemoteConfig<T>` | `remoteconfig_firebase` | `FirebaseRemoteConfig` |
+| Database | `IDatabaseModule` | `database_firebase` | `FirebaseDatabaseModule` |
+| Storage | `IStorageModule` | `storage_firebase` | `FirebaseStorageModule` |
+
+---
+
+## Integration guide
+
+### 1. Bootstrap install
+
+1. Copy `Assets/Monetization/Installer/` and `Assets/Monetization/Logo/` into an empty (or target) project.
+2. Open **Tools → Monetization → Installer**.
+3. Click **Install Monetization**.
+
+The installer:
+
+1. Imports `Installer/MonetizationScripts.unitypackage`
+2. Reads `Installer/installer_config.json` and installs **core** UPM packages + registries (UTask, OpenUPM, etc.)
+3. Opens the **Package Manager** panel after compilation
+
+If Core is already present, the same menu opens the Package Manager directly.
+
+### 2. Install providers
+
+In the Package Manager panel, install the SDK providers you need. Local Firebase archives are copied from `Installer/Dependencies/*.tgz` when configured.
+
+| Provider note | Detail |
+|---------------|--------|
+| GameAnalytics | Use UPM `com.gameanalytics.sdk` via installer — not the legacy `.unitypackage` |
+| Tenjin | Git UPM: `https://github.com/tenjin/tenjin-unity-sdk.git#1.16.5` |
+| Facebook | Often imported manually (`FacebookSDK.unitypackage`) unless you vendor a tgz |
+
+See [`Installer/EXPORT.md`](Installer/EXPORT.md) for unitypackage export rules. Maintainers: Dev tools live under [`Dev/`](Dev/) (`Tools → Monetization Dev`).
+
+### 3. Configure assets
+
+| Asset | Path | Purpose |
+|-------|------|---------|
+| Profile | `Resources/MonetizationProfile.asset` | Settings (`IMonetizationSettings`) + assigned modules — **required** |
+| Keys | `Resources/MonetizationKeys.json` | Ad / IAP / analytics / project keys |
+| RC mapper | `Content/FireBaseVariableMapper.asset` | Assign on Firebase Remote Config module |
+
+Create a profile via **Create → THEBADDEST → MonetizationApi → MonetizationProfile** if needed, place it under `Resources/`, and assign provider module ScriptableObjects.
+
+**AppLovin MAX** — set the SDK key in `MonetizationKeys.json`:
 
 ```json
 {
@@ -65,27 +132,16 @@ If you use **AppLovin MAX**, also set the SDK key in `Resources/MonetizationKeys
 }
 ```
 
-### 2. Install (unified installer)
+Optional editor actions on the profile inspector:
 
-**Bootstrap (empty project):** Copy `Assets/Monetization/Installer/` + `Assets/Monetization/Logo/`, then open `Tools → Monetization → Installer` and click **Install Monetization**.
+- **Sync Project** — package name, version, keystore from `ProjectKeys`, and IAP catalog via each `IAPModule.ApplyCatalogFromJson()`  
+Build-time: `BuildProcessor` also calls `ProjectSettingsSync.SyncFromJson()`.
 
-The installer:
-
-1. Imports `MonetizationScripts.unitypackage`
-2. Reads `Installer/installer_config.json` and installs **core** UPM packages + registries (UTask)
-3. Opens the **Package Manager** panel in the same window after compilation
-
-**Package Manager (same menu after install):** Install or uninstall SDK providers from `installer_config.json`. Local Firebase archives are copied from `Installer/Dependencies/*.tgz` per config.
-
-Provider assemblies compile only when their UPM package is present (`versionDefines` + `defineConstraints`). See [`Installer/EXPORT.md`](Installer/EXPORT.md) for unitypackage export rules.
-
-**Maintainers only:** Dev utilities (e.g. generate `installer_config.json` from manifest) live in [`Dev/`](Dev/) and are excluded from bootstrap and unitypackage exports. Menu: `Tools → Monetization Dev`.
-
-### 3. Initialize the System
+### 4. Initialize
 
 ```csharp
 using THEBADDEST.MonetizationApi;
-using THEBADDEST.Advertisement;
+using THEBADDEST.MonetizationApi.Ads;
 
 public class GameManager : MonoBehaviour
 {
@@ -107,13 +163,16 @@ public class GameManager : MonoBehaviour
 }
 ```
 
-### 4. Use Modules Safely
+Demo reference: `Demo/Test.cs` + `Demo/Test.unity`.
 
-Prefer `TryGetModule` so missing providers never throw:
+### 5. Use modules
+
+Always prefer `TryGetModule` so missing providers never throw:
 
 ```csharp
 if (Monetization.TryGetModule<IAdsModule>(out var ads))
 {
+    ads.OnSdkReady += ok => Debug.Log($"Ads SDK ready: {ok}");
     ads.ShowInterstitial();
 }
 
@@ -136,86 +195,16 @@ if (Monetization.TryGetModule<IRemoteConfig<object>>(out var remoteConfig))
 
 if (Monetization.TryGetModule<IDatabaseModule>(out var database))
 {
-    database.SetValue("players/1/score", 100, success => Debug.Log($"Saved: {success}"));
+    database.SetValue("players/1/score", 100, ok => Debug.Log($"Saved: {ok}"));
 }
 
 if (Monetization.TryGetModule<IStorageModule>(out var storage))
 {
-    storage.UploadBytes("avatars/user.png", imageBytes, success => Debug.Log($"Uploaded: {success}"));
+    storage.UploadBytes("avatars/user.png", imageBytes, ok => Debug.Log($"Uploaded: {ok}"));
 }
 ```
 
-## SDK Events
-
-Provider SDK readiness uses `OnSdkReady` (not lifecycle `OnInitialize()`):
-
-```csharp
-if (Monetization.TryGetModule<IAdsModule>(out var ads))
-{
-    ads.OnSdkReady += success => Debug.Log($"AdMob ready: {success}");
-}
-```
-
-## Multi-Provider Analytics Routing
-
-Use provider markers or the `Analytics` facade when different game flows should target different analytics SDKs.
-
-```csharp
-// Generic event to selected providers.
-Analytics.SendEvent("level_complete", AnalyticsProviders.GameAnalytics | AnalyticsProviders.Firebase);
-
-// Facebook-only purchase.
-if (Monetization.TryGetModule<IFacebookAnalyticsModule>(out var facebook))
-{
-    facebook.LogPurchase(4.99f, "USD");
-}
-
-// Tenjin-only ad impression.
-if (Monetization.TryGetModule<ITenjinAnalyticsModule>(out var tenjin))
-{
-    tenjin.SendAdImpression("applovin", 0.024d, "rewarded_level_end");
-}
-```
-
-For orchestration scripts (ad events, IAP forwarding, campaign callbacks), use:
-
-- `Monetization.GetModules<IAnalyticsModule>()` to iterate available analytics modules.
-- Marker interfaces (`IGAAnalyticsModule`, `IFirebaseAnalyticsModule`, `IFacebookAnalyticsModule`, `ITenjinAnalyticsModule`) for provider-specific behavior.
-
-Automatic ad-event routing was removed from base analytics modules so game code controls exactly where events are sent.
-
-## Provider Notes
-
-- `analytics_tenjin` installs via UPM Git URL: `https://github.com/tenjin/tenjin-unity-sdk.git#1.16.5`.
-- `analytics_facebook` is wired in installer/profile, but Meta's official Unity SDK is typically imported manually (`FacebookSDK.unitypackage`) unless you vendor your own tgz.
-- After these changes, re-export `Installer/MonetizationScripts.unitypackage` from Unity so bootstrap installers include the new modules.
-
-## Swapping Providers
-
-To replace AdMob with another network:
-
-1. Add a new folder + asmdef implementing `IAdsModule` (reference `Ads.Abstractions` only).
-2. Add an installer provider entry in `Installer/installer_config.json`.
-3. Swap the module asset on `MonetizationProfile`.
-4. Game code stays on `TryGetModule<IAdsModule>()` — no Core changes.
-
-## Performance Monitoring
-
-```csharp
-var snapshot = PerformanceMonitor.Instance.GetAdMetrics(AdMetricsTypes.Interstitial);
-Debug.Log($"Shows={snapshot.ShowCount}, LoadSuccess={snapshot.LoadSuccessCount}");
-
-if (Monetization.TryGetModule<IAdsModule>(out var ads))
-{
-    int showCount = ads.GetInterstitialShowCount();
-}
-```
-
-Ad loads respect `MonetizationConfig.AdLoadTimeout` via built-in timeout watchers.
-
-## Resilient Initialization
-
-If a module fails during init, remaining modules still initialize. Check failures via:
+After init, check partial failures:
 
 ```csharp
 await Monetization.Initialize();
@@ -227,43 +216,65 @@ foreach (string failure in Monetization.FailedModules)
 
 `Monetization.OnError` fires with a summary when any module fails (non-throwing).
 
-## Hot-Swap Checklist
+---
 
-1. Open `Tools → Monetization → Validate Hot-Swap Readiness` after changing providers.
-2. Remove provider folder/asmdef + uninstall UPM packages via Installer.
-3. Remove or swap the module asset on `MonetizationProfile`.
-4. Confirm game code uses `TryGetModule<T>()` only — never concrete provider types.
-5. Core + Abstractions must compile with zero SDK references.
+## Analytics routing
 
-## GameAnalytics UPM Note
-
-Install GameAnalytics via the Monetization Installer (`com.gameanalytics.sdk` from OpenUPM). The legacy `.unitypackage` GA SDK has no asmdef and cannot be referenced from provider assemblies.
-
-## Troubleshooting
-
-| Issue | Fix |
-|-------|-----|
-| `TryGetModule<IAdsModule>` returns false | Install `ads_google` provider; assign `GoogleAdsModule` on profile |
-| IAP catalog empty | Click **Sync IAP Catalog** on profile inspector or populate `IAPKeys` in `MonetizationKeys.json` |
-| Firebase RC mapper missing | Assign `Content/FireBaseVariableMapper.asset` on `FirebaseRemoteConfig` module |
-| Profile warns about missing asmdef | Re-install provider via Installer or remove module from profile |
-| GA compile errors after install | Use UPM `com.gameanalytics.sdk`, not legacy unitypackage |
-
-## Project Settings Sync
-
-Project settings (package name, version, keystore) sync from `MonetizationKeys.json` via:
-
-- **Editor**: Sync Project button on Monetization Profile inspector
-- **Build**: `BuildProcessor` calls `ProjectSettingsSync.SyncFromJson()` automatically
-
-Store keystore passwords locally in `MonetizationKeys.json` under `ProjectKeys` (template ships with empty passwords).
-
-## Extending the System
-
-### Adding a New Ad Network
+Game code owns where events go. Automatic ad-event routing was removed from base analytics modules.
 
 ```csharp
-public class AppLovinAdsModule : AdsModule
+Analytics.SendEvent("level_complete", AnalyticsProviders.GameAnalytics | AnalyticsProviders.Firebase);
+
+if (Monetization.TryGetModule<IFacebookAnalyticsModule>(out var facebook))
+{
+    facebook.LogPurchase(4.99f, "USD");
+}
+```
+
+For orchestration (ad events, IAP forwarding):
+
+- `Monetization.GetModules<IAnalyticsModule>()` — iterate available modules
+- Marker interfaces: `IGAAnalyticsModule`, `IFirebaseAnalyticsModule`, `IFacebookAnalyticsModule`, `ITenjinAnalyticsModule`
+
+---
+
+## Swapping providers
+
+1. Implement `IAdsModule` (or other abstraction) in a new folder + asmdef that references **Abstractions only**.
+2. Add an installer provider entry in `Installer/installer_config.json`.
+3. Swap the module asset on `MonetizationProfile`.
+4. Game code stays on `TryGetModule<IAdsModule>()` — no Core changes.
+
+**Hot-swap checklist**
+
+1. **Tools → Monetization → Validate Hot-Swap Readiness**
+2. Uninstall provider UPM packages via Installer; remove provider folder/asmdef if needed
+3. Remove or swap the module asset on the profile
+4. Confirm game asmdefs reference **Core + Abstractions only** (never concrete provider types)
+5. Core + Abstractions must compile with zero SDK references
+
+---
+
+## Performance monitoring
+
+```csharp
+var snapshot = PerformanceMonitor.Instance.GetAdMetrics(AdMetricsTypes.Interstitial);
+Debug.Log($"Shows={snapshot.ShowCount}, LoadSuccess={snapshot.LoadSuccessCount}");
+
+if (Monetization.TryGetModule<IAdsModule>(out var ads))
+{
+    int showCount = ads.GetInterstitialShowCount();
+}
+```
+
+Ad loads respect `IAdsModule.AdLoadTimeout` via built-in timeout watchers.
+
+---
+
+## Extending — new ad network
+
+```csharp
+public class CustomAdsModule : AdsModule
 {
     protected override async UTask OnInitialize()
     {
@@ -272,12 +283,38 @@ public class AppLovinAdsModule : AdsModule
     }
 
     public override IAppAd FetchInterstitial(string placement = "default") { /* ... */ }
-    // Implement other IAdsModule methods
+    // Implement remaining IAdsModule members
 }
 ```
 
+---
+
+## Troubleshooting
+
+| Issue | Fix |
+|-------|-----|
+| `TryGetModule<IAdsModule>` returns false | Install ads provider; assign module on `MonetizationProfile` |
+| Profile not found at runtime | Ensure asset is named/placed so `Resources.Load("MonetizationProfile")` works |
+| IAP catalog empty | **Sync Project** on profile inspector (runs `IAPModule.ApplyCatalogFromJson`) or fill `IAPKeys` in keys JSON |
+| Firebase RC mapper missing | Assign `Content/FireBaseVariableMapper.asset` on the RC module |
+| Profile warns about missing asmdef | Re-install provider via Installer or remove module from profile |
+| GA compile errors after install | Use UPM `com.gameanalytics.sdk`, not legacy unitypackage |
+| Settings / `MonetizationConfig` missing | Config SO was removed — use settings on `MonetizationProfile` (`IMonetizationSettings`) |
+
+---
+
+## Migration notes (v4.1)
+
+- **`MonetizationConfig` removed** — logging, timeouts, retries, and test mode live on `MonetizationProfile` / `IMonetizationSettings`
+- **`IPlacementCatalog` removed** — use `IKeyValueCatalog` / JSON catalog from `MonetizationKeys.json`
+- Prefer **`OnSdkReady`** for SDK readiness (lifecycle `OnInitialize` on modules is separate)
+- Init builds an **`IModuleContext`** (settings + catalog + ad metrics) shared by all modules
+
+---
+
 ## Version History
 
+- **v4.1**: Profile settings (`IMonetizationSettings` / `IModuleContext`); `MonetizationConfig` removed; catalog via `IKeyValueCatalog`
 - **v4.0b Phase 2**: Asmdef split, hot-swappable providers, resilient init, `TryGetModule`, `OnSdkReady`, runtime services
 - **v4.0b Phase 1**: Unified lifecycle, ad metrics, editor-safe module lookup
 

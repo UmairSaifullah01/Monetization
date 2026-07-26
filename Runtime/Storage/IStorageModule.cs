@@ -1,7 +1,7 @@
 using System;
 using THEBADDEST.MonetizationApi;
 
-namespace THEBADDEST.Storage
+namespace THEBADDEST.MonetizationApi.Storage
 {
 	public interface IStorageModule : IModule
 	{

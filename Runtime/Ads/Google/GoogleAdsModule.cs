@@ -5,7 +5,7 @@ using THEBADDEST.MonetizationApi;
 using THEBADDEST.Tasks;
 using UnityEngine;
 
-namespace THEBADDEST.Advertisement
+namespace THEBADDEST.MonetizationApi.Ads
 {
 	public enum AdSizeType
 	{
@@ -42,8 +42,8 @@ namespace THEBADDEST.Advertisement
 					return string.Empty;
 				}
 
-				JsonDataUtility.LoadData();
-				string jsonBannerId = JsonDataUtility.GetData(AD_KEYS_CATEGORY, m_UnitIdKey);
+				var catalog = Monetization.Context?.Catalog ?? CatalogFactory.Create();
+				string jsonBannerId = catalog?.Resolve(AD_KEYS_CATEGORY, m_UnitIdKey);
 				if (!string.IsNullOrEmpty(jsonBannerId))
 				{
 					return jsonBannerId;
@@ -111,21 +111,14 @@ namespace THEBADDEST.Advertisement
 
 		protected override async UTask OnInitialize()
 		{
-			var configAsset = MonetizationConfig.Instance;
-			if (!configAsset.EnableAds)
-			{
-				SendLog.LogModule(ModuleName, "Ads are disabled by MonetizationConfig.", LogLevel.Warning);
-				return;
-			}
-
 			var settings = new GoogleAdsSettings
 			{
 				BannerData = bannerData,
 				TestDeviceIds = testDeviceIds
 			};
 
-			_service = new GoogleAdsService(settings, new JsonPlacementCatalog(), RaiseAdsSdkReady, ModuleName);
-			await _service.InitializeAsync(configAsset.EnableTestMode);
+			_service = new GoogleAdsService(settings, Context.Catalog, RaiseAdsSdkReady, ModuleName);
+			await _service.InitializeAsync(EnableTestMode);
 			bannerData = settings.BannerData;
 		}
 

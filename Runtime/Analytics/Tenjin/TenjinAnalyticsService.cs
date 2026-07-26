@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using THEBADDEST.MonetizationApi;
 
-namespace THEBADDEST.Analytics
+namespace THEBADDEST.MonetizationApi.Analytics
 {
 	public class TenjinAnalyticsService
 	{

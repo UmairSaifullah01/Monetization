@@ -2,7 +2,7 @@ using System;
 using THEBADDEST.MonetizationApi;
 using THEBADDEST.Tasks;
 
-namespace THEBADDEST.Database
+namespace THEBADDEST.MonetizationApi.Database
 {
 	public class FirebaseDatabaseModule : DatabaseModule
 	{
@@ -10,13 +10,6 @@ namespace THEBADDEST.Database
 
 		protected override async UTask OnInitialize()
 		{
-			var configAsset = MonetizationConfig.Instance;
-			if (!configAsset.EnableDatabase)
-			{
-				SendLog.LogModule(ModuleName, "Database is disabled by MonetizationConfig.", LogLevel.Warning);
-				return;
-			}
-
 			_service = new FirebaseDatabaseService(ModuleName, RaiseSdkInitialized);
 			await _service.InitializeAsync();
 		}
@@ -63,12 +56,6 @@ namespace THEBADDEST.Database
 
 		private bool EnsureReady()
 		{
-			if (!MonetizationConfig.Instance.EnableDatabase)
-			{
-				SendLog.LogModule(ModuleName, "Database is disabled by MonetizationConfig.", LogLevel.Warning);
-				return false;
-			}
-
 			if (_service == null || !_service.IsReady)
 			{
 				SendLog.LogModule(ModuleName, "Firebase Database is not initialized.", LogLevel.Warning);

@@ -5,7 +5,7 @@ using Firebase.Extensions;
 using THEBADDEST.Tasks;
 using THEBADDEST.MonetizationApi;
 
-namespace THEBADDEST.Analytics
+namespace THEBADDEST.MonetizationApi.Analytics
 {
 	public class FirebaseAnalyticsService
 	{

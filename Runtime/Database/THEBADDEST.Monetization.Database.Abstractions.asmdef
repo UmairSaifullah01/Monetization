@@ -1,6 +1,6 @@
 {
     "name": "THEBADDEST.Monetization.Database.Abstractions",
-    "rootNamespace": "THEBADDEST.Database",
+    "rootNamespace": "THEBADDEST.MonetizationApi.Database",
     "references": [
         "THEBADDEST.Monetization.Core",
         "THEBADDEST.UTask"

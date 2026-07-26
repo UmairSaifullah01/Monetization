@@ -8,11 +8,22 @@ using UnityEngine;
 namespace THEBADDEST.MonetizationApi
 {
 	/// <summary>
-	/// ScriptableObject that holds and manages all monetization modules.
+	/// ScriptableObject that holds settings and all monetization modules.
 	/// </summary>
 	[CreateAssetMenu(menuName = "THEBADDEST/MonetizationApi/MonetizationProfile", fileName = "MonetizationProfile", order = 0)]
-	public class MonetizationProfile : ScriptableObject, IEnumerable<MonetizationModule>
+	public class MonetizationProfile : ScriptableObject, IEnumerable<MonetizationModule>, IMonetizationSettings
 	{
+		[Header("General Settings")]
+		[SerializeField] private bool enableDebugLogs = true;
+		[SerializeField] private LogLevel logLevel = LogLevel.Info;
+		[SerializeField] private bool enablePerformanceLogging = false;
+		[SerializeField] private int maxRetryAttempts = 3;
+		[SerializeField] private float retryDelaySeconds = 2f;
+		[Tooltip("If enabled, checks for internet connectivity before initializing modules.")]
+		[SerializeField] private bool checkInternetBeforeInit = true;
+		[Tooltip("If enabled, validates and removes duplicate modules on start.")]
+		[SerializeField] private bool validateModulesOnStart = true;
+
 		/// <summary>
 		/// List of all modules in this profile. Only one module per type is allowed.
 		/// </summary>
@@ -21,13 +32,20 @@ namespace THEBADDEST.MonetizationApi
 		private bool isInitialized = false;
 		private readonly ModuleRegistry moduleRegistry = new ModuleRegistry();
 		private readonly List<string> failedModules = new List<string>();
+		private IModuleContext moduleContext;
 
 		public bool IsInitialized => isInitialized;
 		public IReadOnlyList<string> FailedModules => failedModules;
+		public IModuleContext Context => moduleContext;
 
-		/// <summary>
-		/// Checks if the device has internet connectivity.
-		/// </summary>
+		public bool EnableDebugLogs => enableDebugLogs;
+		public LogLevel LogLevel => logLevel;
+		public bool EnablePerformanceLogging => enablePerformanceLogging;
+		public int MaxRetryAttempts => maxRetryAttempts;
+		public float RetryDelaySeconds => retryDelaySeconds;
+		public bool CheckInternetBeforeInit => checkInternetBeforeInit;
+		public bool ValidateModulesOnStart => validateModulesOnStart;
+
 		public static bool IsInternetAvailable()
 		{
 #if UNITY_EDITOR
@@ -35,6 +53,12 @@ namespace THEBADDEST.MonetizationApi
 #else
 			return Application.internetReachability != NetworkReachability.NotReachable;
 #endif
+		}
+
+		public void ApplySendLogConfiguration()
+		{
+			SendLog.Enabled = enableDebugLogs;
+			SendLog.CurrentLogLevel = logLevel;
 		}
 
 		public IEnumerator<MonetizationModule> GetEnumerator()
@@ -47,10 +71,7 @@ namespace THEBADDEST.MonetizationApi
 			return GetEnumerator();
 		}
 
-		/// <summary>
-		/// Initializes all modules in the profile asynchronously.
-		/// </summary>
-		public async UTask Initialize()
+		public async UTask Initialize(IModuleContext context = null)
 		{
 			if (isInitialized)
 			{
@@ -58,16 +79,16 @@ namespace THEBADDEST.MonetizationApi
 				return;
 			}
 
-			var config = MonetizationConfig.Instance;
-			config.ApplySendLogConfiguration();
+			moduleContext = context ?? new ModuleContext(this, NullKeyValueCatalog.Instance, NullAdMetrics.Instance);
+			ApplySendLogConfiguration();
 
-			if (config.CheckInternetBeforeInit && !IsInternetAvailable())
+			if (CheckInternetBeforeInit && !IsInternetAvailable())
 			{
 				SendLog.LogError("No internet connection. Initialization aborted.");
 				return;
 			}
 
-			if (config.ValidateModulesOnStart)
+			if (ValidateModulesOnStart)
 			{
 				RemoveDuplicateModules();
 			}
@@ -84,6 +105,13 @@ namespace THEBADDEST.MonetizationApi
 					continue;
 				}
 
+				if (!module.IsEnabled)
+				{
+					SendLog.LogModule(module.ModuleName, "Module is disabled. Skipping initialization.", LogLevel.Warning);
+					continue;
+				}
+
+				module.BindContext(moduleContext);
 				initializationTasks.Add(InitModuleSafe(module, failedModules, succeeded));
 			}
 
@@ -123,7 +151,7 @@ namespace THEBADDEST.MonetizationApi
 				{
 					succeeded.Add(module);
 				}
-				else
+				else if (module.IsEnabled)
 				{
 					failed.Add($"{module.GetType().Name}: initialization did not complete");
 				}
@@ -171,9 +199,6 @@ namespace THEBADDEST.MonetizationApi
 			}
 		}
 
-		/// <summary>
-		/// Finds a module without requiring runtime initialization. Use in editor/build flows.
-		/// </summary>
 		public T FindModule<T>() where T : class, IModule
 		{
 			foreach (MonetizationModule module in modules)
@@ -187,9 +212,6 @@ namespace THEBADDEST.MonetizationApi
 			return default;
 		}
 
-		/// <summary>
-		/// Gets a module of the specified type.
-		/// </summary>
 		public T GetModule<T>() where T : class, IModule
 		{
 			if (!isInitialized)
@@ -208,9 +230,6 @@ namespace THEBADDEST.MonetizationApi
 			return default;
 		}
 
-		/// <summary>
-		/// Tries to get a module of the specified type without logging errors.
-		/// </summary>
 		public bool TryGetModule<T>(out T module) where T : class, IModule
 		{
 			module = default;
@@ -222,9 +241,6 @@ namespace THEBADDEST.MonetizationApi
 			return moduleRegistry.TryGet(out module);
 		}
 
-		/// <summary>
-		/// Gets all modules assignable to the specified type.
-		/// </summary>
 		public IReadOnlyList<T> GetModules<T>() where T : class, IModule
 		{
 			if (!isInitialized)
@@ -235,9 +251,6 @@ namespace THEBADDEST.MonetizationApi
 			return moduleRegistry.GetAll<T>();
 		}
 
-		/// <summary>
-		/// Updates all modules in the profile.
-		/// </summary>
 		public void UpdateModules()
 		{
 			foreach (MonetizationModule module in modules)
@@ -249,15 +262,12 @@ namespace THEBADDEST.MonetizationApi
 			}
 		}
 
-		/// <summary>
-		/// Resets the profile and all module caches.
-		/// </summary>
 		public void Reset()
 		{
 			isInitialized = false;
 			failedModules.Clear();
 			moduleRegistry.Clear();
+			moduleContext = null;
 		}
-
 	}
 }

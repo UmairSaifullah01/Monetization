@@ -1,7 +1,7 @@
 using THEBADDEST.MonetizationApi;
 using THEBADDEST.Tasks;
 
-namespace THEBADDEST.Advertisement
+namespace THEBADDEST.MonetizationApi.Ads
 {
 
 
@@ -9,7 +9,12 @@ namespace THEBADDEST.Advertisement
 	{
 		public static async UTask Watch(string adType, string unitId, System.Func<bool> isSettled)
 		{
-			float timeout = MonetizationConfig.Instance.AdLoadTimeout;
+			float timeout = 30f;
+			if (Monetization.TryGetModule<IAdsModule>(out var ads))
+			{
+				timeout = ads.AdLoadTimeout;
+			}
+
 			await UTask.Delay(timeout);
 			if (isSettled())
 			{

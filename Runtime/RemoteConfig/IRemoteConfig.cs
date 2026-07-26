@@ -1,7 +1,7 @@
 using System;
 using THEBADDEST.MonetizationApi;
 
-namespace THEBADDEST.RemoteConfigSystem
+namespace THEBADDEST.MonetizationApi.RemoteConfig
 {
 	public interface IRemoteConfig<T> : IModule
 	{

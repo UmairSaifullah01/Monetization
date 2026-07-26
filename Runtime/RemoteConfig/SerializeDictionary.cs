@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace THEBADDEST.RemoteConfigSystem
+namespace THEBADDEST.MonetizationApi.RemoteConfig
 {
     [Serializable]
     public struct KeyValue<TKey, TValue>

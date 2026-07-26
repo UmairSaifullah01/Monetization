@@ -17,9 +17,15 @@ namespace THEBADDEST.MonetizationApi
 
         protected bool isInitialized = false;
         protected bool isInitializing = false;
+        protected IModuleContext Context { get; private set; }
 
         /// <inheritdoc/>
         public bool IsEnabled => enabled;
+
+        public void BindContext(IModuleContext context)
+        {
+            Context = context;
+        }
         /// <inheritdoc/>
         public bool IsInitialized => isInitialized;
         /// <inheritdoc/>

@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using GoogleMobileAds.Api;
 using GoogleMobileAds.Ump.Api;
 using THEBADDEST.MonetizationApi;
+using THEBADDEST.MonetizationApi.Ads;
 using THEBADDEST.Tasks;
 using UnityEngine;
 
-namespace THEBADDEST.Advertisement
+namespace THEBADDEST.MonetizationApi.Ads
 {
 	public class GoogleAdsSettings
 	{
@@ -23,7 +24,7 @@ namespace THEBADDEST.Advertisement
 	public class GoogleAdsService
 	{
 		private readonly GoogleAdsSettings _settings;
-		private readonly IPlacementCatalog _catalog;
+		private readonly IKeyValueCatalog _catalog;
 		private readonly Action<bool> _onSdkReady;
 		private readonly string _moduleName;
 
@@ -38,7 +39,7 @@ namespace THEBADDEST.Advertisement
 
 		public bool CanRequestAds => ConsentInformation.CanRequestAds();
 
-		public GoogleAdsService(GoogleAdsSettings settings, IPlacementCatalog catalog, Action<bool> onSdkReady, string moduleName)
+		public GoogleAdsService(GoogleAdsSettings settings, IKeyValueCatalog catalog, Action<bool> onSdkReady, string moduleName)
 		{
 			_settings = settings;
 			_catalog = catalog;
@@ -75,7 +76,7 @@ namespace THEBADDEST.Advertisement
 
 			if (enableTestMode)
 			{
-				SendLog.LogModule(_moduleName, "Test mode enabled by MonetizationConfig.");
+				SendLog.LogModule(_moduleName, "Test mode enabled.");
 			}
 
 			SetupAllAds();

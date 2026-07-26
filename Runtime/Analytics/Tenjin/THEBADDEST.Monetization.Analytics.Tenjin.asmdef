@@ -1,9 +1,8 @@
-{
+﻿{
     "name": "THEBADDEST.Monetization.Analytics.Tenjin",
-    "rootNamespace": "THEBADDEST.Analytics",
+    "rootNamespace": "THEBADDEST.MonetizationApi.Analytics",
     "references": [
         "THEBADDEST.Monetization.Analytics.Abstractions",
-        "THEBADDEST.Monetization.Configuration",
         "THEBADDEST.Monetization.Core",
         "THEBADDEST.UTask"
     ],
@@ -12,7 +11,7 @@
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
-    "autoReferenced": true,
+    "autoReferenced": false,
     "defineConstraints": [
         "MONETIZATION_TENJIN"
     ],

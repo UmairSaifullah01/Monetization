@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 
-namespace THEBADDEST.RemoteConfigSystem
+namespace THEBADDEST.MonetizationApi.RemoteConfig
 {
 
 

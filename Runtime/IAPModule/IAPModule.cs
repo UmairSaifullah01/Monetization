@@ -15,6 +15,7 @@ namespace THEBADDEST.MonetizationApi
 		public void ApplyCatalogFromJson()
 		{
 			IAPCatalogLoader.ApplyToCatalog(catalog);
+			SendLog.LogModule(ModuleName, "IAP catalog synced from MonetizationKeys.json.");
 		}
 		
 		protected Dictionary<string, Action> successCallbacks = new Dictionary<string, Action>();

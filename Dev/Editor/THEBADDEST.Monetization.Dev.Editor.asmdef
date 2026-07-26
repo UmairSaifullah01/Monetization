@@ -1,6 +1,6 @@
 {
     "name": "THEBADDEST.Monetization.Dev.Editor",
-    "rootNamespace": "THEBADDEST.MonetizationDev",
+    "rootNamespace": "THEBADDEST.MonetizationApi.Dev",
     "references": [
         "THEBADDEST.Monetization.Configuration"
     ],

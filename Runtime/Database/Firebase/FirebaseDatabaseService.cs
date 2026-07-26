@@ -7,7 +7,7 @@ using THEBADDEST.MonetizationApi;
 using LogLevel = THEBADDEST.MonetizationApi.LogLevel;
 
 
-namespace THEBADDEST.Database
+namespace THEBADDEST.MonetizationApi.Database
 {
 	public class FirebaseDatabaseService
 	{

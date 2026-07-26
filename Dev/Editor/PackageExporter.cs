@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace THEBADDEST.MonetizationDev
+namespace THEBADDEST.MonetizationApi.Dev
 {
     /// <summary>
     /// Maintainer-only utility to export the two shipping packages:

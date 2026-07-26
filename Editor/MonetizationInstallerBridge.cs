@@ -1,6 +1,6 @@
 using UnityEditor;
 
-namespace THEBADDEST.MonetizationEditor
+namespace THEBADDEST.MonetizationApi.Editor
 {
     [InitializeOnLoad]
     public static class MonetizationInstallerBridge

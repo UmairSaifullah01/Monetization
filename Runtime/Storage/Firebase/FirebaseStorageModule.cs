@@ -2,7 +2,7 @@ using System;
 using THEBADDEST.MonetizationApi;
 using THEBADDEST.Tasks;
 
-namespace THEBADDEST.Storage
+namespace THEBADDEST.MonetizationApi.Storage
 {
 	public class FirebaseStorageModule : StorageModule
 	{
@@ -10,13 +10,6 @@ namespace THEBADDEST.Storage
 
 		protected override async UTask OnInitialize()
 		{
-			var configAsset = MonetizationConfig.Instance;
-			if (!configAsset.EnableStorage)
-			{
-				SendLog.LogModule(ModuleName, "Storage is disabled by MonetizationConfig.", LogLevel.Warning);
-				return;
-			}
-
 			_service = new FirebaseStorageService(ModuleName, RaiseSdkInitialized);
 			await _service.InitializeAsync();
 		}
@@ -65,12 +58,6 @@ namespace THEBADDEST.Storage
 
 		private bool EnsureReady()
 		{
-			if (!MonetizationConfig.Instance.EnableStorage)
-			{
-				SendLog.LogModule(ModuleName, "Storage is disabled by MonetizationConfig.", LogLevel.Warning);
-				return false;
-			}
-
 			if (_service == null || !_service.IsReady)
 			{
 				SendLog.LogModule(ModuleName, "Firebase Storage is not initialized.", LogLevel.Warning);

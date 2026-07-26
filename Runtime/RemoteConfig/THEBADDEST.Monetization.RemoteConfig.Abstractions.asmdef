@@ -1,6 +1,6 @@
 {
   "name": "THEBADDEST.Monetization.RemoteConfig.Abstractions",
-  "rootNamespace": "THEBADDEST.RemoteConfigSystem",
+  "rootNamespace": "THEBADDEST.MonetizationApi.RemoteConfig",
   "references": [
     "THEBADDEST.Monetization.Core"
   ],

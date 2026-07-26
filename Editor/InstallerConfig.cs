@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace THEBADDEST.MonetizationEditor
+namespace THEBADDEST.MonetizationApi.Editor
 {
     [Serializable]
     public class ProviderConfig

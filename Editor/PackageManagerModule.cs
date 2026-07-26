@@ -2,7 +2,7 @@ using THEBADDEST.MonetizationApi;
 using UnityEditor;
 using UnityEngine;
 
-namespace THEBADDEST.MonetizationEditor
+namespace THEBADDEST.MonetizationApi.Editor
 {
     public class PackageManagerModule
     {
@@ -26,7 +26,7 @@ namespace THEBADDEST.MonetizationEditor
             if (_config == null)
             {
                 EditorGUILayout.HelpBox(
-                    "installer_config.json not found. Run Tools → Monetization → Installer to import the framework.",
+                    "installer_config.json not found. Run Tools â†’ Monetization â†’ Installer to import the framework.",
                     MessageType.Warning);
                 return;
             }

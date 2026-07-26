@@ -1,8 +1,9 @@
 using System;
 using THEBADDEST.MonetizationApi;
+using THEBADDEST.MonetizationApi.Ads;
 
 
-namespace THEBADDEST.Advertisement
+namespace THEBADDEST.MonetizationApi.Ads
 {
 
 

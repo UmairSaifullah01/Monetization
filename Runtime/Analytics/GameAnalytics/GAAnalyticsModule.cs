@@ -5,7 +5,7 @@ using THEBADDEST.MonetizationApi;
 using THEBADDEST.Tasks;
 
 
-namespace THEBADDEST.Analytics
+namespace THEBADDEST.MonetizationApi.Analytics
 {
 
 
@@ -30,14 +30,9 @@ namespace THEBADDEST.Analytics
 
 		private void LoadAnalyticsIdsFromJson()
 		{
-			// Ensure JsonDataUtility is loaded
-			JsonDataUtility.LoadData();
-
-			// Load Game Analytics Game Key
-			_cachedGameKey = JsonDataUtility.GetData(ANALYTICS_KEYS_CATEGORY, GAME_ANALYTICS_GAME_KEY);
-
-			// Load Game Analytics Secret Key
-			_cachedSecretKey = JsonDataUtility.GetData(ANALYTICS_KEYS_CATEGORY, GAME_ANALYTICS_SECRET_KEY);
+			var catalog = Context?.Catalog ?? CatalogFactory.Create();
+			_cachedGameKey = catalog.Resolve(ANALYTICS_KEYS_CATEGORY, GAME_ANALYTICS_GAME_KEY);
+			_cachedSecretKey = catalog.Resolve(ANALYTICS_KEYS_CATEGORY, GAME_ANALYTICS_SECRET_KEY);
 		}
 
 		public override void UpdateModule()
@@ -61,13 +56,6 @@ namespace THEBADDEST.Analytics
 		{
 			await base.OnInitialize();
 
-			var configAsset = MonetizationConfig.Instance;
-			if (!configAsset.EnableAnalytics)
-			{
-				SendLog.LogModule(ModuleName, "Analytics is disabled by MonetizationConfig.", LogLevel.Warning);
-				return;
-			}
-
 			if (string.IsNullOrEmpty(_cachedGameKey) || string.IsNullOrEmpty(_cachedSecretKey))
 			{
 				LoadAnalyticsIdsFromJson();
@@ -80,13 +68,6 @@ namespace THEBADDEST.Analytics
 
 		public override void SendEvent(string name)
 		{
-			var configAsset = MonetizationConfig.Instance;
-			if (!configAsset.EnableAnalytics)
-			{
-				SendLog.LogModule(ModuleName, "Analytics is disabled by MonetizationConfig. Event not sent.", LogLevel.Warning);
-				return;
-			}
-
 			if (!_gameAnalyticsReady)
 			{
 				SendLog.LogModule(ModuleName, "Cannot send event: Game Analytics not initialized.", LogLevel.Warning);

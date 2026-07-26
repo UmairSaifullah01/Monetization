@@ -1,4 +1,4 @@
-{
+﻿{
     "name": "THEBADDEST.Monetization.IAP.Unity",
     "rootNamespace": "THEBADDEST.MonetizationApi",
     "references": [
@@ -13,7 +13,7 @@
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
-    "autoReferenced": true,
+    "autoReferenced": false,
     "defineConstraints": [
         "MONETIZATION_UNITY_IAP"
     ],

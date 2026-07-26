@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using THEBADDEST.MonetizationApi;
 
-namespace THEBADDEST.Analytics
+namespace THEBADDEST.MonetizationApi.Analytics
 {
 	[Flags]
 	public enum AnalyticsProviders

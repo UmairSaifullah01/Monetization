@@ -1,6 +1,6 @@
 {
   "name": "THEBADDEST.Monetization.Bootstrap.Installer.Editor",
-  "rootNamespace": "Installer",
+  "rootNamespace": "THEBADDEST.MonetizationApi.Installer",
   "references": [],
   "includePlatforms": [
     "Editor"

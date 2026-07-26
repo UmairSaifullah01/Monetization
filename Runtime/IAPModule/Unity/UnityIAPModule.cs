@@ -12,13 +12,6 @@ namespace THEBADDEST.MonetizationApi
 
         protected override async UTask OnInitialize()
         {
-            var configAsset = MonetizationConfig.Instance;
-            if (!configAsset.EnableIAP)
-            {
-                SendLog.LogModule(ModuleName, "IAP is disabled by MonetizationConfig.", LogLevel.Warning);
-                return;
-            }
-
             _service = new UnityIAPService(Catalog, ModuleName);
             await _service.InitializeAsync();
         }

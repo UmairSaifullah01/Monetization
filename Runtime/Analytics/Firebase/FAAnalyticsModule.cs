@@ -3,7 +3,7 @@ using Firebase.Analytics;
 using THEBADDEST.MonetizationApi;
 using THEBADDEST.Tasks;
 
-namespace THEBADDEST.Analytics
+namespace THEBADDEST.MonetizationApi.Analytics
 {
 	public class FAAnalyticsModule : AnalyticsModule, IFirebaseAnalyticsModule
 	{
@@ -13,13 +13,6 @@ namespace THEBADDEST.Analytics
 		protected override async UTask OnInitialize()
 		{
 			await base.OnInitialize();
-
-			var configAsset = MonetizationConfig.Instance;
-			if (!configAsset.EnableAnalytics)
-			{
-				SendLog.LogModule(ModuleName, "Analytics is disabled by MonetizationConfig.", LogLevel.Warning);
-				return;
-			}
 
 			_service = new FirebaseAnalyticsService(ModuleName, success =>
 			{
@@ -123,13 +116,6 @@ namespace THEBADDEST.Analytics
 
 		private bool EnsureReady()
 		{
-			var configAsset = MonetizationConfig.Instance;
-			if (!configAsset.EnableAnalytics)
-			{
-				SendLog.LogModule(ModuleName, "Analytics is disabled by MonetizationConfig.", LogLevel.Warning);
-				return false;
-			}
-
 			if (!_firebaseReady || _service == null || !_service.IsReady)
 			{
 				SendLog.LogModule(ModuleName, "Cannot send event: Firebase Analytics not initialized.", LogLevel.Warning);

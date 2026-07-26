@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 
 
-namespace THEBADDEST.MonetizationEditor
+namespace THEBADDEST.MonetizationApi.Editor
 {
 
 
@@ -14,9 +14,7 @@ namespace THEBADDEST.MonetizationEditor
 		protected override string collectionTitle => "Modules";
 		protected override string collectionPropertyName => "modules";
 
-		DrawCollection<MonetizationModule> drawComponentCollection;
-		bool titleFoldout;
-		bool settingsFoldout;
+		bool generalSettingsFoldout = true;
 		private Texture2D logoTexture;
 		private void OnEnable()
 		{
@@ -52,10 +50,40 @@ namespace THEBADDEST.MonetizationEditor
 			EditorGUILayout.Space(10);
 		}
 
+		private void DrawGeneralSettings()
+		{
+			EditorGUILayout.BeginVertical(EditorTools.Window);
+			generalSettingsFoldout = EditorGUILayout.Foldout(generalSettingsFoldout, "General Settings", true, EditorTools.BoldFoldout);
+			if (generalSettingsFoldout)
+			{
+				EditorGUI.indentLevel++;
+				DrawProp("enableDebugLogs");
+				DrawProp("logLevel");
+				DrawProp("enablePerformanceLogging");
+				DrawProp("maxRetryAttempts");
+				DrawProp("retryDelaySeconds");
+				DrawProp("checkInternetBeforeInit");
+				DrawProp("validateModulesOnStart");
+				EditorGUI.indentLevel--;
+			}
+			EditorGUILayout.EndVertical();
+			EditorGUILayout.Space(8);
+		}
+
+		private void DrawProp(string propertyName)
+		{
+			var prop = serializedObject.FindProperty(propertyName);
+			if (prop != null)
+			{
+				EditorGUILayout.PropertyField(prop, true);
+			}
+		}
 
 		protected override void OnGUIUpdate()
 		{
+			serializedObject.Update();
 			DrawTitle();
+			DrawGeneralSettings();
 			ProviderProfileValidator.DrawWarnings(target as MonetizationProfile);
 			DrawCollections();
 			EditorGUILayout.Space(10);
@@ -64,47 +92,13 @@ namespace THEBADDEST.MonetizationEditor
 			if (GUILayout.Button("Sync Project", GUILayout.Width(200), GUILayout.Height(40)))
 			{
 				serializedObject.ApplyModifiedProperties();
-				ProjectSettingsSync.SyncFromJson();
-			}
-
-			if (GUILayout.Button("Sync IAP Catalog", GUILayout.Width(200), GUILayout.Height(40)))
-			{
-				serializedObject.ApplyModifiedProperties();
-				SyncIapCatalogFromJson();
+				ProjectSettingsSync.SyncFromJson(target as MonetizationProfile);
 			}
 
 			EditorGUILayout.Space();
 			EditorGUILayout.EndHorizontal();
+			serializedObject.ApplyModifiedProperties();
 			EditorUtility.SetDirty(target as MonetizationProfile);
-		}
-
-		private void SyncIapCatalogFromJson()
-		{
-			var profile = target as MonetizationProfile;
-			if (profile == null)
-			{
-				return;
-			}
-
-			int synced = 0;
-			foreach (var module in profile.modules)
-			{
-				if (module is IAPModule iapModule)
-				{
-					iapModule.ApplyCatalogFromJson();
-					synced++;
-					EditorUtility.SetDirty(module);
-				}
-			}
-
-			if (synced > 0)
-			{
-				Debug.Log($"Synced IAP catalog from MonetizationKeys.json for {synced} module(s).");
-			}
-			else
-			{
-				Debug.LogWarning("No IAPModule found in profile to sync.");
-			}
 		}
 
 	}

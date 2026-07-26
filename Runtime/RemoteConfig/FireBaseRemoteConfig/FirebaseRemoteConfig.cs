@@ -2,7 +2,7 @@ using THEBADDEST.Tasks;
 using UnityEngine;
 using THEBADDEST.MonetizationApi;
 
-namespace THEBADDEST.RemoteConfigSystem
+namespace THEBADDEST.MonetizationApi.RemoteConfig
 {
 	public class FirebaseRemoteConfig : RemoteConfigModule
 	{
@@ -13,14 +13,13 @@ namespace THEBADDEST.RemoteConfigSystem
 
 		protected override async UTask OnInitialize()
 		{
-			var configAsset = MonetizationConfig.Instance;
-			if (!configAsset.EnableRemoteConfig)
-			{
-				SendLog.LogModule(ModuleName, "Remote Config is disabled by MonetizationConfig.", LogLevel.Warning);
-				return;
-			}
-
-			_service = new FirebaseRemoteConfigService(m_VariablesMapper, ModuleName, RaiseSdkInitialized, OnDataLoadCompleted);
+			_service = new FirebaseRemoteConfigService(
+				m_VariablesMapper,
+				ConfigFetchTimeout,
+				EnableConfigCaching,
+				ModuleName,
+				RaiseSdkInitialized,
+				OnDataLoadCompleted);
 			await _service.InitializeAsync();
 		}
 

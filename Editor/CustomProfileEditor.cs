@@ -4,11 +4,11 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 
 
-namespace THEBADDEST.MonetizationEditor
+namespace THEBADDEST.MonetizationApi.Editor
 {
 	
 
-	public abstract class CustomProfileEditor<T, T1> : Editor where T : Object, IEnumerable<T1> where T1 : ScriptableObject
+	public abstract class CustomProfileEditor<T, T1> : UnityEditor.Editor where T : Object, IEnumerable<T1> where T1 : ScriptableObject
 	{
 
 		protected virtual string collectionPropertyName { get; set; }

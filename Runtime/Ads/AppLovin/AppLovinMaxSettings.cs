@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace THEBADDEST.Advertisement
+namespace THEBADDEST.MonetizationApi.Ads
 {
 	[Serializable]
 	public class AppLovinMaxSettings

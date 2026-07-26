@@ -1,15 +1,24 @@
 using System;
 using THEBADDEST.MonetizationApi;
+using UnityEngine;
 
 
-namespace THEBADDEST.Advertisement
+namespace THEBADDEST.MonetizationApi.Ads
 {
 
 
 	public abstract class AdsModule : MonetizationModule, IAdsModule
 	{
+		[Header("Ads Settings")]
+		[Tooltip("Enable test mode for ads (use test ad units / verbose SDK logging).")]
+		[SerializeField] protected bool enableTestMode = true;
+		[Tooltip("Timeout in seconds for ad load operations.")]
+		[SerializeField] protected float adLoadTimeout = 30f;
 
 		protected Action<bool> _sdkReadyCallbacks;
+
+		public bool EnableTestMode => enableTestMode;
+		public float AdLoadTimeout => adLoadTimeout;
 
 		public event Action<bool> OnSdkReady
 		{

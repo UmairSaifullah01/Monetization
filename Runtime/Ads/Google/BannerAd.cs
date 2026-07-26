@@ -2,9 +2,10 @@ using System;
 using GoogleMobileAds.Api;
 using UnityEngine;
 using THEBADDEST.MonetizationApi;
+using THEBADDEST.MonetizationApi.Ads;
 
 
-namespace THEBADDEST.Advertisement
+namespace THEBADDEST.MonetizationApi.Ads
 {
 
 
@@ -89,15 +90,14 @@ namespace THEBADDEST.Advertisement
 
 		public void Load()
 		{
-			var config = MonetizationConfig.Instance;
 			if (bannerView == null)
 			{
 				Create();
 			}
 
-			if (config.EnableTestMode)
+			if (Monetization.TryGetModule<IAdsModule>(out var ads) && ads.EnableTestMode)
 			{
-				SendLog.LogModule(GoogleAdsLog.Module, "Test mode enabled by MonetizationConfig.");
+				SendLog.LogModule(GoogleAdsLog.Module, "Test mode enabled.");
 			}
 
 			PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Banner, AdEventType.LoadStarted, bannerData.unitId);

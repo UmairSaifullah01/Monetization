@@ -1,4 +1,4 @@
-namespace THEBADDEST.Storage
+namespace THEBADDEST.MonetizationApi.Storage
 {
 	public class StorageObjectMetadata
 	{

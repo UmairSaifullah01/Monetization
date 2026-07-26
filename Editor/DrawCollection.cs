@@ -5,7 +5,7 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 
 
-namespace THEBADDEST.MonetizationEditor
+namespace THEBADDEST.MonetizationApi.Editor
 {
 
 
@@ -63,11 +63,33 @@ namespace THEBADDEST.MonetizationEditor
 
 				EditorGUILayout.BeginVertical(GUI.skin.box);
 				int cache = i;
-				editorData.folded = EditorTools.DrawHeaderFoldoutLessWithButton(editorData.reference.GetType().Name, editorData.folded, EditorGUIUtility.IconContent("Toolbar Minus"), () => RemoveType(cache));
+				var enabledProp = editorData.serializedObject.FindProperty("enabled");
+				bool enabled = enabledProp == null || enabledProp.boolValue;
+				bool newEnabled;
+				editorData.folded = EditorTools.DrawHeaderFoldoutWithEnableAndRemove(
+					editorData.reference.GetType().Name,
+					editorData.folded,
+					enabled,
+					out newEnabled,
+					() => RemoveType(cache));
+				if (enabledProp != null && newEnabled != enabled)
+				{
+					enabledProp.boolValue = newEnabled;
+					editorData.serializedObject.ApplyModifiedProperties();
+				}
+
+				if (!newEnabled)
+				{
+					var prev = GUI.color;
+					GUI.color = new Color(1f, 1f, 1f, 0.55f);
+					EditorGUILayout.HelpBox("Module disabled - skipped at init.", MessageType.None);
+					GUI.color = prev;
+				}
+
 				if (editorData.folded)
 				{
 					EditorTools.DrawScript(editorData.reference);
-					EditorTools.DrawAllFields(editorData.reference, editorData.serializedObject, false);
+					EditorTools.DrawAllFields(editorData.reference, editorData.serializedObject, false, skipFieldNames: new[] { "enabled" });
 				}
 
 				EditorGUILayout.EndVertical();
@@ -106,7 +128,7 @@ namespace THEBADDEST.MonetizationEditor
 
 			if (addableCount == 0)
 			{
-				menu.AddDisabledItem(new GUIContent("No module types found — install a provider assembly first"));
+				menu.AddDisabledItem(new GUIContent("No module types found - install a provider first"));
 			}
 
 			menu.ShowAsContext();

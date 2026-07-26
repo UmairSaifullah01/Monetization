@@ -3,7 +3,7 @@ using Facebook.Unity;
 using THEBADDEST.MonetizationApi;
 using THEBADDEST.Tasks;
 
-namespace THEBADDEST.Analytics
+namespace THEBADDEST.MonetizationApi.Analytics
 {
 	public class FacebookAnalyticsService
 	{

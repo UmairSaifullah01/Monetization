@@ -2,7 +2,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace Installer
+namespace THEBADDEST.MonetizationApi.Installer
 {
     public class MonetizationInstallerWindow : EditorWindow
     {

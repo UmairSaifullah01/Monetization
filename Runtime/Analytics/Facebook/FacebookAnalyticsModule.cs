@@ -3,7 +3,7 @@ using THEBADDEST.MonetizationApi;
 using THEBADDEST.Tasks;
 using UnityEngine;
 
-namespace THEBADDEST.Analytics
+namespace THEBADDEST.MonetizationApi.Analytics
 {
 	public class FacebookAnalyticsModule : AnalyticsModule, IFacebookAnalyticsModule
 	{
@@ -22,15 +22,9 @@ namespace THEBADDEST.Analytics
 		{
 			await base.OnInitialize();
 
-			if (!MonetizationConfig.Instance.EnableAnalytics)
-			{
-				SendLog.LogModule(ModuleName, "Analytics is disabled by MonetizationConfig.", LogLevel.Warning);
-				return;
-			}
-
-			JsonDataUtility.LoadData();
-			var appId = JsonDataUtility.GetData(FACEBOOK_KEYS_CATEGORY, FACEBOOK_APP_ID);
-			var clientToken = JsonDataUtility.GetData(FACEBOOK_KEYS_CATEGORY, FACEBOOK_CLIENT_TOKEN);
+			var catalog = Context?.Catalog ?? CatalogFactory.Create();
+			var appId = catalog.Resolve(FACEBOOK_KEYS_CATEGORY, FACEBOOK_APP_ID);
+			var clientToken = catalog.Resolve(FACEBOOK_KEYS_CATEGORY, FACEBOOK_CLIENT_TOKEN);
 
 			_service = new FacebookAnalyticsService(ModuleName);
 			await _service.InitializeAsync(appId, clientToken);
@@ -110,12 +104,6 @@ namespace THEBADDEST.Analytics
 
 		private bool EnsureReady()
 		{
-			if (!MonetizationConfig.Instance.EnableAnalytics)
-			{
-				SendLog.LogModule(ModuleName, "Analytics is disabled by MonetizationConfig.", LogLevel.Warning);
-				return false;
-			}
-
 			_facebookReady = _service != null && _service.IsReady;
 			if (!_facebookReady)
 			{

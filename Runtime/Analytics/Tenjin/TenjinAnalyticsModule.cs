@@ -3,7 +3,7 @@ using THEBADDEST.MonetizationApi;
 using THEBADDEST.Tasks;
 using UnityEngine;
 
-namespace THEBADDEST.Analytics
+namespace THEBADDEST.MonetizationApi.Analytics
 {
 	public class TenjinAnalyticsModule : AnalyticsModule, ITenjinAnalyticsModule
 	{
@@ -20,13 +20,7 @@ namespace THEBADDEST.Analytics
 		protected override async UTask OnInitialize()
 		{
 			await base.OnInitialize();
-			if (!MonetizationConfig.Instance.EnableAnalytics)
-			{
-				SendLog.LogModule(ModuleName, "Analytics is disabled by MonetizationConfig.", LogLevel.Warning);
-				return;
-			}
 
-			JsonDataUtility.LoadData();
 			var apiKey = ResolveApiKey();
 
 			_service = new TenjinAnalyticsService(ModuleName);
@@ -91,31 +85,26 @@ namespace THEBADDEST.Analytics
 			_service.SendPurchase(productId, currency, quantity, unitPrice, string.Empty, string.Empty);
 		}
 
-		private static string ResolveApiKey()
+		private string ResolveApiKey()
 		{
+			var catalog = Context?.Catalog ?? CatalogFactory.Create();
 #if UNITY_ANDROID
-			return JsonDataUtility.GetData(TENJIN_KEYS_CATEGORY, TENJIN_ANDROID_API_KEY);
+			return catalog.Resolve(TENJIN_KEYS_CATEGORY, TENJIN_ANDROID_API_KEY);
 #elif UNITY_IOS
-			return JsonDataUtility.GetData(TENJIN_KEYS_CATEGORY, TENJIN_IOS_API_KEY);
+			return catalog.Resolve(TENJIN_KEYS_CATEGORY, TENJIN_IOS_API_KEY);
 #else
-			var androidKey = JsonDataUtility.GetData(TENJIN_KEYS_CATEGORY, TENJIN_ANDROID_API_KEY);
+			var androidKey = catalog.Resolve(TENJIN_KEYS_CATEGORY, TENJIN_ANDROID_API_KEY);
 			if (!string.IsNullOrEmpty(androidKey))
 			{
 				return androidKey;
 			}
 
-			return JsonDataUtility.GetData(TENJIN_KEYS_CATEGORY, TENJIN_IOS_API_KEY);
+			return catalog.Resolve(TENJIN_KEYS_CATEGORY, TENJIN_IOS_API_KEY);
 #endif
 		}
 
 		private bool EnsureReady()
 		{
-			if (!MonetizationConfig.Instance.EnableAnalytics)
-			{
-				SendLog.LogModule(ModuleName, "Analytics is disabled by MonetizationConfig.", LogLevel.Warning);
-				return false;
-			}
-
 			if (_service == null || !_service.IsReady)
 			{
 				SendLog.LogModule(ModuleName, "Tenjin Analytics is not initialized.", LogLevel.Warning);

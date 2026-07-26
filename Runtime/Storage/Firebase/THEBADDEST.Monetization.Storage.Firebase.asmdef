@@ -1,6 +1,6 @@
-{
+﻿{
     "name": "THEBADDEST.Monetization.Storage.Firebase",
-    "rootNamespace": "THEBADDEST.Storage",
+    "rootNamespace": "THEBADDEST.MonetizationApi.Storage",
     "references": [
         "THEBADDEST.Monetization.Storage.Abstractions",
         "THEBADDEST.Monetization.Core",
@@ -13,7 +13,7 @@
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
-    "autoReferenced": true,
+    "autoReferenced": false,
     "defineConstraints": [
         "MONETIZATION_FIREBASE_STORAGE"
     ],

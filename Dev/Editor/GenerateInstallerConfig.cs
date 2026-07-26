@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
-namespace THEBADDEST.MonetizationDev
+namespace THEBADDEST.MonetizationApi.Dev
 {
     /// <summary>
     /// Maintainer-only utility. Not shipped in bootstrap or MonetizationScripts.unitypackage.

@@ -1,6 +1,6 @@
 namespace THEBADDEST.MonetizationApi
 {
-	public interface IPlacementCatalog
+	public interface IKeyValueCatalog
 	{
 		string Resolve(string category, string key);
 	}

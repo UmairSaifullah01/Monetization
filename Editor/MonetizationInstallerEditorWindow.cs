@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace THEBADDEST.MonetizationEditor
+namespace THEBADDEST.MonetizationApi.Editor
 {
     public class MonetizationInstallerEditorWindow : EditorWindow
     {

@@ -1,14 +1,15 @@
 using System;
 using THEBADDEST.MonetizationApi;
+using THEBADDEST.MonetizationApi.Ads;
 using THEBADDEST.Tasks;
 using UnityEngine;
 
-namespace THEBADDEST.Advertisement
+namespace THEBADDEST.MonetizationApi.Ads
 {
 	public class AppLovinMaxAdsService
 	{
 		private readonly AppLovinMaxSettings _settings;
-		private readonly IPlacementCatalog _catalog;
+		private readonly IKeyValueCatalog _catalog;
 		private readonly Action<bool> _onSdkReady;
 		private readonly string _moduleName;
 
@@ -21,7 +22,7 @@ namespace THEBADDEST.Advertisement
 		public IAppRewardAd Rewarded { get; private set; }
 		public IAppAd AppOpen { get; private set; }
 
-		public AppLovinMaxAdsService(AppLovinMaxSettings settings, IPlacementCatalog catalog, Action<bool> onSdkReady, string moduleName)
+		public AppLovinMaxAdsService(AppLovinMaxSettings settings, IKeyValueCatalog catalog, Action<bool> onSdkReady, string moduleName)
 		{
 			_settings = settings;
 			_catalog = catalog;

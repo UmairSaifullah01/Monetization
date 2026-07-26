@@ -12,4 +12,32 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 128156ce19eff495e9f0e2b1e3cdc7a7, type: 3}
   m_Name: MonetizationProfile
   m_EditorClassIdentifier: THEBADDEST.Monetization.Core::THEBADDEST.MonetizationApi.MonetizationProfile
-  modules: []
+  enableDebugLogs: 1
+  logLevel: 3
+  enablePerformanceLogging: 0
+  maxRetryAttempts: 3
+  retryDelaySeconds: 2
+  checkInternetBeforeInit: 1
+  validateModulesOnStart: 1
+  enableTestMode: 1
+  adLoadTimeout: 30
+  configFetchTimeout: 15
+  enableConfigCaching: 1
+  modules:
+  - {fileID: 9181623583832546956}
+--- !u!114 &9181623583832546956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a24f13153a0ac6247bbc751c0471287c, type: 3}
+  m_Name: UnityIAPModule
+  m_EditorClassIdentifier: THEBADDEST.Monetization.IAP.Unity::THEBADDEST.MonetizationApi.UnityIAPModule
+  enabled: 0
+  moduleName: UnityIAPModule
+  catalog:
+    items: []

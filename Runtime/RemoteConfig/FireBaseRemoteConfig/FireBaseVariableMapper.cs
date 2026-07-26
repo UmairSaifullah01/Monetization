@@ -5,11 +5,11 @@ using UnityEngine;
 using THEBADDEST.MonetizationApi;
 
 
-namespace THEBADDEST.RemoteConfigSystem
+namespace THEBADDEST.MonetizationApi.RemoteConfig
 {
 
 
-	[CreateAssetMenu(menuName = "THEBADDEST/RemoteConfigSystem/FireBaseVariableMapper", fileName = "FireBaseVariableMapper", order = 0)]
+	[CreateAssetMenu(menuName = "THEBADDEST/MonetizationApi/RemoteConfig/FireBaseVariableMapper", fileName = "FireBaseVariableMapper", order = 0)]
 	public class FireBaseVariableMapper : RemoteVariablesMapper
 	{
 		protected override void ConvertPrimitiveToSoValue(RemoteVariable remoteVariable, object targetObject)

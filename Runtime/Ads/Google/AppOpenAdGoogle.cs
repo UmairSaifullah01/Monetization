@@ -3,9 +3,10 @@ using GoogleMobileAds.Api;
 using GoogleMobileAds.Common;
 using UnityEngine;
 using THEBADDEST.MonetizationApi;
+using THEBADDEST.MonetizationApi.Ads;
 
 
-namespace THEBADDEST.Advertisement
+namespace THEBADDEST.MonetizationApi.Ads
 {
 
 

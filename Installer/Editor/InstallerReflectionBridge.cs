@@ -2,11 +2,11 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-namespace Installer
+namespace THEBADDEST.MonetizationApi.Installer
 {
     public static class InstallerReflectionBridge
     {
-        private const string EditorBridgeType = "THEBADDEST.MonetizationEditor.MonetizationInstallerBridge, THEBADDEST.Monetization.Editor";
+        private const string EditorBridgeType = "THEBADDEST.MonetizationApi.Editor.MonetizationInstallerBridge, THEBADDEST.Monetization.Editor";
 
         public static void TryOpenPackageManagerWindow()
         {

@@ -6,7 +6,7 @@ using THEBADDEST.MonetizationApi;
 using UnityEditor;
 using UnityEngine;
 
-namespace THEBADDEST.MonetizationEditor
+namespace THEBADDEST.MonetizationApi.Editor
 {
 	public static class HotSwapValidator
 	{
@@ -79,7 +79,7 @@ namespace THEBADDEST.MonetizationEditor
 
 				if (ProviderProfileValidator.Validate(profile).Count == 0)
 				{
-					sb.AppendLine("  None — profile matches installed providers.");
+					sb.AppendLine("  None â€” profile matches installed providers.");
 				}
 			}
 
