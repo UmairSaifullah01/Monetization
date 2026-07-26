@@ -35,6 +35,14 @@ namespace THEBADDEST.MonetizationApi.Demo
 			}
 		}
 
+		public void ShowPrivacyPolicy()
+		{
+			if (Monetization.TryGetModule<IAdsModule>(out var ads))
+			{
+				ads.ShowPrivacyPolicyPanel();
+			}
+		}
+
 		public void Fetch()
 		{
 		}

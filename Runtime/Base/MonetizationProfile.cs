@@ -23,6 +23,8 @@ namespace THEBADDEST.MonetizationApi
 		[SerializeField] private bool checkInternetBeforeInit = true;
 		[Tooltip("If enabled, validates and removes duplicate modules on start.")]
 		[SerializeField] private bool validateModulesOnStart = true;
+		[Tooltip("If enabled, Sync Project applies Android custom keystore settings from ProjectKeys.")]
+		[SerializeField] private bool useKeyStore = true;
 
 		/// <summary>
 		/// List of all modules in this profile. Only one module per type is allowed.
@@ -45,15 +47,9 @@ namespace THEBADDEST.MonetizationApi
 		public float RetryDelaySeconds => retryDelaySeconds;
 		public bool CheckInternetBeforeInit => checkInternetBeforeInit;
 		public bool ValidateModulesOnStart => validateModulesOnStart;
+		public bool UseKeyStore => useKeyStore;
 
-		public static bool IsInternetAvailable()
-		{
-#if UNITY_EDITOR
-			return true;
-#else
-			return Application.internetReachability != NetworkReachability.NotReachable;
-#endif
-		}
+		public static bool IsInternetAvailable() => InternetChecker.IsAvailable();
 
 		public void ApplySendLogConfiguration()
 		{
@@ -82,10 +78,9 @@ namespace THEBADDEST.MonetizationApi
 			moduleContext = context ?? new ModuleContext(this, NullKeyValueCatalog.Instance, NullAdMetrics.Instance);
 			ApplySendLogConfiguration();
 
-			if (CheckInternetBeforeInit && !IsInternetAvailable())
+			if (CheckInternetBeforeInit && !InternetChecker.IsAvailable())
 			{
-				SendLog.LogError("No internet connection. Initialization aborted.");
-				return;
+				await InternetChecker.WaitUntilAvailableAsync();
 			}
 
 			if (ValidateModulesOnStart)

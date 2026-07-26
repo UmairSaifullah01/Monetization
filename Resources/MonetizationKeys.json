@@ -31,13 +31,16 @@
     "AndroidApiKey": "your-tenjin-android-api-key",
     "IosApiKey": "your-tenjin-ios-api-key"
   },
+  "PrivacyKeys": {
+    "PrivacyPolicyUrl": "https://example.com/privacy",
+    "TermsOfServiceUrl": "https://example.com/terms"
+  },
   "ProjectKeys": {
     "PackageName": "com.umgames.test",
     "Version": "1.0",
     "BundleVersionCode": "1",
     "MinApiLevel": "26",
     "TargetApiLevel": "36",
-    "UseKeyStore": "true",
     "KeyStorePath": "Assets/Keystore/user.keystore",
     "KeyAliasName": "user",
     "KeyStorePassword": "",

@@ -9,5 +9,6 @@ namespace THEBADDEST.MonetizationApi
 		float RetryDelaySeconds { get; }
 		bool CheckInternetBeforeInit { get; }
 		bool ValidateModulesOnStart { get; }
+		bool UseKeyStore { get; }
 	}
 }

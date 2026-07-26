@@ -84,6 +84,10 @@ namespace THEBADDEST.MonetizationApi.Ads
 
 		IAppAd FetchAppOpen(string placement = "default");
 
+		void ShowPrivacyPolicyPanel();
+
+		void HidePrivacyPolicyPanel();
+
 	}
 
 

@@ -117,7 +117,7 @@ See [`Installer/EXPORT.md`](Installer/EXPORT.md) for unitypackage export rules. 
 | Asset | Path | Purpose |
 |-------|------|---------|
 | Profile | `Resources/MonetizationProfile.asset` | Settings (`IMonetizationSettings`) + assigned modules — **required** |
-| Keys | `Resources/MonetizationKeys.json` | Ad / IAP / analytics / project keys |
+| Keys | `Resources/MonetizationKeys.json` | Ad / IAP / analytics / privacy / project keys |
 | RC mapper | `Content/FireBaseVariableMapper.asset` | Assign on Firebase Remote Config module |
 
 Create a profile via **Create → THEBADDEST → MonetizationApi → MonetizationProfile** if needed, place it under `Resources/`, and assign provider module ScriptableObjects.
@@ -131,6 +131,21 @@ Create a profile via **Create → THEBADDEST → MonetizationApi → Monetizatio
   }
 }
 ```
+
+**Privacy Policy panel** — place a prefab at `Resources/PrivacyPolicyPanel` with a `PrivacyPolicyPanel` component, enable `Show Privacy Policy Panel` on the ads module, set URLs in keys, then call `ShowPrivacyPolicyPanel()` (e.g. from Settings). If the prefab is missing, the call logs a warning and does nothing.
+
+```json
+{
+  "PrivacyKeys": {
+    "PrivacyPolicyUrl": "https://example.com/privacy",
+    "TermsOfServiceUrl": "https://example.com/terms"
+  }
+}
+```
+
+Build version text uses `ProjectKeys.Version` and `ProjectKeys.BundleVersionCode`.
+
+**Internet checker** — place a prefab at `Resources/InternetCheckerPanel` with an `InternetCheckerPanel` component. When `Check Internet Before Init` is enabled and the device is offline, that panel is shown; **Retry** continues init once connectivity returns. If the prefab is missing, a warning is logged and init continues without the panel.
 
 Optional editor actions on the profile inspector:
 
@@ -158,6 +173,7 @@ public class GameManager : MonoBehaviour
         if (Monetization.TryGetModule<IAdsModule>(out var ads))
         {
             ads.LoadInterstitial();
+            // ads.ShowPrivacyPolicyPanel(); // when enabled on the ads module
         }
     }
 }

@@ -59,6 +59,7 @@ namespace THEBADDEST.MonetizationApi.Editor
 			DrawProp("retryDelaySeconds");
 			DrawProp("checkInternetBeforeInit");
 			DrawProp("validateModulesOnStart");
+			DrawProp("useKeyStore");
 			EditorGUILayout.EndVertical();
 			EditorGUILayout.Space(8);
 		}

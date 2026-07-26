@@ -2,7 +2,8 @@
     "name": "THEBADDEST.Monetization.Core",
     "rootNamespace": "THEBADDEST.MonetizationApi",
     "references": [
-        "THEBADDEST.UTask"
+        "THEBADDEST.UTask",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

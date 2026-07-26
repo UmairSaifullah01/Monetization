@@ -3,7 +3,9 @@
   "rootNamespace": "THEBADDEST.MonetizationApi.Ads",
   "references": [
     "THEBADDEST.Monetization.Core",
-    "THEBADDEST.UTask"
+    "THEBADDEST.Monetization.Configuration",
+    "THEBADDEST.UTask",
+    "UnityEngine.UI"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],
