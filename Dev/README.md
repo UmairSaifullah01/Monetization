@@ -10,6 +10,7 @@ Maintainer-only editor utilities for this repository. **Not** included in:
 | Menu | Purpose |
 |------|---------|
 | `Tools → Monetization Dev → Generate Installer Config From Manifest` | Sync `Installer/installer_config.json` tgz mappings from `manifest.json` and `Installer/Dependencies/` |
+| `Tools → Monetization Dev → Icon Downloader` | Browse/search Unity editor icons and export selected PNGs to `Editor/Icons/` for the profile inspector |
 | `Tools → Monetization Dev → Export MonetizationScripts.unitypackage` | Export the framework content package to `Installer/MonetizationScripts.unitypackage` (Runtime, JsonDataUtility, Editor, Resources, Content, Demo, `installer_config.json`, `Dependencies/*.tgz`) |
 | `Tools → Monetization Dev → Export Installer Bootstrap Package` | Export the bootstrap installer package (installer Editor scripts + Logo + embedded `MonetizationScripts.unitypackage`) to a chosen path |
 | `Tools → Monetization Dev → Export All Packages` | Export the content package, then the bootstrap package |

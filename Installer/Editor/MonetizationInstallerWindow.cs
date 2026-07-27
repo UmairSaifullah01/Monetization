@@ -143,7 +143,7 @@ namespace THEBADDEST.MonetizationApi.Installer
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
-            GUILayout.Label("Version 4.0b - Developed by Umair Saifullah", new GUIStyle(GUI.skin.label)
+            GUILayout.Label("Version 4.1 - Developed by Umair Saifullah", new GUIStyle(GUI.skin.label)
             {
                 fontSize = 11,
                 fontStyle = FontStyle.Italic,

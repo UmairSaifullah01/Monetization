@@ -14,7 +14,10 @@ namespace THEBADDEST.MonetizationApi.Editor
 		protected override string collectionTitle => "Modules";
 		protected override string collectionPropertyName => "modules";
 
+		private static readonly Color SyncButtonColor = new Color(0.22f, 0.45f, 0.85f);
+
 		private Texture2D logoTexture;
+
 		private void OnEnable()
 		{
 			logoTexture = AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Monetization/Logo/logo.png");
@@ -22,77 +25,88 @@ namespace THEBADDEST.MonetizationApi.Editor
 
 		protected override void DrawTitle()
 		{
-			EditorGUILayout.Space();
+			EditorGUILayout.Space(4);
 			GUILayout.BeginVertical(EditorTools.Window);
-			EditorGUILayout.Space();
+			EditorGUILayout.Space(4);
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 			if (logoTexture != null)
 			{
-				GUILayout.Label(logoTexture, GUILayout.Width(70), GUILayout.Height(70));
-				GUILayout.Space(10);
+				GUILayout.Label(logoTexture, GUILayout.Width(56), GUILayout.Height(56));
+				GUILayout.Space(8);
 			}
+
 			var titleStyle = new GUIStyle(GUI.skin.label)
 			{
-				fontSize = 28,
+				fontSize = 24,
 				fontStyle = FontStyle.Bold,
 				alignment = TextAnchor.MiddleLeft,
 				normal = { textColor = new Color(0.7f, 0.7f, 0.7f) }
 			};
-			GUILayout.Label("Monetization Profile", titleStyle, GUILayout.Height(50));
+			GUILayout.Label("Monetization Profile", titleStyle, GUILayout.Height(44));
 			GUILayout.FlexibleSpace();
 			GUILayout.EndHorizontal();
-			EditorGUILayout.Space();
-			GUILayout.Label("Version 4.0b - Developed by Umair Saifullah", new GUIStyle() { alignment = TextAnchor.LowerRight, fontStyle = FontStyle.Italic, normal = { textColor = Color.gray } });
-			EditorGUILayout.Space();
+			GUILayout.Label(
+				"Version 4.1 - Developed by Umair Saifullah",
+				new GUIStyle
+				{
+					alignment = TextAnchor.LowerRight,
+					fontStyle = FontStyle.Italic,
+					normal = { textColor = Color.gray }
+				});
+			EditorGUILayout.Space(2);
 			GUILayout.EndVertical();
-			EditorGUILayout.Space(10);
+			EditorGUILayout.Space(4);
 		}
 
-		private void DrawGeneralSettings()
+		private void DrawSettingsSections()
 		{
-			EditorGUILayout.BeginVertical(EditorTools.Window);
-			DrawProp("enableDebugLogs");
-			DrawProp("logLevel");
-			DrawProp("enablePerformanceLogging");
-			DrawProp("maxRetryAttempts");
-			DrawProp("retryDelaySeconds");
-			DrawProp("checkInternetBeforeInit");
-			DrawProp("validateModulesOnStart");
-			DrawProp("useKeyStore");
-			EditorGUILayout.EndVertical();
-			EditorGUILayout.Space(8);
+			EditorTools.DrawSectionTitle("Logs");
+			EditorTools.DrawToggleRow("console.infoicon.sml", "Enable Debug Logs", FindProp("enableDebugLogs"));
+			EditorTools.DrawPropertyRow("UnityEditor.ConsoleWindow", "Log Level", FindProp("logLevel"));
+			EditorTools.DrawToggleRow("Profiler.UI", "Performance Logging", FindProp("enablePerformanceLogging"));
+
+			EditorTools.DrawSectionTitle("Initialization");
+			EditorTools.DrawPropertyRow("Refresh", "Max Retry Attempts", FindProp("maxRetryAttempts"));
+			EditorTools.DrawPropertyRow("TestStopwatch", "Retry Delay Seconds", FindProp("retryDelaySeconds"));
+			EditorTools.DrawToggleRow("BuildSettings.Web.Small", "Internet Before Init", FindProp("checkInternetBeforeInit"));
+			EditorTools.DrawToggleRow("TestPassed", "Validate On Start", FindProp("validateModulesOnStart"));
+
+			EditorTools.DrawSectionTitle("Build");
+			EditorTools.DrawToggleRow("AssemblyLock", "Apply Keystore", FindProp("useKeyStore"));
 		}
 
-		private void DrawProp(string propertyName)
+		private SerializedProperty FindProp(string propertyName)
 		{
-			var prop = serializedObject.FindProperty(propertyName);
-			if (prop != null)
-			{
-				EditorGUILayout.PropertyField(prop, true);
-			}
+			return serializedObject.FindProperty(propertyName);
 		}
 
 		protected override void OnGUIUpdate()
 		{
 			serializedObject.Update();
 			DrawTitle();
-			DrawGeneralSettings();
-			ProviderProfileValidator.DrawWarnings(target as MonetizationProfile);
-			DrawCollections();
-			EditorGUILayout.Space(10);
-			EditorGUILayout.BeginHorizontal();
-			EditorGUILayout.Space();
-			if (GUILayout.Button("Sync Project", GUILayout.Width(200), GUILayout.Height(40)))
+			DrawSettingsSections();
+
+			var profile = target as MonetizationProfile;
+			var warnings = ProviderProfileValidator.Validate(profile);
+			if (warnings.Count > 0)
 			{
-				serializedObject.ApplyModifiedProperties();
-				ProjectSettingsSync.SyncFromJson(target as MonetizationProfile);
+				EditorTools.DrawSectionTitle("Validation");
+				EditorGUILayout.HelpBox(string.Join("\n", warnings), MessageType.Warning);
 			}
 
-			EditorGUILayout.Space();
-			EditorGUILayout.EndHorizontal();
+			EditorTools.DrawSectionTitle("Modules");
+			DrawCollections();
+
+			EditorTools.DrawSectionTitle("Setup");
+			EditorTools.DrawAccentButton("SYNC PROJECT", SyncButtonColor, () =>
+			{
+				serializedObject.ApplyModifiedProperties();
+				ProjectSettingsSync.SyncFromJson(profile);
+			});
+
 			serializedObject.ApplyModifiedProperties();
-			EditorUtility.SetDirty(target as MonetizationProfile);
+			EditorUtility.SetDirty(profile);
 		}
 
 	}

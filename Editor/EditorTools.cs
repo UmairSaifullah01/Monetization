@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
@@ -17,6 +18,7 @@ namespace THEBADDEST.MonetizationApi.Editor
 	#if UNITY_EDITOR
 	public static class EditorTools
 	{
+		private const string EditorIconsFolder = "Assets/Monetization/Editor/Icons";
 
 		public static GUIStyle BoldFoldout
 		{
@@ -48,6 +50,169 @@ namespace THEBADDEST.MonetizationApi.Editor
 		public static GUIStyle StyleOrange => Style(new Color(1f,    0.5f,  0.0f,  0.3f));
 		public static GUIStyle Border      => Style(new Color(0,     0.5f,  1f,    0.0f));
 		public static GUIStyle FlatBox     => Style(new Color(0.35f, 0.35f, 0.35f, 0.1f));
+
+		#endregion
+
+		#region Profile Inspector UI
+
+		public static void DrawSectionTitle(string title)
+		{
+			EditorGUILayout.Space(8);
+			var style = new GUIStyle(EditorStyles.boldLabel)
+			{
+				fontSize = 11,
+				normal = { textColor = EditorGUIUtility.isProSkin ? new Color(0.75f, 0.75f, 0.75f) : new Color(0.25f, 0.25f, 0.25f) }
+			};
+			GUILayout.Label((title ?? string.Empty).ToUpperInvariant(), style);
+			DrawSplitter();
+			EditorGUILayout.Space(4);
+		}
+
+		public static GUIContent LoadEditorIcon(string iconKey)
+		{
+			if (string.IsNullOrEmpty(iconKey))
+			{
+				return GUIContent.none;
+			}
+
+			// Support "Primary|Fallback1|Fallback2" for Unity version differences.
+			string[] keys = iconKey.Split(new[] { '|' }, System.StringSplitOptions.RemoveEmptyEntries);
+			foreach (string key in keys)
+			{
+				string trimmed = key.Trim();
+				if (string.IsNullOrEmpty(trimmed))
+				{
+					continue;
+				}
+
+				string fileName = SanitizeIconFileName(trimmed) + ".png";
+				var texture = AssetDatabase.LoadAssetAtPath<Texture2D>($"{EditorIconsFolder}/{fileName}");
+				if (texture != null)
+				{
+					return new GUIContent(texture);
+				}
+
+				GUIContent content = TryIconContent(trimmed);
+				if (content != null)
+				{
+					return content;
+				}
+
+				if (!trimmed.StartsWith("d_", System.StringComparison.Ordinal))
+				{
+					content = TryIconContent("d_" + trimmed);
+					if (content != null)
+					{
+						return content;
+					}
+				}
+			}
+
+			return GUIContent.none;
+		}
+
+		private static GUIContent TryIconContent(string iconKey)
+		{
+			try
+			{
+				GUIContent content = EditorGUIUtility.IconContent(iconKey);
+				if (content != null && content.image != null)
+				{
+					return new GUIContent(content.image);
+				}
+			}
+			catch
+			{
+				// Icon name may not exist on this Unity version.
+			}
+
+			return null;
+		}
+
+		public static void DrawToggleRow(string iconKey, string label, SerializedProperty prop)
+		{
+			if (prop == null)
+			{
+				return;
+			}
+
+			EditorGUILayout.BeginHorizontal();
+			DrawRowIcon(iconKey);
+			GUILayout.Label(label, GUILayout.Width(170));
+			GUILayout.FlexibleSpace();
+
+			bool on = prop.boolValue;
+			var prev = GUI.backgroundColor;
+			GUI.backgroundColor = on
+				? (EditorGUIUtility.isProSkin ? new Color(0.75f, 0.75f, 0.75f) : new Color(0.85f, 0.85f, 0.85f))
+				: (EditorGUIUtility.isProSkin ? new Color(0.22f, 0.22f, 0.22f) : new Color(0.55f, 0.55f, 0.55f));
+			if (GUILayout.Button(on ? "ON" : "OFF", EditorStyles.miniButton, GUILayout.Width(50), GUILayout.Height(18)))
+			{
+				prop.boolValue = !on;
+			}
+
+			GUI.backgroundColor = prev;
+			EditorGUILayout.EndHorizontal();
+			EditorGUILayout.Space(2);
+		}
+
+		public static void DrawPropertyRow(string iconKey, string label, SerializedProperty prop)
+		{
+			if (prop == null)
+			{
+				return;
+			}
+
+			EditorGUILayout.BeginHorizontal();
+			DrawRowIcon(iconKey);
+			GUILayout.Label(label, GUILayout.Width(170));
+			EditorGUILayout.PropertyField(prop, GUIContent.none, true);
+			EditorGUILayout.EndHorizontal();
+			EditorGUILayout.Space(2);
+		}
+
+		public static void DrawAccentButton(string label, Color accent, Action onClick, float height = 36f)
+		{
+			var prev = GUI.backgroundColor;
+			GUI.backgroundColor = accent;
+			if (GUILayout.Button(label, GUILayout.Height(height)))
+			{
+				onClick?.Invoke();
+			}
+
+			GUI.backgroundColor = prev;
+		}
+
+		private static void DrawRowIcon(string iconKey)
+		{
+			GUIContent icon = LoadEditorIcon(iconKey);
+			if (icon.image != null)
+			{
+				GUILayout.Label(icon, GUILayout.Width(20), GUILayout.Height(18));
+			}
+			else
+			{
+				GUILayout.Space(20);
+			}
+		}
+
+		private static string SanitizeIconFileName(string name)
+		{
+			var builder = new StringBuilder(name.Length);
+			foreach (char c in name)
+			{
+				if (c == '/' || c == '\\' || c == ':' || c == '*' || c == '?' || c == '"' || c == '<' || c == '>' || c == '|')
+				{
+					builder.Append('_');
+				}
+				else
+				{
+					builder.Append(c);
+				}
+			}
+
+			return builder.ToString();
+		}
 
 		#endregion
 

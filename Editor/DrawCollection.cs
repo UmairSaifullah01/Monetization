@@ -53,6 +53,8 @@ namespace THEBADDEST.MonetizationApi.Editor
 			using var check = new EditorGUI.ChangeCheckScope();
 			EditorGUILayout.Space();
 			InitSubEditors();
+
+			bool hasModule = false;
 			for (int i = 0; i < editorDataContainer.Length; i++)
 			{
 				var editorData = editorDataContainer[i];
@@ -61,6 +63,7 @@ namespace THEBADDEST.MonetizationApi.Editor
 					continue;
 				}
 
+				hasModule = true;
 				EditorGUILayout.BeginVertical(GUI.skin.box);
 				int cache = i;
 				var enabledProp = editorData.serializedObject.FindProperty("enabled");
@@ -93,6 +96,18 @@ namespace THEBADDEST.MonetizationApi.Editor
 				}
 
 				EditorGUILayout.EndVertical();
+			}
+
+			if (!hasModule)
+			{
+				var emptyStyle = new GUIStyle(EditorStyles.centeredGreyMiniLabel)
+				{
+					wordWrap = true,
+					alignment = TextAnchor.MiddleCenter,
+					fontSize = 12,
+					padding = new RectOffset(8, 8, 16, 16)
+				};
+				EditorGUILayout.LabelField("No module added. Please add modules.", emptyStyle, GUILayout.Height(48));
 			}
 
 			EditorTools.DrawAddRemoveButton(DrawAddMenu, DrawRemoveMenu);
