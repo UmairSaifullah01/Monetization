@@ -1,4 +1,5 @@
 using System;
+using THEBADDEST.MonetizationApi;
 using UnityEngine;
 
 namespace THEBADDEST.MonetizationApi.Ads
@@ -15,6 +16,8 @@ namespace THEBADDEST.MonetizationApi.Ads
 		public const string REWARDED_ID_KEY = "Rewarded";
 		public const string APP_OPEN_ID_KEY = "AppOpen";
 
+		[Tooltip("Shows all available Ad IDs from JSON.")]
+		[JsonDataCategory(AD_KEYS_CATEGORY)]
 		[SerializeField] private string adKeysReference = "";
 		[SerializeField] private bool enableAdaptiveBanner = true;
 		[SerializeField] private MaxSdkBase.BannerPosition bannerPosition = MaxSdkBase.BannerPosition.TopCenter;

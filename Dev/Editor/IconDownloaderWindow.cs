@@ -18,6 +18,22 @@ namespace THEBADDEST.MonetizationApi.Dev
 		private const string ExportFolder = "Assets/Monetization/Editor/Icons";
 		private const float CellSize = 64f;
 		private const float CellPadding = 4f;
+		private const int NormalizedIconSize = 32;
+
+		/// <summary>
+		/// Icons used by MonetizationProfileEditor. Keep in sync with profile inspector rows.
+		/// </summary>
+		public static readonly string[] ProfileIconKeys =
+		{
+			"console.infoicon.sml",
+			"UnityEditor.ConsoleWindow",
+			"Profiler.UI",
+			"Refresh",
+			"TestStopwatch",
+			"BuildSettings.Web.Small",
+			"TestPassed",
+			"AssemblyLock"
+		};
 
 		private static readonly MethodInfo GetEditorAssetBundleMethod =
 			typeof(EditorGUIUtility).GetMethod("GetEditorAssetBundle", BindingFlags.NonPublic | BindingFlags.Static);
@@ -27,6 +43,7 @@ namespace THEBADDEST.MonetizationApi.Dev
 		private readonly HashSet<string> _selected = new HashSet<string>(StringComparer.Ordinal);
 		private string _search = string.Empty;
 		private Vector2 _scroll;
+
 		private struct IconEntry
 		{
 			public string Name;
@@ -39,6 +56,106 @@ namespace THEBADDEST.MonetizationApi.Dev
 			var window = GetWindow<IconDownloaderWindow>("Icon Downloader");
 			window.minSize = new Vector2(480, 420);
 			window.Show();
+		}
+
+		[MenuItem("Tools/Monetization Dev/Export Profile Icons")]
+		public static void ExportProfileIconsMenu()
+		{
+			int count = ExportProfileIcons();
+			EditorUtility.DisplayDialog(
+				"Export Profile Icons",
+				$"Exported {count} profile icon(s) to {ExportFolder}.",
+				"OK");
+		}
+
+		/// <summary>
+		/// Batch entry: Unity.exe -batchmode -projectPath ... -executeMethod THEBADDEST.MonetizationApi.Dev.IconDownloaderWindow.ExportProfileIconsBatch -quit
+		/// </summary>
+		public static void ExportProfileIconsBatch()
+		{
+			int count = ExportProfileIcons();
+			Debug.Log($"Icon Downloader batch: exported {count} profile icon(s) to {ExportFolder}.");
+		}
+
+		[InitializeOnLoadMethod]
+		private static void EnsureProfileIconsOnLoad()
+		{
+			EditorApplication.delayCall += () =>
+			{
+				if (EditorApplication.isPlayingOrWillChangePlaymode)
+				{
+					return;
+				}
+
+				if (!AnyProfileIconMissing())
+				{
+					return;
+				}
+
+				ExportProfileIcons();
+			};
+		}
+
+		private static bool AnyProfileIconMissing()
+		{
+			string folder = Path.Combine(Application.dataPath, "Monetization/Editor/Icons");
+			if (!Directory.Exists(folder))
+			{
+				return true;
+			}
+
+			foreach (string key in ProfileIconKeys)
+			{
+				string path = Path.Combine(folder, SanitizeFileName(key) + ".png");
+				if (!File.Exists(path))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		public static int ExportProfileIcons()
+		{
+			EnsureExportFolder();
+			int exported = 0;
+			var paths = new List<string>();
+
+			foreach (string key in ProfileIconKeys)
+			{
+				Texture2D source = ResolveIconTexture(key);
+				if (source == null)
+				{
+					Debug.LogWarning($"Icon Downloader: profile icon '{key}' not found.");
+					continue;
+				}
+
+				Texture2D normalized = CreateNormalizedIcon(source, NormalizedIconSize);
+				if (normalized == null)
+				{
+					Debug.LogWarning($"Icon Downloader: could not normalize '{key}'.");
+					continue;
+				}
+
+				string fileName = SanitizeFileName(key) + ".png";
+				string assetPath = $"{ExportFolder}/{fileName}";
+				string absolutePath = Path.Combine(Application.dataPath, "Monetization/Editor/Icons", fileName);
+				File.WriteAllBytes(absolutePath, normalized.EncodeToPNG());
+				UnityEngine.Object.DestroyImmediate(normalized);
+				paths.Add(assetPath);
+				exported++;
+			}
+
+			AssetDatabase.Refresh();
+			foreach (string assetPath in paths)
+			{
+				ConfigureImporter(assetPath);
+			}
+
+			AssetDatabase.Refresh();
+			Debug.Log($"Icon Downloader: exported {exported} profile icon(s) to {ExportFolder}.");
+			return exported;
 		}
 
 		private void OnEnable()
@@ -72,6 +189,11 @@ namespace THEBADDEST.MonetizationApi.Dev
 			if (GUILayout.Button("Reload", EditorStyles.toolbarButton, GUILayout.Width(60)))
 			{
 				LoadIcons();
+			}
+
+			if (GUILayout.Button("Export Profile", EditorStyles.toolbarButton, GUILayout.Width(100)))
+			{
+				ExportProfileIcons();
 			}
 
 			EditorGUILayout.EndHorizontal();
@@ -174,7 +296,7 @@ namespace THEBADDEST.MonetizationApi.Dev
 			EditorGUI.BeginDisabledGroup(_selected.Count == 0);
 			if (GUILayout.Button("Export Selected", GUILayout.Width(140), GUILayout.Height(28)))
 			{
-				ExportIcons(_allIcons.Where(i => _selected.Contains(i.Name)));
+				ExportIcons(_allIcons.Where(i => _selected.Contains(i.Name)), normalize: true);
 			}
 
 			EditorGUI.EndDisabledGroup();
@@ -182,7 +304,7 @@ namespace THEBADDEST.MonetizationApi.Dev
 			EditorGUI.BeginDisabledGroup(_filteredIcons.Count == 0);
 			if (GUILayout.Button("Export Filtered", GUILayout.Width(140), GUILayout.Height(28)))
 			{
-				ExportIcons(_filteredIcons);
+				ExportIcons(_filteredIcons, normalize: true);
 			}
 
 			EditorGUI.EndDisabledGroup();
@@ -229,7 +351,6 @@ namespace THEBADDEST.MonetizationApi.Dev
 				}
 			}
 
-			// Also probe IconContent for common names that may not appear as raw bundle paths.
 			foreach (string probe in ProfileIconKeys)
 			{
 				TryAddIconContent(probe, seen);
@@ -246,8 +367,7 @@ namespace THEBADDEST.MonetizationApi.Dev
 				return;
 			}
 
-			GUIContent content = EditorGUIUtility.IconContent(name);
-			var texture = content?.image as Texture2D;
+			Texture2D texture = ResolveIconTexture(name);
 			if (texture == null)
 			{
 				seen.Remove(name);
@@ -256,19 +376,6 @@ namespace THEBADDEST.MonetizationApi.Dev
 
 			_allIcons.Add(new IconEntry { Name = name, Texture = texture });
 		}
-
-		private static readonly string[] ProfileIconKeys =
-		{
-			"console.infoicon.sml",
-			"UnityEditor.ConsoleWindow",
-			"Profiler.UI",
-			"d_Profiler.UI",
-			"Refresh",
-			"TestStopwatch",
-			"BuildSettings.Web.Small",
-			"TestPassed",
-			"AssemblyLock"
-		};
 
 		private void ApplyFilter()
 		{
@@ -284,7 +391,7 @@ namespace THEBADDEST.MonetizationApi.Dev
 				.ToList();
 		}
 
-		private void ExportIcons(IEnumerable<IconEntry> icons)
+		private void ExportIcons(IEnumerable<IconEntry> icons, bool normalize)
 		{
 			EnsureExportFolder();
 			int exported = 0;
@@ -301,20 +408,21 @@ namespace THEBADDEST.MonetizationApi.Dev
 				string assetPath = $"{ExportFolder}/{fileName}";
 				string absolutePath = Path.Combine(Application.dataPath, "Monetization/Editor/Icons", fileName);
 
-				Texture2D readable = CreateReadableCopy(icon.Texture);
-				if (readable == null)
+				Texture2D toEncode = normalize
+					? CreateNormalizedIcon(icon.Texture, NormalizedIconSize)
+					: CreateReadableCopy(icon.Texture);
+				if (toEncode == null)
 				{
 					Debug.LogWarning($"Icon Downloader: could not read texture '{icon.Name}'.");
 					continue;
 				}
 
-				byte[] png = readable.EncodeToPNG();
-				if (readable != icon.Texture)
+				File.WriteAllBytes(absolutePath, toEncode.EncodeToPNG());
+				if (toEncode != icon.Texture)
 				{
-					DestroyImmediate(readable);
+					UnityEngine.Object.DestroyImmediate(toEncode);
 				}
 
-				File.WriteAllBytes(absolutePath, png);
 				paths.Add(assetPath);
 				exported++;
 			}
@@ -327,6 +435,75 @@ namespace THEBADDEST.MonetizationApi.Dev
 
 			AssetDatabase.Refresh();
 			Debug.Log($"Icon Downloader: exported {exported} icon(s) to {ExportFolder}.");
+		}
+
+		private static Texture2D ResolveIconTexture(string key)
+		{
+			try
+			{
+				GUIContent content = EditorGUIUtility.IconContent(key);
+				var texture = content?.image as Texture2D;
+				if (texture != null)
+				{
+					return texture;
+				}
+
+				if (!key.StartsWith("d_", StringComparison.Ordinal))
+				{
+					content = EditorGUIUtility.IconContent("d_" + key);
+					return content?.image as Texture2D;
+				}
+			}
+			catch
+			{
+				// Icon may not exist on this Unity version.
+			}
+
+			return null;
+		}
+
+		private static Texture2D CreateNormalizedIcon(Texture2D source, int size)
+		{
+			Texture2D readable = CreateReadableCopy(source);
+			if (readable == null)
+			{
+				return null;
+			}
+
+			float scale = Mathf.Min((float)size / readable.width, (float)size / readable.height);
+			int drawW = Mathf.Max(1, Mathf.RoundToInt(readable.width * scale));
+			int drawH = Mathf.Max(1, Mathf.RoundToInt(readable.height * scale));
+
+			RenderTexture previous = RenderTexture.active;
+			var scaledRt = RenderTexture.GetTemporary(drawW, drawH, 0, RenderTextureFormat.ARGB32);
+			Graphics.Blit(readable, scaledRt);
+			RenderTexture.active = scaledRt;
+			var scaled = new Texture2D(drawW, drawH, TextureFormat.RGBA32, false);
+			scaled.ReadPixels(new Rect(0, 0, drawW, drawH), 0, 0);
+			scaled.Apply();
+			RenderTexture.active = previous;
+			RenderTexture.ReleaseTemporary(scaledRt);
+
+			var result = new Texture2D(size, size, TextureFormat.RGBA32, false);
+			var clear = new Color[size * size];
+			for (int i = 0; i < clear.Length; i++)
+			{
+				clear[i] = Color.clear;
+			}
+
+			result.SetPixels(clear);
+			int offsetX = (size - drawW) / 2;
+			int offsetY = (size - drawH) / 2;
+			result.SetPixels(offsetX, offsetY, drawW, drawH, scaled.GetPixels());
+			result.Apply();
+
+			UnityEngine.Object.DestroyImmediate(scaled);
+			if (readable != source)
+			{
+				UnityEngine.Object.DestroyImmediate(readable);
+			}
+
+			return result;
 		}
 
 		private static void EnsureExportFolder()
@@ -401,6 +578,7 @@ namespace THEBADDEST.MonetizationApi.Dev
 			importer.npotScale = TextureImporterNPOTScale.None;
 			importer.alphaIsTransparency = true;
 			importer.filterMode = FilterMode.Bilinear;
+			importer.maxTextureSize = 64;
 			importer.SaveAndReimport();
 		}
 	}

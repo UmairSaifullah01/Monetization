@@ -183,17 +183,24 @@ namespace THEBADDEST.MonetizationApi.Editor
 			GUI.backgroundColor = prev;
 		}
 
+		private const int RowIconSize = 16;
+		private const int RowIconSlot = 20;
+
 		private static void DrawRowIcon(string iconKey)
 		{
+			Rect slot = GUILayoutUtility.GetRect(RowIconSlot, RowIconSize, GUILayout.Width(RowIconSlot), GUILayout.Height(RowIconSize));
 			GUIContent icon = LoadEditorIcon(iconKey);
-			if (icon.image != null)
+			if (icon.image == null)
 			{
-				GUILayout.Label(icon, GUILayout.Width(20), GUILayout.Height(18));
+				return;
 			}
-			else
-			{
-				GUILayout.Space(20);
-			}
+
+			var rect = new Rect(
+				slot.x + (slot.width - RowIconSize) * 0.5f,
+				slot.y + (slot.height - RowIconSize) * 0.5f,
+				RowIconSize,
+				RowIconSize);
+			GUI.DrawTexture(rect, icon.image, ScaleMode.ScaleToFit, true);
 		}
 
 		private static string SanitizeIconFileName(string name)
