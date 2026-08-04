@@ -85,7 +85,7 @@ namespace THEBADDEST.MonetizationApi
         /// <inheritdoc/>
         public virtual void UpdateModule()
         {
-            if (!enabled || !isInitialized)
+            if (!enabled)
             {
                 return;
             }

@@ -122,6 +122,23 @@ namespace THEBADDEST.MonetizationApi.Ads
 			bannerData = settings.BannerData;
 		}
 
+		protected override void OnUpdateModule()
+		{
+			base.OnUpdateModule();
+
+			var catalog = Context?.Catalog ?? CatalogFactory.Create();
+			string appId = catalog?.Resolve(AD_KEYS_CATEGORY, APP_ID_KEY);
+
+#if UNITY_EDITOR
+			GoogleMobileAdsSettingsSync.ApplyAppId(appId, ModuleName);
+#else
+			if (string.IsNullOrEmpty(appId))
+			{
+				SendLog.LogModule(ModuleName, "Google Ads AppId not found in AdKeys JSON.", LogLevel.Warning);
+			}
+#endif
+		}
+
 		public override IAppAd FetchBanner(string placement = "default") => _service?.BannerView;
 
 		public override IAppAd FetchInterstitial(string placement = "default") => _service?.Interstitial;

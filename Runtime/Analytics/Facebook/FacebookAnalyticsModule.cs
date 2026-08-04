@@ -32,6 +32,24 @@ namespace THEBADDEST.MonetizationApi.Analytics
 			RaiseSdkInitialized(_facebookReady);
 		}
 
+		protected override void OnUpdateModule()
+		{
+			base.OnUpdateModule();
+
+			var catalog = Context?.Catalog ?? CatalogFactory.Create();
+			var appId = catalog.Resolve(FACEBOOK_KEYS_CATEGORY, FACEBOOK_APP_ID);
+			var clientToken = catalog.Resolve(FACEBOOK_KEYS_CATEGORY, FACEBOOK_CLIENT_TOKEN);
+
+#if UNITY_EDITOR
+			FacebookSettingsSync.ApplyKeys(appId, clientToken, ModuleName);
+#else
+			if (string.IsNullOrEmpty(appId) || string.IsNullOrEmpty(clientToken))
+			{
+				SendLog.LogModule(ModuleName, "Facebook AppId/ClientToken not found in MonetizationKeys.json.", LogLevel.Warning);
+			}
+#endif
+		}
+
 		public override void SendEvent(string name)
 		{
 			if (!EnsureReady()) return;

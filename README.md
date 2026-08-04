@@ -149,7 +149,7 @@ Build version text uses `ProjectKeys.Version` and `ProjectKeys.BundleVersionCode
 
 Optional editor actions on the profile inspector:
 
-- **Sync Project** — package name, version, keystore from `ProjectKeys`, and IAP catalog via each `IAPModule.ApplyCatalogFromJson()`  
+- **Sync Project** — package name, version, keystore from `ProjectKeys`; IAP catalog; AppLovin SDK key + AdMob App Id → `AppLovinSettings`; Facebook AppId/ClientToken → `FacebookSettings`; GameAnalytics keys → `SettingsGA`; Google Mobile Ads App Id → `GoogleMobileAdsSettings`  
 Build-time: `BuildProcessor` also calls `ProjectSettingsSync.SyncFromJson()`.
 
 ### 4. Initialize

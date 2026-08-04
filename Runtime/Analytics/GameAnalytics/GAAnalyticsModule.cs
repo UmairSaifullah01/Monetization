@@ -35,12 +35,10 @@ namespace THEBADDEST.MonetizationApi.Analytics
 			_cachedSecretKey = catalog.Resolve(ANALYTICS_KEYS_CATEGORY, GAME_ANALYTICS_SECRET_KEY);
 		}
 
-		public override void UpdateModule()
+		protected override void OnUpdateModule()
 		{
-			// Load IDs from JSON
 			LoadAnalyticsIdsFromJson();
 
-			// Set keys if loaded successfully
 			if (!string.IsNullOrEmpty(_cachedGameKey) && !string.IsNullOrEmpty(_cachedSecretKey))
 			{
 				GameAnalytics.SettingsGA.SetKeys(_cachedGameKey, _cachedSecretKey);

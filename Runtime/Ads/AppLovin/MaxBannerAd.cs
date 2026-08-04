@@ -17,6 +17,7 @@ namespace THEBADDEST.MonetizationApi.Ads
 		private readonly bool _adaptive;
 
 		private bool _created;
+		private bool _isLoaded;
 
 		public MaxBannerAd(string unitId, MaxSdkBase.BannerPosition position, bool adaptive)
 		{
@@ -43,6 +44,7 @@ namespace THEBADDEST.MonetizationApi.Ads
 			}
 
 			_created = true;
+			_isLoaded = false;
 			PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Banner, AdEventType.LoadStarted, _unitId);
 
 			MaxSdk.CreateBanner(_unitId, _position);
@@ -61,11 +63,12 @@ namespace THEBADDEST.MonetizationApi.Ads
 
 			MaxSdk.DestroyBanner(_unitId);
 			_created = false;
+			_isLoaded = false;
 		}
 
 		public bool IsLoaded()
 		{
-			return _created && !string.IsNullOrEmpty(_unitId) && MaxSdk.IsBannerReady(_unitId);
+			return _created && _isLoaded && !string.IsNullOrEmpty(_unitId);
 		}
 
 		public void Show()
@@ -103,6 +106,7 @@ namespace THEBADDEST.MonetizationApi.Ads
 				return;
 			}
 
+			_isLoaded = true;
 			PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Banner, AdEventType.LoadSucceeded, _unitId);
 			OnAdLoaded?.Invoke();
 		}
@@ -114,6 +118,7 @@ namespace THEBADDEST.MonetizationApi.Ads
 				return;
 			}
 
+			_isLoaded = false;
 			PerformanceMonitor.Instance.RecordAdEvent(AdMetricsTypes.Banner, AdEventType.LoadFailed, _unitId);
 			SendLog.LogModule("AppLovinMaxAdsModule", $"Banner failed to load: {error?.Message}", LogLevel.Warning);
 			OnAdLoadFailed?.Invoke();

@@ -10,6 +10,7 @@ namespace THEBADDEST.MonetizationApi.Ads
 		private const string AD_KEYS_CATEGORY = "AdKeys";
 
 		public const string SDK_KEY = "MaxSdkKey";
+		public const string APP_ID_KEY = "AppId";
 		public const string BANNER_ID_KEY = "BannerTop";
 		public const string INTERSTITIAL_ID_KEY = "Interstitial";
 		public const string INTERSTITIAL_VIDEO_ID_KEY = "InterstitialVideo";

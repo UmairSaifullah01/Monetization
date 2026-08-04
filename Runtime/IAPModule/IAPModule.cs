@@ -11,13 +11,8 @@ namespace THEBADDEST.MonetizationApi
 	{
 		[SerializeField] private IAPCatalog catalog = new IAPCatalog();
 		public IAPCatalog Catalog => catalog;
-
-		public void ApplyCatalogFromJson()
-		{
-			IAPCatalogLoader.ApplyToCatalog(catalog);
-			SendLog.LogModule(ModuleName, "IAP catalog synced from MonetizationKeys.json.");
-		}
 		
+
 		protected Dictionary<string, Action> successCallbacks = new Dictionary<string, Action>();
 		protected Dictionary<string, Action> failCallbacks = new Dictionary<string, Action>();
 
@@ -82,6 +77,21 @@ namespace THEBADDEST.MonetizationApi
         }
 
 		public abstract void RestorePurchases();
+		
+		public void ApplyCatalogFromJson()
+		{
+			IAPCatalogLoader.ApplyToCatalog(catalog);
+#if UNITY_EDITOR
+			UnityEditor.EditorUtility.SetDirty(this);
+#endif
+			SendLog.LogModule(ModuleName, "IAP catalog synced from MonetizationKeys.json.");
+		}
+
+		protected override void OnUpdateModule()
+		{
+			base.OnUpdateModule();
+			ApplyCatalogFromJson();
+		}
 
 	}
 

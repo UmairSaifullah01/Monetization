@@ -2,10 +2,14 @@ using THEBADDEST.MonetizationApi;
 using UnityEditor;
 using UnityEngine;
 
+
 namespace THEBADDEST.MonetizationApi.Editor
 {
+
+
 	public static class ProjectSettingsSync
 	{
+
 		private const string PROJECT_KEYS_CATEGORY = "ProjectKeys";
 		private const string PACKAGE_NAME_KEY = "PackageName";
 		private const string VERSION_KEY = "Version";
@@ -20,7 +24,6 @@ namespace THEBADDEST.MonetizationApi.Editor
 		public static void SyncFromJson(MonetizationProfile profile = null)
 		{
 			JsonDataUtility.Reload();
-
 			if (profile == null)
 			{
 				profile = Resources.Load<MonetizationProfile>("MonetizationProfile");
@@ -36,11 +39,9 @@ namespace THEBADDEST.MonetizationApi.Editor
 			string keyAliasName = JsonDataUtility.GetData(PROJECT_KEYS_CATEGORY, KEY_ALIAS_NAME_KEY) ?? "user";
 			string keyStorePassword = JsonDataUtility.GetData(PROJECT_KEYS_CATEGORY, KEY_STORE_PASSWORD_KEY) ?? string.Empty;
 			string keyAliasPassword = JsonDataUtility.GetData(PROJECT_KEYS_CATEGORY, KEY_ALIAS_PASSWORD_KEY) ?? string.Empty;
-
 			PlayerSettings.applicationIdentifier = packageName;
 			PlayerSettings.bundleVersion = version;
-
-#if UNITY_ANDROID
+			#if UNITY_ANDROID
 			PlayerSettings.Android.bundleVersionCode = bundleVersionCode;
 			PlayerSettings.Android.minSdkVersion = (AndroidSdkVersions)minApiLevel;
 			PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)targetApiLevel;
@@ -53,46 +54,34 @@ namespace THEBADDEST.MonetizationApi.Editor
 				{
 					PlayerSettings.Android.keystorePass = keyStorePassword;
 				}
+
 				if (!string.IsNullOrEmpty(keyAliasPassword))
 				{
 					PlayerSettings.Android.keyaliasPass = keyAliasPassword;
 				}
 			}
-#endif
-
-			SyncIapModules(profile);
-
+			#endif
+			SyncModules(profile);
 			AssetDatabase.SaveAssets();
 			Debug.Log($"[Monetization] Project settings synced: Package={packageName}, Version={version}, BundleCode={bundleVersionCode}, MinAPI={minApiLevel}, TargetAPI={targetApiLevel}, UseKeyStore={useKeyStore}");
 		}
 
-		private static void SyncIapModules(MonetizationProfile profile)
+		private static void SyncModules(MonetizationProfile profile)
 		{
 			if (profile?.modules == null)
 			{
 				return;
 			}
-
-			int synced = 0;
-			foreach (var module in profile.modules)
-			{
-				if (module is IAPModule iapModule)
-				{
-					iapModule.ApplyCatalogFromJson();
-					EditorUtility.SetDirty(iapModule);
-					synced++;
-				}
-			}
-
-			if (synced > 0)
-			{
-				Debug.Log($"[Monetization] IAP catalog synced for {synced} module(s).");
-			}
+			
+			profile.UpdateModules();
 		}
 
 		private static int ParseInt(string value, int fallback)
 		{
 			return int.TryParse(value, out int result) ? result : fallback;
 		}
+
 	}
+
+
 }

@@ -72,12 +72,12 @@ namespace THEBADDEST.MonetizationApi.Analytics
 		public override void SendTransaction(string productId, string currencyCode, int quantity, double unitPrice, string receipt, string signature)
 		{
 			if (!EnsureReady()) return;
-			_service.LogEvent(FirebaseAnalytics.EventPurchase, new[]
+			_service.LogEvent("purchase", new[]
 			{
-				new Parameter(FirebaseAnalytics.ParameterItemId, productId),
-				new Parameter(FirebaseAnalytics.ParameterCurrency, currencyCode),
-				new Parameter(FirebaseAnalytics.ParameterQuantity, quantity),
-				new Parameter(FirebaseAnalytics.ParameterValue, unitPrice)
+				new Parameter("item_id", productId),
+				new Parameter("currency", currencyCode),
+				new Parameter("quantity", quantity),
+				new Parameter("value", unitPrice)
 			});
 			SendLog.LogModule(ModuleName, $"Transaction sent: {productId}");
 		}
